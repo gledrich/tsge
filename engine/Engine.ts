@@ -39,10 +39,7 @@ export default class Engine {
   #oldTimestamp: number = 0;
   #secondsPassed: number;
 
-  constructor(
-    callbacks: EngineCallbacks,
-    opts: EngineOpts
-  ) {
+  constructor(callbacks: EngineCallbacks, opts: EngineOpts) {
     const defaultedOpts = {
       width: '100%',
       height: '100%',
@@ -114,11 +111,11 @@ export default class Engine {
       if (object instanceof Line) {
         this.#drawLine(object);
       }
-      
+
       if (object instanceof Rectangle) {
         this.#drawRectangle(object);
       }
-      
+
       if (object instanceof Sprite) {
         this.#drawSprite(object);
       }
@@ -160,7 +157,7 @@ export default class Engine {
       rectangle.position.x,
       rectangle.position.y,
       rectangle.width,
-      rectangle.height,
+      rectangle.height
     );
   }
 
@@ -202,7 +199,7 @@ export default class Engine {
       position.x,
       position.y,
       frameWidth * 3,
-      frameHeight * 3,
+      frameHeight * 3
     );
   }
 
@@ -241,9 +238,7 @@ export default class Engine {
   static #sortSet() {
     const arr: GameObject[] = Array.from(Engine.objects);
 
-    arr.sort((a, b) =>
-      a.zIndex > b.zIndex ? 1 : -1
-    );
+    arr.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
 
     return new Set<GameObject>(arr);
   }
