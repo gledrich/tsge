@@ -1,5 +1,8 @@
 import Engine from '../built/Engine.js';
 import Line from '../built/Line.js';
+import Vector2 from '../built/Vector2.js';
+import Text from '../built/Text.js';
+
 
 window.onload = () => {
   new DemoGame();
@@ -17,17 +20,23 @@ class DemoGame {
       }
     );
 
-    console.log(game);
     game.callbacks.onLoad();
   }
 
   onLoad() {
-    const line = new Line({
-      tag: 'line',
-      width: 1,
-      zIndex: '0',
-      p1: { x: 0, y: 0 },
-      p2: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+    const titleText = new Text({
+      tag: 'titleText',
+      colour: 'white',
+      backgroundColour: '#43aa8b',
+      fontSize: 50,
+      zIndex: 10,
+      text: 'Demo Game',
+      height: 300,
+      width: 500,
     });
+    titleText.position = new Vector2(
+      window.innerWidth / 2 - titleText.width / 2,
+      window.innerHeight / 2 - titleText.height / 2,
+    );
   }
 }

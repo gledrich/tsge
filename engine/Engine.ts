@@ -1,5 +1,6 @@
 import Canvas from './Canvas.js';
 import Line from './Line.js';
+import Text from './Text.js';
 import GameObject from './GameObject.js';
 
 export interface EngineOpts {
@@ -91,9 +92,9 @@ export default class Engine {
     this.#setBackground();
 
     Engine.#sortSet().forEach((object) => {
-      // if (object instanceof Text) {
-      //   this.#drawText(object);
-      // }
+      if (object instanceof Text) {
+        this.#drawText(object);
+      }
 
       if (object instanceof Line) {
         this.#drawLine(object);
@@ -132,7 +133,7 @@ export default class Engine {
 
   static #sortSet() {
     const arr: GameObject[] = Array.from(Engine.objects);
-    
+
     arr.sort((a, b) =>
       a.zIndex > b.zIndex ? 1 : -1
     );
