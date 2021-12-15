@@ -1,0 +1,21 @@
+{
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.4.1",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.15",
+    "typescript": "^4.5.4"
+  },
+  "name": "tsge",
+  "version": "1.0.0",
+  "description": "Typescript game engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "tsc -w & nodemon Example/server"
+  },
+  "author": "Rich <richgled25@gmail.com>",
+  "license": "ISC"
+}
