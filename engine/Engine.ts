@@ -132,10 +132,12 @@ export default class Engine {
 
   static #sortSet() {
     const arr: GameObject[] = Array.from(Engine.objects);
-    const sorted: GameObject[] = arr.sort((a, b) =>
+    
+    arr.sort((a, b) =>
       a.zIndex > b.zIndex ? 1 : -1
     );
-    return new Set(sorted);
+
+    return new Set(arr);
   }
 
   static registerObject(object) {

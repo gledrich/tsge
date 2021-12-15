@@ -28,6 +28,7 @@ export default class Line extends GameObject {
     this.x2 = props.p2.x;
     this.y2 = props.p2.y;
 
-    Engine.registerObject(this);
+    
+    this.registerSelf();
   }
 }
