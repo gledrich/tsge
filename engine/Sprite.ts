@@ -2,7 +2,7 @@ import Engine from './Engine.js';
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 
-const sprites = new Set();
+const sprites = new Set<Sprite>();
 
 interface SpriteProps {
   tag: string;

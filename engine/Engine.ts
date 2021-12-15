@@ -35,9 +35,9 @@ export default class Engine {
   mouseX: number;
   mouseY: number;
 
-  fps = 0;
-  #oldTimestamp = 0;
-  #secondsPassed;
+  fps: number = 0;
+  #oldTimestamp: number = 0;
+  #secondsPassed: number;
 
   constructor(
     callbacks: EngineCallbacks,
@@ -245,7 +245,7 @@ export default class Engine {
       a.zIndex > b.zIndex ? 1 : -1
     );
 
-    return new Set(arr);
+    return new Set<GameObject>(arr);
   }
 
   static registerObject(object) {
@@ -268,7 +268,7 @@ export default class Engine {
 
   static destroyObject(object) {
     if (object instanceof Sprite) {
-      delete Window[object.tag];
+      delete Engine[object.tag];
     }
 
     this.objects.delete(object);
