@@ -35,20 +35,23 @@ export default class Engine {
 
   constructor(
     callbacks: EngineCallbacks,
-    opts: EngineOpts = {
+    opts: EngineOpts
+  ) {
+    const defaultedOpts = {
       width: '100%',
       height: '100%',
       title: 'Example',
       backgroundColour: 'white',
-    }
-  ) {
+      ...opts,
+    };
+
     Engine.objects.findAll = this.#findAllObjects.bind(this);
 
     this.#title = document.createElement('title');
-    this.#title.innerHTML = opts.title;
+    this.#title.innerHTML = defaultedOpts.title;
     document.getElementsByTagName('head')[0].appendChild(this.#title);
 
-    this.backgroundColour = opts.backgroundColour;
+    this.backgroundColour = defaultedOpts.backgroundColour;
 
     this.callbacks = {
       onLoad: () => {
@@ -62,8 +65,8 @@ export default class Engine {
     this.#ctx = this.#canvas.getContext('2d');
 
     this.#window = document.createElement('div');
-    this.#window.style.width = opts.width;
-    this.#window.style.height = opts.height;
+    this.#window.style.width = defaultedOpts.width;
+    this.#window.style.height = defaultedOpts.height;
 
     document.addEventListener('mousemove', this.#setMousePos.bind(this));
 
