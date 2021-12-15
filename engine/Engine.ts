@@ -81,7 +81,6 @@ export default class Engine {
   }
 
   #onLoad() {
-    console.log('loaded');
     this.#draw();
 
     window.requestAnimationFrame(this.#update.bind(this));

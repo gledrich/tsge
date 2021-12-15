@@ -61,7 +61,6 @@ export default class Sprite extends GameObject {
   }
 
   stop() {
-    console.log('hit')
     Engine.destroyObject(this);
     sprites.delete(this);
   }
