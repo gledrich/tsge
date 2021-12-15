@@ -112,7 +112,7 @@ export default class Text extends GameObject {
     }
   }
 
-  #mouseClick(event) {
+  #mouseClick(event: MouseEvent) {
     if (
       event.x > this.position.x &&
       event.x < this.position.x + this.width &&

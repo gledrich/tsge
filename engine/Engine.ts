@@ -86,7 +86,7 @@ export default class Engine {
     window.requestAnimationFrame(this.#update.bind(this));
   }
 
-  #update(timestamp) {
+  #update(timestamp: number) {
     this.#secondsPassed = (timestamp - this.#oldTimestamp) / 1000;
     this.#oldTimestamp = timestamp;
 
@@ -125,7 +125,7 @@ export default class Engine {
     });
   }
 
-  #drawText(text) {
+  #drawText(text: Text) {
     if (text.backgroundColour) {
       this.#ctx.fillStyle = text.backgroundColour;
       this.#ctx.fillRect(
@@ -147,14 +147,14 @@ export default class Engine {
     );
   }
 
-  #drawLine(line) {
+  #drawLine(line: Line) {
     this.#ctx.lineWidth = line.width;
     this.#ctx.moveTo(line.x1, line.y1);
     this.#ctx.lineTo(line.x2, line.y2);
     this.#ctx.stroke();
   }
 
-  #drawRectangle(rectangle) {
+  #drawRectangle(rectangle: Rectangle) {
     this.#ctx.fillStyle = rectangle.colour;
     this.#ctx.fillRect(
       rectangle.position.x,
@@ -164,7 +164,7 @@ export default class Engine {
     );
   }
 
-  #drawSprite(sprite) {
+  #drawSprite(sprite: Sprite) {
     const {
       img,
       cols,
@@ -206,25 +206,25 @@ export default class Engine {
     );
   }
 
-  #findAllObjects(tag = '') {
+  #findAllObjects(tag: string = '') {
     return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
   }
 
-  #setMousePos(event) {
+  #setMousePos(event: MouseEvent) {
     if (event) {
       this.mouseX = event.x;
       this.mouseY = event.y;
     }
   }
 
-  async setTimeout(timeoutFn, time) {
+  async setTimeout(timeoutFn: Function, time: number) {
     await new Promise((resolve) => {
       setTimeout(resolve, time);
     });
     timeoutFn();
   }
 
-  countdown(milliseconds, fn, onEnded) {
+  countdown(milliseconds: number, fn: Function, onEnded: Function) {
     setTimeout(onEnded, milliseconds);
 
     for (let i = 1; i <= milliseconds; i += 1) {
@@ -234,7 +234,7 @@ export default class Engine {
     }
   }
 
-  set cursor(value) {
+  set cursor(value: string) {
     document.getElementById('canvas').style.cursor = value;
   }
 
@@ -248,7 +248,7 @@ export default class Engine {
     return new Set<GameObject>(arr);
   }
 
-  static registerObject(object) {
+  static registerObject(object: GameObject) {
     if (object instanceof Sprite) {
       const ref = `${object.tag}_${this.objects.size}`;
       const sprite = object;
@@ -266,7 +266,7 @@ export default class Engine {
     }
   }
 
-  static destroyObject(object) {
+  static destroyObject(object: GameObject) {
     if (object instanceof Sprite) {
       delete Engine[object.tag];
     }

@@ -82,7 +82,7 @@ export default class Rectangle extends GameObject {
     this.registerSelf();
   }
 
-  hasCollided(obj) {
+  hasCollided(obj: GameObject) {
     if (obj instanceof Rectangle) {
       let bigger;
       let smaller;
