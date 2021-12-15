@@ -3,15 +3,14 @@ import Line from '../built/Line.js';
 import Vector2 from '../built/Vector2.js';
 import Text from '../built/Text.js';
 
-
 window.onload = () => {
   new DemoGame();
 };
 
 class DemoGame {
   constructor() {
-    const game = new Engine(
-      { onLoad: this.onLoad },
+    this.game = new Engine(
+      { onLoad: this.onLoad.bind(this), update: this.update.bind(this) },
       {
         width: '100%',
         height: '100%',
@@ -20,7 +19,7 @@ class DemoGame {
       }
     );
 
-    game.callbacks.onLoad();
+    this.game.callbacks.onLoad();
   }
 
   onLoad() {
@@ -36,7 +35,9 @@ class DemoGame {
     });
     titleText.position = new Vector2(
       window.innerWidth / 2 - titleText.width / 2,
-      window.innerHeight / 2 - titleText.height / 2,
+      window.innerHeight / 2 - titleText.height / 2
     );
   }
+
+  update() {}
 }

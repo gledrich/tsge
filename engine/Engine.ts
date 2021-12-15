@@ -12,10 +12,15 @@ export interface EngineOpts {
 
 export interface EngineCallbacks {
   onLoad: Function;
+  update: Function;
+}
+
+class ObjectSet extends Set<GameObject> {
+  findAll: Function;
 }
 
 export default class Engine {
-  static objects = new Set<GameObject>();
+  static objects = new ObjectSet();
 
   #canvas: HTMLCanvasElement;
   #ctx: CanvasRenderingContext2D;
@@ -24,6 +29,9 @@ export default class Engine {
 
   backgroundColour: string;
   callbacks: EngineCallbacks;
+
+  mouseX: number;
+  mouseY: number;
 
   constructor(
     callbacks: EngineCallbacks,
@@ -34,6 +42,8 @@ export default class Engine {
       backgroundColour: 'white',
     }
   ) {
+    Engine.objects.findAll = this.#findAllObjects.bind(this);
+
     this.#title = document.createElement('title');
     this.#title.innerHTML = opts.title;
     document.getElementsByTagName('head')[0].appendChild(this.#title);
@@ -45,6 +55,7 @@ export default class Engine {
         callbacks.onLoad();
         this.#onLoad();
       },
+      update: callbacks.update,
     };
 
     this.#canvas = new Canvas().canvas;
@@ -53,6 +64,8 @@ export default class Engine {
     this.#window = document.createElement('div');
     this.#window.style.width = opts.width;
     this.#window.style.height = opts.height;
+
+    document.addEventListener('mousemove', this.#setMousePos.bind(this));
 
     document.getElementsByTagName('body')[0].appendChild(this.#window);
     this.#window.appendChild(this.#canvas);
@@ -77,7 +90,7 @@ export default class Engine {
 
     this.fps = Math.round(1 / this.#secondsPassed);
 
-    // this.updateCallback();
+    this.callbacks.update();
     this.#draw();
 
     window.requestAnimationFrame(this.#update.bind(this));
@@ -129,6 +142,17 @@ export default class Engine {
     this.#ctx.moveTo(line.x1, line.y1);
     this.#ctx.lineTo(line.x2, line.y2);
     this.#ctx.stroke();
+  }
+
+  #findAllObjects(tag = '') {
+    return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
+  }
+
+  #setMousePos(event) {
+    if (event) {
+      this.mouseX = event.x;
+      this.mouseY = event.y;
+    }
   }
 
   static #sortSet() {
