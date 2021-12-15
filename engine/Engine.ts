@@ -2,6 +2,8 @@ import Canvas from './Canvas.js';
 import Line from './Line.js';
 import Text from './Text.js';
 import GameObject from './GameObject.js';
+import Rectangle from './Rectangle.js';
+import Sprite from './Sprite.js';
 
 export interface EngineOpts {
   width: string;
@@ -32,6 +34,10 @@ export default class Engine {
 
   mouseX: number;
   mouseY: number;
+
+  fps = 0;
+  #oldTimestamp = 0;
+  #secondsPassed;
 
   constructor(
     callbacks: EngineCallbacks,
@@ -81,12 +87,6 @@ export default class Engine {
     window.requestAnimationFrame(this.#update.bind(this));
   }
 
-  fps = 0;
-
-  #oldTimestamp = 0;
-
-  #secondsPassed;
-
   #update(timestamp) {
     this.#secondsPassed = (timestamp - this.#oldTimestamp) / 1000;
     this.#oldTimestamp = timestamp;
@@ -114,6 +114,14 @@ export default class Engine {
 
       if (object instanceof Line) {
         this.#drawLine(object);
+      }
+      
+      if (object instanceof Rectangle) {
+        this.#drawRectangle(object);
+      }
+      
+      if (object instanceof Sprite) {
+        this.#drawSprite(object);
       }
     });
   }
@@ -147,6 +155,58 @@ export default class Engine {
     this.#ctx.stroke();
   }
 
+  #drawRectangle(rectangle) {
+    this.#ctx.fillStyle = rectangle.colour;
+    this.#ctx.fillRect(
+      rectangle.position.x,
+      rectangle.position.y,
+      rectangle.width,
+      rectangle.height,
+    );
+  }
+
+  #drawSprite(sprite) {
+    const {
+      img,
+      cols,
+      frameWidth,
+      frameHeight,
+      position,
+      startCol,
+      endCol,
+      ref,
+    } = sprite;
+
+    this.#ctx.imageSmoothingEnabled = true;
+    this.#ctx.imageSmoothingQuality = 'high';
+
+    const maxFrame = endCol - 1;
+
+    while (Engine[ref] < startCol) {
+      Engine[ref] += 1;
+    }
+
+    if (Engine[ref] > maxFrame) {
+      Engine[ref] = startCol;
+    }
+
+    // Update rows and columns
+    const column = Engine[ref] % cols;
+    const row = Math.floor(Engine[ref] / cols);
+
+    this.#ctx.drawImage(
+      img,
+      column * frameWidth,
+      row * frameHeight,
+      frameWidth,
+      frameHeight,
+      position.x,
+      position.y,
+      frameWidth * 3,
+      frameHeight * 3,
+    );
+  }
+
   #findAllObjects(tag = '') {
     return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
   }
@@ -156,6 +216,27 @@ export default class Engine {
       this.mouseX = event.x;
       this.mouseY = event.y;
     }
+  }
+
+  async setTimeout(timeoutFn, time) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, time);
+    });
+    timeoutFn();
+  }
+
+  countdown(milliseconds, fn, onEnded) {
+    setTimeout(onEnded, milliseconds);
+
+    for (let i = 1; i <= milliseconds; i += 1) {
+      if (i % 1000 === 0) {
+        setTimeout(fn, i);
+      }
+    }
+  }
+
+  set cursor(value) {
+    document.getElementById('canvas').style.cursor = value;
   }
 
   static #sortSet() {
@@ -169,10 +250,28 @@ export default class Engine {
   }
 
   static registerObject(object) {
-    this.objects.add(object);
+    if (object instanceof Sprite) {
+      const ref = `${object.tag}_${this.objects.size}`;
+      const sprite = object;
+
+      this[ref] = 0;
+      sprite.ref = ref;
+      sprite.img.id = ref;
+      this.objects.add(sprite);
+
+      setInterval(() => {
+        this[ref] += 1;
+      }, 100);
+    } else {
+      this.objects.add(object);
+    }
   }
 
   static destroyObject(object) {
+    if (object instanceof Sprite) {
+      delete Window[object.tag];
+    }
+
     this.objects.delete(object);
   }
 }

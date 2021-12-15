@@ -31,15 +31,12 @@ interface TextProperties {
 const defaultProps = {
   tag: 'text',
   colour: 'black',
-  backgroundColour: 'white',
   fontSize: '25', // px
   font: 'Helvetica',
   text: '',
   horizontalAlign: 'center',
   verticalAlign: 'middle',
   position: new Vector2(0, 0),
-  width: 100,
-  height: 100,
   zIndex: '0',
   register: true,
   onClick: () => {},
@@ -74,7 +71,6 @@ export default class Text extends GameObject {
     };
 
     this.colour = defaultedProps.colour;
-    this.backgroundColour = defaultedProps.backgroundColour;
     this.fontSize = parseInt(defaultedProps.fontSize, 10);
     this.font = `${this.fontSize}px ${defaultedProps.font}`;
     this.text = defaultedProps.text;
@@ -85,6 +81,10 @@ export default class Text extends GameObject {
     this.width = defaultedProps.width || this.fontSize * this.length;
     this.height = defaultedProps.height || this.fontSize * 2;
     this.#onMouseClick = this.#mouseClick.bind(this);
+    
+    if (defaultedProps.backgroundColour) {
+      this.backgroundColour = defaultedProps.backgroundColour;
+    }
 
     if (defaultedProps.onClick) {
       this.onClick = defaultedProps.onClick;
