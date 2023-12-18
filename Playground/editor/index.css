@@ -1,0 +1,27 @@
+.editor {
+  z-index: 100;
+  background-color: black;
+  height: 35%;
+  width: 80%;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  margin: 1rem;
+  border-radius: 1rem;
+  padding: .5rem 0 0 .5rem;
+  color: white;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor h2 {
+  display: block;
+}
+
+.editor-textbox {
+  flex-grow: 1;
+  border-radius: 1rem;
+  margin: .5rem;
+  margin-left: 0;
+}

@@ -1,4 +1,8 @@
 import sidebar from './sidebar/index.js';
+import { createEditor, updateEditor } from './editor/index.js';
+import { getScript } from './helpers.js';
+
+let script;
 
 window.onload = async () => {
   const playground = createPlayground();
@@ -8,44 +12,10 @@ window.onload = async () => {
   document.body.appendChild(playground);
   document.body.appendChild(editor);
 
-  let savedScript = localStorage.getItem('script.js');
+  script = await getScript();
 
-  if (savedScript) {
-    console.log(savedScript);
-  } else {
-    localStorage.setItem(
-      'script.js',
-      `
-      import Engine from '../built/Engine.js';
-      import Text from '../built/Text.js'; 
-      import Vector2 from '../built/Vector2.js';
-
-      const engine = new Engine(
-        {
-          onLoad: () => {
-            console.log('loaded');
-          },
-          update: () => {
-            console.log('updated');
-          },
-        },
-        {
-          title: 'Playground',
-          backgroundColour: '#A7DCCC',
-          width: ${playground.offsetWidth},
-          height: ${playground.offsetHeight},
-        }
-      )
-
-      engine.callbacks.onLoad();
-    `
-    );
-
-    savedScript = localStorage.getItem('script.js');
-  }
-
-  updatePlayground();
-  updateEditor();
+  await updatePlayground();
+  await updateEditor();
 };
 
 const createPlayground = () => {
@@ -56,38 +26,12 @@ const createPlayground = () => {
   return div;
 };
 
-export const updatePlayground = () => {
+export const updatePlayground = async () => {
   document.getElementById('script.js')?.remove();
 
   const script = document.createElement('script');
   script.type = 'module';
-  script.innerHTML = localStorage.getItem('script.js');
+  script.innerHTML = await getScript();
   script.id = 'script.js';
   document.body.appendChild(script);
-};
-
-const createEditor = () => {
-  const div = document.createElement('div');
-  div.id = 'editor';
-  div.className = 'editor';
-
-  const title = document.createElement('h2');
-  title.innerText = 'Script.ts';
-
-  const textbox = document.createElement('textarea');
-  textbox.id = 'editor-textbox';
-  textbox.className = 'editor-textbox';
-  textbox.addEventListener('change', () => {
-    updatePlayground();
-  });
-
-  div.appendChild(title);
-  div.appendChild(textbox);
-
-  return div;
-};
-
-export const updateEditor = () => {
-  document.getElementById('editor-textbox').innerText =
-    localStorage.getItem('script.js');
 };
