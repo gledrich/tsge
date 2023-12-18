@@ -1,5 +1,5 @@
 import { getScript, updateScript } from '../helpers.js';
-import { updatePlayground } from '../index.js';
+import { updatePlayground, engine } from '../index.js';
 import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
 import js from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/languages/javascript.min.js';
 
@@ -14,8 +14,35 @@ export const createEditor = () => {
   div.id = 'editor';
   div.className = 'editor';
 
+  const banner = document.createElement('div');
+  banner.className = 'banner';
   const title = document.createElement('h2');
   title.innerText = 'Script.js';
+
+  const iconsContainer = document.createElement('div');
+  iconsContainer.className = 'icons-container';
+  const expand = document.createElement('i');
+  expand.className = 'fa-solid fa-window-maximize expand';
+  expand.onclick = () => {
+    if (div.classList.contains('hidden')) {
+      div.classList.remove('hidden');
+    } else if (div.classList.contains('expanded')) {
+      div.classList.remove('expanded');
+    } else {
+      div.classList.add('expanded');
+    }
+  };
+  const close = document.createElement('i');
+  close.className = 'fa-solid fa-rectangle-xmark close';
+  close.onclick = () => {
+    if (div.classList.contains('hidden')) {
+      div.classList.remove('hidden');
+    } else {
+      div.classList.add('hidden');
+    }
+
+    div.classList.remove('expanded');
+  };
 
   const pre = document.createElement('pre');
   const textbox = document.createElement('code');
@@ -35,7 +62,11 @@ export const createEditor = () => {
     }
   };
 
-  div.appendChild(title);
+  banner.appendChild(title);
+  iconsContainer.appendChild(close);
+  iconsContainer.appendChild(expand);
+  banner.appendChild(iconsContainer);
+  div.appendChild(banner);
   pre.appendChild(textbox);
   div.appendChild(pre);
 

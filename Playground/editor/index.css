@@ -1,6 +1,11 @@
 .editor {
+  /* resize: both; */
   z-index: 100;
   background-color: #011627;
+  max-height: 60%;
+  max-width: 60%;
+  min-height: 20%;
+  min-width: 30%;
   height: 35%;
   width: 40%;
   position: fixed;
@@ -10,23 +15,75 @@
   border-radius: 1rem;
   padding: .5rem 0 0 .5rem;
   color: white;
-  overflow: scroll;
+  overflow: auto;
   display: flex;
   flex-direction: column;
+  transition: all .25s linear;
+}
+
+.expanded {
+  height: 60%;
+  width: 60%;
+}
+
+.hidden {
+  min-height: 12%;
+  min-width: 12%;
+  height: 12%;
+  width: 12%;
+}
+
+.close {
+  display: flex;
+}
+
+.hidden .close {
+  /* display: none; */
+  /* visibility: hidden; */
+}
+
+.hidden code {
+  display: none;
+}
+
+.banner {
+  display: flex;
+  gap: 1rem;
+  position: fixed;
+  margin: .25rem;
+  padding: 1rem;
+  margin-top: -1rem;
+  right: 2rem;
+}
+
+.icons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.close {
+  color: red;
+}
+
+.expand {
+  color: lightgreen;
 }
 
 .editor h2 {
-  display: block;
-  position: fixed;
-  margin: .25rem;
   font-family: Arial, Helvetica, sans-serif;
+  padding: 1rem;
   background-color: rgba(0, 0, 0, 1);
   width: calc(fit-content + 1rem);
   border-radius: 1rem;
-  padding: 1rem;
-  right: 3rem;
+}
+
+.editor-textbox {
+  /* margin-left: 1rem; */
 }
 
 .editor-textbox:focus-visible,.editor-textbox:focus {
   outline-style: none;
 }
+
+

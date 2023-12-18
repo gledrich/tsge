@@ -4,7 +4,7 @@ import { getScript } from './helpers.js';
 import Engine from '../built/Engine.js';
 
 let script;
-const engine = new Engine(
+export const engine = new Engine(
   {
     onLoad: () => {},
     update: () => {},

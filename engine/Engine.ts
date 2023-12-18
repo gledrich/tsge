@@ -32,6 +32,9 @@ export default class Engine {
   backgroundColour: string;
   callbacks: EngineCallbacks;
 
+  width: number;
+  height: number;
+
   mouseX: number;
   mouseY: number;
 
@@ -47,6 +50,7 @@ export default class Engine {
       backgroundColour: 'white',
       ...opts,
     };
+
 
     Engine.objects.findAll = this.#findAllObjects.bind(this);
 
@@ -66,6 +70,8 @@ export default class Engine {
 
     this.#canvas = new Canvas().canvas;
     this.#ctx = this.#canvas.getContext('2d');
+    this.width = this.#canvas.width;
+    this.height = this.#canvas.height;
 
     this.#window = document.createElement('div');
     this.#window.id = 'canvas-container';

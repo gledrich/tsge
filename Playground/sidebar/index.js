@@ -19,14 +19,14 @@ const makeTextIcon = () => {
   textIcon.onclick = async () => {
     await updateTheLot(`
 const text = new Text({
-tag: 'completedText',
+tag: 'exampleTag',
 colour: 'white',
 backgroundColour: '#43aa8b',
 fontSize: 50,
 zIndex: 10,
-text: 'Completed',
-height: 300,
-width: 500,
+text: 'Example',
+height: 100,
+width: 400,
 register: true,
 });
 text.position = new Vector2(
