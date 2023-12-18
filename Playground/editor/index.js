@@ -1,4 +1,5 @@
-import { getScript } from '../helpers.js';
+import { getScript, updateScript } from '../helpers.js';
+import { updatePlayground } from '../index.js';
 
 export const createEditor = () => {
   const div = document.createElement('div');
@@ -12,6 +13,7 @@ export const createEditor = () => {
   textbox.id = 'editor-textbox';
   textbox.className = 'editor-textbox';
   textbox.addEventListener('change', async () => {
+    await updateScript(textbox.value, false);
     await updatePlayground();
   });
 
@@ -22,5 +24,7 @@ export const createEditor = () => {
 };
 
 export const updateEditor = async () => {
-  document.getElementById('editor-textbox').innerText = await getScript();
+  const s = await getScript();
+  console.log(s);
+  document.getElementById('editor-textbox').value = s;
 };

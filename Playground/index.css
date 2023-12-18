@@ -8,7 +8,7 @@ body {
   background-color: aliceblue;
 }
 
-.playground {
+#canvas-container {
   position: fixed;
   background-color: lightgray;
   position: fixed;

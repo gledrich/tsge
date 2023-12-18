@@ -29,28 +29,9 @@ const createInitialFile = async () => {
   const res = await fetch('/file/123', {
     method: 'PUT',
     body: JSON.stringify({
-      data: `import Engine from '../built/Engine.js';
-import Text from '../built/Text.js'; 
+      data: `import Text from '../built/Text.js'; 
 import Vector2 from '../built/Vector2.js';
 
-const engine = new Engine(
-  {
-    onLoad: () => {
-      console.log('loaded');
-    },
-    update: () => {
-      console.log('updated');
-    },
-  },
-  {
-    title: 'Playground',
-    backgroundColour: '#A7DCCC',
-    width: ${playground.offsetWidth},
-    height: ${playground.offsetHeight},
-  }
-)
-
-engine.callbacks.onLoad();
 `,
     }),
     headers: {
@@ -80,4 +61,21 @@ export const getScript = async () => {
   }
 
   return script;
+};
+
+export const updateScript = async (data, upsert = true) => {
+  const res = await fetch('/file/123', {
+    method: 'PUT',
+    body: JSON.stringify({
+      data,
+      upsert,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    window.alert('Error updating script.');
+  }
 };

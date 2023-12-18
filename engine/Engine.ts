@@ -68,6 +68,7 @@ export default class Engine {
     this.#ctx = this.#canvas.getContext('2d');
 
     this.#window = document.createElement('div');
+    this.#window.id = 'canvas-container';
     this.#window.style.width = defaultedOpts.width;
     this.#window.style.height = defaultedOpts.height;
 
@@ -267,5 +268,9 @@ export default class Engine {
     }
 
     this.objects.delete(object);
+  }
+
+  static destroyAll() {
+    this.objects.clear();
   }
 }

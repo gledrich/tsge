@@ -1,32 +1,37 @@
 import sidebar from './sidebar/index.js';
 import { createEditor, updateEditor } from './editor/index.js';
 import { getScript } from './helpers.js';
+import Engine from '../built/Engine.js';
 
 let script;
+const engine = new Engine(
+  {
+    onLoad: () => {},
+    update: () => {},
+  },
+  {
+    title: 'Playground',
+    backgroundColour: '#A7DCCC',
+    width: '100%',
+    height: '100%',
+  }
+);
 
 window.onload = async () => {
-  const playground = createPlayground();
   const editor = createEditor();
 
   document.body.appendChild(sidebar());
-  document.body.appendChild(playground);
   document.body.appendChild(editor);
 
+  engine.callbacks.onLoad();
   script = await getScript();
 
   await updatePlayground();
   await updateEditor();
 };
 
-const createPlayground = () => {
-  const div = document.createElement('div');
-  div.id = 'playground';
-  div.className = 'playground';
-
-  return div;
-};
-
 export const updatePlayground = async () => {
+  Engine.destroyAll();
   document.getElementById('script.js')?.remove();
 
   const script = document.createElement('script');

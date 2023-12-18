@@ -23,7 +23,14 @@ router.get('/file/:id', (req, res) => {
         return res.status(404).json({ id: sanitisedId });
       });
     }
-    return res.status(200).json(file.toString());
+
+    const f = file.toString();
+
+    if (f) {
+      return res.status(200).json(file.toString());
+    }
+
+    return res.status(404).json({ sanitisedId });
   });
 });
 
@@ -32,7 +39,17 @@ router.put('/file/:id', (req, res) => {
   const filePath = `${__dirname}/${sanitisedId}.js`;
   const file = String(req.body.data);
 
-  fs.appendFile(filePath, file, (err) => {
+  if (req.body.upsert) {
+    return fs.appendFile(filePath, file, (err) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      return res.status(200).json(file.toString());
+    });
+  }
+
+  return fs.writeFile(filePath, file, (err) => {
     if (err) {
       return res.status(500).json(err);
     }

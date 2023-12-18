@@ -1,5 +1,6 @@
 import { updatePlayground } from '../index.js';
 import { updateEditor } from '../editor/index.js';
+import { updateScript } from '../helpers.js';
 
 export default () => {
   const sidebarDiv = document.createElement('div');
@@ -16,34 +17,26 @@ const makeTextIcon = () => {
   textIcon.textContent = 'T';
   textIcon.className = 'icon';
   textIcon.onclick = async () => {
-    await fetch('/file/123', {
-      method: 'PUT',
-      body: JSON.stringify({
-        data: `
+    await updateScript(`
 const text = new Text({
-  tag: 'completedText',
-  colour: 'white',
-  backgroundColour: '#43aa8b',
-  fontSize: 50,
-  zIndex: 10,
-  text: 'Completed',
-  height: 300,
-  width: 500,
-  register: true,
+tag: 'completedText',
+colour: 'white',
+backgroundColour: '#43aa8b',
+fontSize: 50,
+zIndex: 10,
+text: 'Completed',
+height: 300,
+width: 500,
+register: true,
 });
 text.position = new Vector2(
-  window.innerWidth / 2 - text.width / 2,
-  window.innerHeight / 2 - text.height / 2
+window.innerWidth / 2 - text.width / 2,
+window.innerHeight / 2 - text.height / 2
 );
-    `,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+      `);
 
-    await updateEditor();
     await updatePlayground();
+    await updateEditor();
   };
 
   return textIcon;
