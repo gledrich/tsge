@@ -1,22 +1,25 @@
 html,
 body {
   margin: 0;
-  padding: 1rem;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
   background-color: aliceblue;
 }
 
 .playground {
-  margin-left: 1rem;
-  display: flex;
-  background-color: red;
-  position: absolute;
+  position: fixed;
+  background-color: lightgray;
+  position: fixed;
   left: 10rem;
+  min-height: 100vh;
+  min-width: 80%;
+  width: 100%;
 }
 
 .editor {
+  z-index: 100;
   background-color: black;
   height: 35%;
   width: 80%;
@@ -28,4 +31,17 @@ body {
   padding: .5rem 0 0 .5rem;
   color: white;
   overflow: scroll;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor h2 {
+  display: block;
+}
+
+.editor-textbox {
+  flex-grow: 1;
+  border-radius: 1rem;
+  margin: .5rem;
+  margin-left: 0;
 }
