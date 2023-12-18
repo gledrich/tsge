@@ -7,6 +7,6 @@ export default class Canvas {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.canvas.style.zIndex = '0';
-    this.canvas.style.position = 'absolute';
+    this.canvas.style.position = 'fixed';
   }
 }
