@@ -6,8 +6,8 @@ export default () => {
   const sidebarDiv = document.createElement('div');
   sidebarDiv.className = 'sidebar';
 
-  sidebarDiv.appendChild(makeTextIcon());
   sidebarDiv.appendChild(makeVectorIcon());
+  sidebarDiv.appendChild(makeTextIcon());
 
   return sidebarDiv;
 };
@@ -17,7 +17,7 @@ const makeTextIcon = () => {
   textIcon.textContent = 'T';
   textIcon.className = 'icon';
   textIcon.onclick = async () => {
-    await updateScript(`
+    await updateTheLot(`
 const text = new Text({
 tag: 'completedText',
 colour: 'white',
@@ -34,9 +34,6 @@ window.innerWidth / 2 - text.width / 2,
 window.innerHeight / 2 - text.height / 2
 );
       `);
-
-    await updatePlayground();
-    await updateEditor();
   };
 
   return textIcon;
@@ -46,11 +43,17 @@ const makeVectorIcon = () => {
   const vectorIcon = document.createElement('button');
   vectorIcon.textContent = 'V';
   vectorIcon.className = 'icon';
-  vectorIcon.onclick = () => {
-    document.getElementById('editor-textbox').value += `
-    
-    new Vector2(window.innerWidth / 2, window.innerHeight / 2);`;
+  vectorIcon.onclick = async () => {
+    await updateTheLot(
+      `new Vector2(window.innerWidth / 2, window.innerHeight / 2);`
+    );
   };
 
   return vectorIcon;
+};
+
+const updateTheLot = async (scriptData) => {
+  await updateScript(scriptData);
+  await updatePlayground();
+  await updateEditor();
 };
