@@ -17,3 +17,17 @@ body {
   min-width: 80%;
   width: 100%;
 }
+
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  position: fixed;
+  bottom: 2rem;
+  left: 12rem;
+}
+
+.action-buttons i {
+  font-size: x-large;
+  color: #011627;
+}

@@ -4,6 +4,8 @@ import { getScript } from './helpers.js';
 import Engine from '../built/Engine.js';
 
 let script;
+let isPaused = true;
+
 export const engine = new Engine(
   {
     onLoad: () => {},
@@ -23,7 +25,7 @@ window.onload = async () => {
   document.body.appendChild(sidebar());
   document.body.appendChild(editor);
 
-  engine.callbacks.onLoad();
+  setupActionButtons();
   script = await getScript();
 
   await updatePlayground();
@@ -39,4 +41,29 @@ export const updatePlayground = async () => {
   script.innerHTML = await getScript();
   script.id = 'script.js';
   document.body.appendChild(script);
+};
+
+const setupActionButtons = () => {
+  const actionButtons = document.createElement('div');
+  actionButtons.className = 'action-buttons';
+
+  const play = document.createElement('i');
+  play.className = 'fa-solid fa-play';
+  play.onclick = () => {
+    if (isPaused) {
+      engine.callbacks.onLoad();
+      isPaused = false;
+    }
+  };
+
+  const pause = document.createElement('i');
+  pause.className = 'fa-solid fa-pause';
+  pause.onclick = () => {
+    isPaused = true;
+  };
+
+  actionButtons.appendChild(play);
+  actionButtons.appendChild(pause);
+
+  document.body.appendChild(actionButtons);
 };
