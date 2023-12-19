@@ -16,8 +16,14 @@ export const createEditor = () => {
 
   const banner = document.createElement('div');
   banner.className = 'banner';
+
   const title = document.createElement('h2');
-  title.innerText = 'Script.js';
+  title.innerText = 'Editor';
+  title.onclick = () => {
+    if (div.classList.contains('hidden')) {
+      div.classList.remove('hidden');
+    }
+  };
 
   const iconsContainer = document.createElement('div');
   iconsContainer.className = 'icons-container';

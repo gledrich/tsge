@@ -10,7 +10,7 @@ const text = new Text({
   backgroundColour: '#43aa8b',
   fontSize: 50,
   zIndex: 10,
-  text: 'Hello World',
+  text: 'Hello world',
   height: 100,
   width: 400,
   register: true,
