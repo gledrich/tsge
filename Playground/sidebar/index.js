@@ -6,18 +6,16 @@ export default () => {
   const sidebarDiv = document.createElement('div');
   sidebarDiv.className = 'sidebar';
 
-  sidebarDiv.appendChild(makeVectorIcon());
-  sidebarDiv.appendChild(makeTextIcon());
-
-  return sidebarDiv;
-};
-
-const makeTextIcon = () => {
-  const textIcon = document.createElement('button');
-  textIcon.textContent = 'T';
-  textIcon.className = 'icon';
-  textIcon.onclick = async () => {
-    await updateTheLot(`
+  sidebarDiv.appendChild(
+    iconFactory(
+      'V',
+      `new Vector2(window.innerWidth / 2, window.innerHeight / 2);`
+    )
+  );
+  sidebarDiv.appendChild(
+    iconFactory(
+      'T',
+      `
 const text = new Text({
 tag: 'exampleTag',
 colour: 'white',
@@ -33,23 +31,15 @@ text.position = new Vector2(
 window.innerWidth / 2 - text.width / 2,
 window.innerHeight / 2 - text.height / 2
 );
-      `);
-  };
+`
+    )
+  );
 
-  return textIcon;
-};
+  sidebarDiv.appendChild(iconFactory('R', ``));
+  sidebarDiv.appendChild(iconFactory('S', ``));
+  sidebarDiv.appendChild(iconFactory('L', ``));
 
-const makeVectorIcon = () => {
-  const vectorIcon = document.createElement('button');
-  vectorIcon.textContent = 'V';
-  vectorIcon.className = 'icon';
-  vectorIcon.onclick = async () => {
-    await updateTheLot(
-      `new Vector2(window.innerWidth / 2, window.innerHeight / 2);`
-    );
-  };
-
-  return vectorIcon;
+  return sidebarDiv;
 };
 
 const updateTheLot = async (scriptData) => {
@@ -57,3 +47,14 @@ const updateTheLot = async (scriptData) => {
   await updatePlayground();
   await updateEditor();
 };
+
+function iconFactory(text, scriptData) {
+  const icon = document.createElement('button');
+  icon.textContent = text;
+  icon.className = 'icon';
+  icon.onclick = async () => {
+    await updateTheLot(scriptData);
+  };
+
+  return icon;
+}
