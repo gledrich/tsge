@@ -25,6 +25,7 @@ body {
   position: fixed;
   bottom: 2rem;
   left: 12rem;
+  z-index: 100;
 }
 
 .action-buttons i {

@@ -1,23 +1,10 @@
 import sidebar from './sidebar/index.js';
 import { createEditor, updateEditor } from './editor/index.js';
-import { getScript } from './helpers.js';
+import { getScript, updateScript } from './helpers.js';
 import Engine from '../built/Engine.js';
 
 let script;
 let isPaused = true;
-
-export const engine = new Engine(
-  {
-    onLoad: () => {},
-    update: () => {},
-  },
-  {
-    title: 'Playground',
-    backgroundColour: '#A7DCCC',
-    width: '100%',
-    height: '100%',
-  }
-);
 
 window.onload = async () => {
   const editor = createEditor();
@@ -49,9 +36,15 @@ const setupActionButtons = () => {
 
   const play = document.createElement('i');
   play.className = 'fa-solid fa-play';
-  play.onclick = () => {
+  play.onclick = async () => {
     if (isPaused) {
-      engine.callbacks.onLoad();
+      await updateScript(
+        document.getElementById('editor-textbox').innerText,
+        false
+      );
+      await updatePlayground();
+      await updateEditor(true);
+      window.engine?.callbacks.onLoad();
       isPaused = false;
     }
   };
@@ -62,8 +55,26 @@ const setupActionButtons = () => {
     isPaused = true;
   };
 
+  const refresh = document.createElement('i');
+  refresh.className = 'fa-solid fa-rotate';
+  refresh.onclick = async () => {
+    await updateScript(
+      document.getElementById('editor-textbox').innerText,
+      false
+    );
+    await updatePlayground();
+    await updateEditor(true);
+
+    window.engine?.callbacks.onLoad();
+
+    if (isPaused) {
+      isPaused = false;
+    }
+  };
+
   actionButtons.appendChild(play);
   actionButtons.appendChild(pause);
+  actionButtons.appendChild(refresh);
 
   document.body.appendChild(actionButtons);
 };

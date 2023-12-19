@@ -1,5 +1,5 @@
 import { getScript, updateScript } from '../helpers.js';
-import { updatePlayground, engine } from '../index.js';
+import { updatePlayground } from '../index.js';
 import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
 import js from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/languages/javascript.min.js';
 
@@ -63,7 +63,7 @@ export const createEditor = () => {
       await updatePlayground();
 
       setTimeout(async () => {
-        await updateEditor(false);
+        await updateEditor(true);
       }, 500);
     }
   };
