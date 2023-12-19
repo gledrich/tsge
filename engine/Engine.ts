@@ -22,7 +22,8 @@ class ObjectSet extends Set<GameObject> {
 }
 
 export default class Engine {
-  static objects = new ObjectSet();
+  public static objects = new ObjectSet();
+  public static paused = false;
 
   #canvas: HTMLCanvasElement;
   #ctx: CanvasRenderingContext2D;
@@ -91,13 +92,15 @@ export default class Engine {
   }
 
   #update(timestamp: number) {
-    this.#secondsPassed = (timestamp - this.#oldTimestamp) / 1000;
-    this.#oldTimestamp = timestamp;
+    if (!Engine.paused) {
+      this.#secondsPassed = (timestamp - this.#oldTimestamp) / 1000;
+      this.#oldTimestamp = timestamp;
 
-    this.fps = Math.round(1 / this.#secondsPassed);
+      this.fps = Math.round(1 / this.#secondsPassed);
 
-    this.callbacks.update();
-    this.#draw();
+      this.callbacks.update();
+      this.#draw();
+    }
 
     window.requestAnimationFrame(this.#update.bind(this));
   }

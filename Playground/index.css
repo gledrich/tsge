@@ -31,4 +31,5 @@ body {
 .action-buttons i {
   font-size: x-large;
   color: #011627;
+  cursor: pointer;
 }

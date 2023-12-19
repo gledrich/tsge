@@ -4,7 +4,6 @@ import { getScript, updateScript } from './helpers.js';
 import Engine from '../built/Engine.js';
 
 let script;
-let isPaused = true;
 
 window.onload = async () => {
   const editor = createEditor();
@@ -37,22 +36,14 @@ const setupActionButtons = () => {
   const play = document.createElement('i');
   play.className = 'fa-solid fa-play';
   play.onclick = async () => {
-    if (isPaused) {
-      await updateScript(
-        document.getElementById('editor-textbox').innerText,
-        false
-      );
-      await updatePlayground();
-      await updateEditor(true);
-      window.engine?.callbacks.onLoad();
-      isPaused = false;
-    }
+    Engine.paused = false;
   };
 
   const pause = document.createElement('i');
   pause.className = 'fa-solid fa-pause';
   pause.onclick = () => {
-    isPaused = true;
+    Engine.paused = true;
+    document.getElementById('canvas').style = 'cursor: default';
   };
 
   const refresh = document.createElement('i');
@@ -67,8 +58,8 @@ const setupActionButtons = () => {
 
     window.engine?.callbacks.onLoad();
 
-    if (isPaused) {
-      isPaused = false;
+    if (Engine.paused) {
+      Engine.paused = false;
     }
   };
 

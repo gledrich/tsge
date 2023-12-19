@@ -20,6 +20,11 @@
   flex-direction: column;
   transition: all .25s linear;
   padding-left: 1rem;
+  scrollbar-width: none;
+}
+
+.editor::-webkit-scrollbar {
+  display: none;
 }
 
 .expanded {
@@ -32,6 +37,10 @@
   min-width: 12%;
   height: 12%;
   width: 12%;
+}
+
+.hidden h2 {
+  cursor: pointer;
 }
 
 .close {
@@ -62,6 +71,10 @@
   flex-direction: column;
   justify-content: center;
   gap: .25rem;
+}
+
+.icons-container i {
+  cursor: pointer;
 }
 
 .close {
