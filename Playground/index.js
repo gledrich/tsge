@@ -1,4 +1,3 @@
-import sidebar from './sidebar/index.js';
 import { createEditor, updateEditor } from './editor/index.js';
 import { getScript, updateScript } from './helpers.js';
 import Engine from '../built/Engine.js';
@@ -8,7 +7,6 @@ let script;
 window.onload = async () => {
   const editor = createEditor();
 
-  document.body.appendChild(sidebar());
   document.body.appendChild(editor);
 
   setupActionButtons();
@@ -16,11 +14,14 @@ window.onload = async () => {
 
   await updatePlayground();
   await updateEditor();
+
+  Engine.paused = true;
 };
 
 export const updatePlayground = async () => {
   Engine.destroyAll();
   document.getElementById('script.js')?.remove();
+  document.getElementById('canvas-container')?.remove();
 
   const script = document.createElement('script');
   script.type = 'module';
@@ -55,8 +56,6 @@ const setupActionButtons = () => {
     );
     await updatePlayground();
     await updateEditor(true);
-
-    window.engine?.callbacks.onLoad();
 
     if (Engine.paused) {
       Engine.paused = false;

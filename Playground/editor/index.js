@@ -1,3 +1,4 @@
+import sidebar from '../sidebar/index.js';
 import { getScript, updateScript } from '../helpers.js';
 import { updatePlayground } from '../index.js';
 import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
@@ -10,6 +11,10 @@ hljs.configure({
 });
 
 export const createEditor = () => {
+  const container = document.createElement('div');
+  container.className = 'editor-container';
+  container.appendChild(sidebar());
+
   const div = document.createElement('div');
   div.id = 'editor';
   div.className = 'editor';
@@ -75,8 +80,9 @@ export const createEditor = () => {
   div.appendChild(banner);
   pre.appendChild(textbox);
   div.appendChild(pre);
+  container.appendChild(div);
 
-  return div;
+  return container;
 };
 
 export const updateEditor = async (shouldFetchScript = true) => {
