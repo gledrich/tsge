@@ -51,7 +51,8 @@ Deletes all Game Objects.
 
 ```js
 {
-  onLoad, update;
+  onLoad, 
+  update
 }
 ```
 
