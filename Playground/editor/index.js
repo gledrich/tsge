@@ -32,6 +32,16 @@ export const createEditor = () => {
 
   const iconsContainer = document.createElement('div');
   iconsContainer.className = 'icons-container';
+
+  const save = document.createElement('i');
+  save.id = 'saveIcon';
+  save.className = 'fa-solid fa-cloud save';
+  save.onclick = async () => {
+    await updateScript(textbox.innerText, false);
+    await updatePlayground();
+    await updateEditor(true);
+  };
+
   const expand = document.createElement('i');
   expand.className = 'fa-solid fa-window-maximize expand';
   expand.onclick = () => {
@@ -62,20 +72,11 @@ export const createEditor = () => {
   textbox.spellcheck = 'on';
   textbox.contentEditable = 'true';
   textbox.onchange = async () => await updateEditor(false);
-  textbox.onkeyup = async (e) => {
-    if (e.code === 'Enter') {
-      await updateScript(textbox.innerText, false);
-      await updatePlayground();
-
-      setTimeout(async () => {
-        await updateEditor(true);
-      }, 500);
-    }
-  };
 
   banner.appendChild(title);
   iconsContainer.appendChild(close);
   iconsContainer.appendChild(expand);
+  iconsContainer.appendChild(save);
   banner.appendChild(iconsContainer);
   div.appendChild(banner);
   pre.appendChild(textbox);
@@ -86,6 +87,13 @@ export const createEditor = () => {
 };
 
 export const updateEditor = async (shouldFetchScript = true) => {
+  const saveIcon = document.getElementById('saveIcon');
+
+  if (saveIcon) {
+    saveIcon.classList.remove('save');
+    saveIcon.classList.add('saving');
+  }
+
   let script = document.getElementById('editor-textbox').innerText;
 
   if (shouldFetchScript) {
@@ -105,4 +113,9 @@ export const updateEditor = async (shouldFetchScript = true) => {
       language: 'javascript',
     }
   ).value;
+
+  if (saveIcon) {
+    saveIcon.classList.remove('saving');
+    saveIcon.classList.add('save');
+  }
 };

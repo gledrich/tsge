@@ -58,6 +58,15 @@
   display: flex;
 }
 
+.save {
+  color: rgb(38, 163, 197);
+  transition: all 1s ease-in-out;
+}
+
+.saving {
+  color: white;
+}
+
 .hidden .close {
   /* display: none; */
   /* visibility: hidden; */
@@ -81,7 +90,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: .25rem;
+  align-items: center;
+  gap: .35rem;
 }
 
 .icons-container i {
