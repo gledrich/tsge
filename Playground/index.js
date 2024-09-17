@@ -5,8 +5,10 @@ import Engine from '../built/Engine.js';
 let script;
 
 window.onload = async () => {
+  const logo = makeLogo();
   const editor = createEditor();
 
+  document.body.appendChild(logo);
   document.body.appendChild(editor);
 
   setupActionButtons();
@@ -28,6 +30,18 @@ export const updatePlayground = async () => {
   script.innerHTML = await getScript();
   script.id = 'script.js';
   document.body.appendChild(script);
+};
+
+const makeLogo = () => {
+  const container = document.createElement('div');
+  container.className = 'logo-container';
+
+  const logo = document.createElement('h1');
+  logo.innerHTML = 'TSGE';
+
+  container.appendChild(logo);
+
+  return container;
 };
 
 const setupActionButtons = () => {

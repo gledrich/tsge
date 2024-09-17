@@ -18,6 +18,23 @@ body {
   width: 100%;
 }
 
+.logo-container {
+  position: fixed;
+  z-index: 1000;
+  margin-left: 1rem;
+  margin-top: 1rem;
+  font-family: Arial Rounded MT Bold;
+  padding: .25rem;
+  border-color: #067a69;
+  border-width: .25rem;
+  border-style: inset;
+  border-radius: 1rem;
+}
+
+.logo-container h1 {
+  margin: 0;
+}
+
 .action-buttons {
   display: flex;
   flex-direction: row;
