@@ -31,6 +31,9 @@
   transition: all .25s linear;
   padding-left: 1rem;
   scrollbar-width: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .editor::-webkit-scrollbar {

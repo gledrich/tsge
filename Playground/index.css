@@ -29,6 +29,9 @@ body {
   border-width: .25rem;
   border-style: inset;
   border-radius: 1rem;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .logo-container h1 {
