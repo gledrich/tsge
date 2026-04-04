@@ -231,6 +231,7 @@ class PlayScene extends Scene {
       let hit = false;
       this.meteors = this.meteors.filter((m) => {
         if (Physics.checkCollision(fb, m)) {
+          console.log(`Meteor destroyed! Score +10. Total: ${this.score + 10}`);
           this.spawnExplosion(m.position, m.radius, m.colour);
           m.destroySelf();
           this.score += 10;
@@ -323,13 +324,15 @@ class PlayScene extends Scene {
     this.meteors = this.meteors.filter((meteor) => {
       if (!this.isInvulnerable && Physics.checkCollision(this.player, meteor)) {
         this.lives -= 1;
+        console.log(`Player hit! Lives remaining: ${this.lives}`);
         this.livesText.text = `Lives: ${this.lives}`;
         this.shakeIntensity = 20; // Big shake on hit
 
         if (this.lives <= 0) {
-          const finalScore =
-            this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          const finalScore = this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          console.log(`Game Over! Final Score: ${finalScore}`);
           if (finalScore > this.highScore) {
+            console.log(`New High Score: ${finalScore}!`);
             localStorage.setItem('dinoHighScore', finalScore.toString());
           }
           this.onGameOver(finalScore);
