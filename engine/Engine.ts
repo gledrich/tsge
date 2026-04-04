@@ -97,6 +97,8 @@ export default class Engine {
 
     document.getElementsByTagName('body')[0].appendChild(this.#window);
     this.#window.appendChild(this.#canvas);
+
+    setTimeout(() => this.callbacks.onLoad(), 0);
   }
 
   #onLoad() {
