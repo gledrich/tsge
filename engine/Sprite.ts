@@ -1,12 +1,13 @@
 import Engine from './Engine.js';
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
+import ResourceLoader from './Loader.js';
 
 const sprites = new Set<Sprite>();
 
 interface SpriteProps {
   tag: string;
-  img: HTMLImageElement;
+  img: HTMLImageElement | string;
   rows: number;
   cols: number;
   position: Vector2;
@@ -45,7 +46,12 @@ export default class Sprite extends GameObject {
 
     super(props.tag, props.zIndex || '1');
 
-    this.img = props.img;
+    if (typeof props.img === 'string') {
+      this.img = ResourceLoader.getImage(props.img);
+    } else {
+      this.img = props.img;
+    }
+
     this.rows = props.rows;
     this.cols = props.cols;
     this.position = props.position;
