@@ -4,6 +4,7 @@ import Vector2 from '../built/Vector2.js';
 import Text from '../built/Text.js';
 import Sprite from '../built/Sprite.js';
 import Scene from '../built/Scene.js';
+import Circle from '../built/Circle.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -123,17 +124,15 @@ class PlayScene extends Scene {
       if (star.position.y > 2000) star.position.y = 0;
     });
 
-    // Spawn Meteors (Lowered spawn rate from 0.05 to 0.02)
+    // Spawn Meteors (Circles)
     if (Math.random() < 0.02) {
-      const meteor = new Rectangle({
-        position: new Vector2(
-          Math.random() * 2000,
-          Engine.camera.position.y - 100
-        ),
-        width: 30 + Math.random() * 40,
-        height: 30 + Math.random() * 40,
+      const radius = 15 + Math.random() * 20;
+      const meteor = new Circle({
+        position: new Vector2(Math.random() * 2000, Engine.camera.position.y - 100),
+        radius: radius,
         colour: '#F94144',
-        zIndex: 4
+        zIndex: 4,
+        tag: 'meteor'
       });
       // Set initial velocity (Lowered)
       meteor.velocity.y = 100 + Math.random() * 200;
