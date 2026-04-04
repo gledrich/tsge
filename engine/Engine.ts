@@ -135,6 +135,9 @@ export default class Engine {
 
       this.callbacks.update();
       this.#draw();
+    } else {
+      // Still allow drawing in paused mode if debug is on or for initial frame
+      this.#draw();
     }
 
     window.requestAnimationFrame(this.#update.bind(this));
