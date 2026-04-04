@@ -13,13 +13,13 @@ hljs.configure({
 
 export const createEditor = () => {
   const container = document.createElement('div');
-  container.className = 'editor-container';
+  container.className = 'editor-container collapsed';
   container.appendChild(sidebar());
 
   // Toggle Sidebar Button
   const toggleBtn = document.createElement('div');
   toggleBtn.className = 'toggle-sidebar';
-  toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+  toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
   toggleBtn.onclick = () => {
     container.classList.toggle('collapsed');
     const icon = toggleBtn.querySelector('i');

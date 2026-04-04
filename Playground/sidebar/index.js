@@ -4,57 +4,89 @@ import { updateScript } from '../helpers.js';
 
 export default () => {
   const sidebarDiv = document.createElement('div');
-  sidebarDiv.className = 'sidebar';
+  sidebarDiv.className = 'sidebar minimized';
 
-  sidebarDiv.appendChild(
-    iconFactory(
-      'V',
-      `new Vector2(window.innerWidth / 2, window.innerHeight / 2);`
-    )
-  );
-  sidebarDiv.appendChild(
-    iconFactory(
-      'T',
-      `
-const text = new Text({
-tag: 'exampleTag',
-colour: 'white',
-backgroundColour: '#43aa8b',
-fontSize: 50,
-zIndex: 10,
-text: 'Example',
-height: 100,
-width: 400,
-register: true,
-});
-text.position = new Vector2(
-window.innerWidth / 2 - text.width / 2,
-window.innerHeight / 2 - text.height / 2
-);
-`
-    )
-  );
+  const header = document.createElement('div');
+  header.className = 'sidebar-header';
+  header.onclick = () => {
+    sidebarDiv.classList.toggle('minimized');
+  };
 
-  sidebarDiv.appendChild(iconFactory('R', ``));
-  sidebarDiv.appendChild(iconFactory('S', ``));
-  sidebarDiv.appendChild(iconFactory('L', ``));
+  const title = document.createElement('div');
+  title.className = 'sidebar-title';
+  title.innerText = 'Snippets';
+
+  const toggleIcon = document.createElement('i');
+  toggleIcon.className = 'fa-solid fa-chevron-down sidebar-toggle-icon';
+
+  header.appendChild(title);
+  header.appendChild(toggleIcon);
+  sidebarDiv.appendChild(header);
+
+  const snippets = [
+    { icon: 'fa-arrows-up-down-left-right', label: 'Vector2', code: 'new Vector2(0, 0)' },
+    { icon: 'fa-font', label: 'Text', code: `new Text({
+  tag: 'textObj',
+  text: 'Hello World',
+  fontSize: 30,
+  colour: 'white',
+  position: new Vector2(100, 100),
+  width: 200,
+  zIndex: 10
+});` },
+    { icon: 'fa-square', label: 'Rectangle', code: `new Rectangle({
+  tag: 'rectObj',
+  position: new Vector2(100, 100),
+  width: 50,
+  height: 50,
+  colour: '#43aa8b',
+  zIndex: 5
+});` },
+    { icon: 'fa-circle', label: 'Circle', code: `new Circle({
+  tag: 'circleObj',
+  position: new Vector2(100, 100),
+  radius: 25,
+  colour: '#F94144',
+  zIndex: 5
+});` },
+    { icon: 'fa-image', label: 'Sprite', code: `new Sprite({
+  tag: 'spriteObj',
+  img: dinoImg,
+  rows: 1,
+  cols: 24,
+  position: new Vector2(100, 100),
+  startCol: 0,
+  endCol: 4,
+  zIndex: 5
+});` },
+    { icon: 'fa-minus', label: 'Line', code: `new Line({
+  tag: 'lineObj',
+  width: 2,
+  p1: new Vector2(0, 0),
+  p2: new Vector2(100, 100),
+  zIndex: 1
+});` }
+  ];
+
+  snippets.forEach(s => {
+    sidebarDiv.appendChild(snippetFactory(s.icon, s.label, s.code));
+  });
 
   return sidebarDiv;
 };
 
-const updateTheLot = async (scriptData) => {
-  await updateScript(scriptData);
-  await updatePlayground();
-  await updateEditor();
-};
-
-function iconFactory(text, scriptData) {
-  const icon = document.createElement('button');
-  icon.textContent = text;
-  icon.className = 'icon';
-  icon.onclick = async () => {
-    await updateTheLot(scriptData);
+function snippetFactory(iconClass, label, code) {
+  const btn = document.createElement('button');
+  btn.className = 'snippet-btn';
+  btn.title = label;
+  btn.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${label}</span>`;
+  
+  btn.onclick = () => {
+    const textbox = document.getElementById('editor-textbox');
+    textbox.focus();
+    // Insert at cursor position if possible, otherwise append
+    document.execCommand('insertText', false, code);
   };
 
-  return icon;
+  return btn;
 }
