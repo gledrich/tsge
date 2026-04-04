@@ -211,10 +211,14 @@ export default class Engine {
     this.#ctx.fillRect(x, y, overlayWidth, overlayHeight);
     
     this.#ctx.fillStyle = 'white';
-    this.#ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 20);
-    this.#ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 40);
-    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 60);
-    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 75);
+    this.#ctx.textAlign = 'center';
+    this.#ctx.textBaseline = 'middle';
+    
+    const centerX = x + overlayWidth / 2;
+    this.#ctx.fillText(`FPS: ${this.fps}`, centerX, y + 15);
+    this.#ctx.fillText(`Objects: ${objects.size}`, centerX, y + 35);
+    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, centerX, y + 55);
+    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, centerX, y + 70);
     this.#ctx.restore();
   }
 
