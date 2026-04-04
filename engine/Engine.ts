@@ -89,7 +89,7 @@ export default class Engine {
     scene.onLoad();
   }
 
-  #canvas: HTMLCanvasElement;
+  #canvas: Canvas;
   #ctx: CanvasRenderingContext2D;
   #window: HTMLDivElement;
   #title: HTMLTitleElement;
@@ -147,10 +147,10 @@ export default class Engine {
       update: callbacks.update,
     };
 
-    this.#canvas = new Canvas().canvas;
-    this.#ctx = this.#canvas.getContext('2d');
-    this.width = this.#canvas.width;
-    this.height = this.#canvas.height;
+    this.#canvas = new Canvas();
+    this.#ctx = this.#canvas.canvas.getContext('2d');
+    this.width = this.#canvas.canvas.width;
+    this.height = this.#canvas.canvas.height;
 
     this.#window = document.createElement('div');
     this.#window.id = 'canvas-container';
@@ -159,8 +159,14 @@ export default class Engine {
 
     Input.init();
 
+    window.addEventListener('resize', () => {
+      this.#canvas.resize();
+      this.width = this.#canvas.canvas.width;
+      this.height = this.#canvas.canvas.height;
+    });
+
     document.getElementsByTagName('body')[0].appendChild(this.#window);
-    this.#window.appendChild(this.#canvas);
+    this.#window.appendChild(this.#canvas.canvas);
 
     setTimeout(() => this.callbacks.onLoad(), 0);
   }
@@ -219,7 +225,7 @@ export default class Engine {
 
   #setBackground() {
     this.#ctx.fillStyle = this.backgroundColour;
-    this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
+    this.#ctx.fillRect(0, 0, this.#canvas.canvas.width, this.#canvas.canvas.height);
   }
 
   #draw() {
@@ -268,7 +274,7 @@ export default class Engine {
     const overlayWidth = 180;
     const statsHeight = 80;
     const padding = 10;
-    const x = this.#canvas.width - overlayWidth - padding;
+    const x = this.#canvas.canvas.width - overlayWidth - padding;
     let y = padding;
 
     // Background for Stats
