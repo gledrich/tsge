@@ -1,0 +1,44 @@
+# TSGE Roadmap
+
+This document outlines the planned features and milestones for the **TypeScript Game Engine (TSGE)**.
+
+## Phase 1: Short-Term (Foundation & Performance)
+
+- **Input State Management:**
+  - [ ] Implement keyboard state tracking (e.g., `Input.isKeyDown('w')`).
+  - [ ] Add Gamepad API support for controller input.
+- **Collision Resolution:**
+  - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
+  - [ ] Add basic friction and restitution (bounciness) to `Physics`.
+- **Rendering Optimization:**
+  - [ ] Implement Viewport Culling (only draw objects within the `Camera` bounds).
+  - [ ] Add support for simple Z-sorting optimizations.
+
+## Phase 2: Medium-Term (Core Game Systems)
+
+- **Audio Manager:**
+  - [ ] Implement a `Sound` class using the Web Audio API.
+  - [ ] Support for background music loops and one-off sound effects.
+  - [ ] Master volume and channel-based volume control.
+- **Tilemaps & Maps:**
+  - [ ] Create a `Tilemap` class to render grid-based levels.
+  - [ ] Support for loading Tiled JSON map exports.
+- **UI Framework:**
+  - [ ] Add a `Button` component with hover/click states.
+  - [ ] Implement UI anchoring (top-left, center, etc.) relative to the screen.
+  - [ ] Add a `ProgressBar` component for health/loading bars.
+
+## Phase 3: Long-Term (Advanced Features)
+
+- **Particle System:**
+  - [ ] Create a `ParticleEmitter` class for fire, smoke, and explosions.
+  - [ ] Support for velocity, gravity, and life-cycle scaling for particles.
+- **Spatial Partitioning:**
+  - [ ] Implement a Quadtree to handle hundreds of active objects efficiently during collision checks.
+- **Scene Effects:**
+  - [ ] Add built-in scene transitions (e.g., Fade, Slide).
+  - [ ] Implement basic post-processing effects (e.g., Screen Shake, Chromatic Aberration).
+
+---
+
+_Last Updated: April 2026_
