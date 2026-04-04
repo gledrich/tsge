@@ -231,6 +231,7 @@ export default class Engine {
     this.#setBackground();
 
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
+    const bounds = Engine.camera.getViewportBounds(this.width, this.height);
 
     this.#ctx.save();
 
@@ -239,7 +240,15 @@ export default class Engine {
     this.#ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
 
     Engine.#getSortedArray(objects).forEach((object) => {
-      object.draw(this.#ctx);
+      // Frustum Culling
+      if (
+        object.position.x < bounds.x + bounds.width &&
+        object.position.x + object.width > bounds.x &&
+        object.position.y < bounds.y + bounds.height &&
+        object.position.y + object.height > bounds.y
+      ) {
+        object.draw(this.#ctx);
+      }
     });
 
     if (Engine.debug) {
@@ -248,7 +257,6 @@ export default class Engine {
 
     this.#ctx.restore();
   }
-
   #drawDebug(objects: Set<GameObject>) {
     this.#ctx.strokeStyle = 'red';
     this.#ctx.lineWidth = 1;
