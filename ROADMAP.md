@@ -5,7 +5,7 @@ This document outlines the planned features and milestones for the **TypeScript 
 ## Phase 1: Short-Term (Foundation & Performance)
 
 - **Input State Management:**
-  - [ ] Implement keyboard state tracking (e.g., `Input.isKeyDown('w')`).
+  *   [x] Implement keyboard state tracking (e.g., `Input.isKeyDown('w')`).
   - [ ] Add Gamepad API support for controller input.
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
