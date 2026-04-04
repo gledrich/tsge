@@ -3,6 +3,7 @@ import GameObject from './GameObject.js';
 import Sprite from './Sprite.js';
 import Input from './Input.js';
 import Scene from './Scene.js';
+import Camera from './Camera.js';
 
 export interface EngineOpts {
   width: string;
@@ -23,6 +24,7 @@ class ObjectSet extends Set<GameObject> {
 export default class Engine {
   public static objects = new ObjectSet();
   public static paused = false;
+  public static camera = new Camera();
   private static _currentScene: Scene;
 
   public static get currentScene(): Scene {
@@ -31,6 +33,7 @@ export default class Engine {
 
   public static set currentScene(scene: Scene) {
     this._currentScene = scene;
+    this.camera.reset();
     scene.onLoad();
   }
 
@@ -135,9 +138,17 @@ export default class Engine {
 
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
+    this.#ctx.save();
+    
+    // Apply camera transform
+    this.#ctx.scale(Engine.camera.zoom, Engine.camera.zoom);
+    this.#ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
+
     Engine.#sortSet(objects).forEach((object) => {
       object.draw(this.#ctx);
     });
+
+    this.#ctx.restore();
   }
 
   #findAllObjects(tag: string = '') {
