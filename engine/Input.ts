@@ -49,7 +49,9 @@ export default class Input {
         if (!found) Engine.selectedObject = null;
       }
 
-      this.clickListeners.forEach((listener) => listener(pos));
+      if (!Engine.paused) {
+        this.clickListeners.forEach((listener) => listener(pos));
+      }
     });
 
     document.addEventListener('mousedown', (event: MouseEvent) => {
