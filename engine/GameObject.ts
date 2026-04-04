@@ -4,6 +4,8 @@ import Vector2 from './Vector2.js';
 export default abstract class GameObject {
   tag: string;
   zIndex: string;
+  velocity: Vector2 = new Vector2(0, 0);
+  acceleration: Vector2 = new Vector2(0, 0);
 
   constructor(tag: string, zIndex: string) {
     this.tag = tag;
