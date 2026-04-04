@@ -25,6 +25,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "built/", "Example/", "Playground/"],
+    ignores: ["node_modules/", "built/", "Example/", "Playground/", "docs/api/"],
   },
 ];
