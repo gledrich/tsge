@@ -5,6 +5,7 @@ import Text from '../built/Text.js';
 import Sprite from '../built/Sprite.js';
 import Scene from '../built/Scene.js';
 import Circle from '../built/Circle.js';
+import Physics from '../built/Physics.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -92,7 +93,7 @@ class PlayScene extends Scene {
       text: 'Time: 0s',
       fontSize: 24,
       colour: 'white',
-      position: new Vector2(20, 20),
+      position: new Vector2(window.innerWidth / 2 - 75, 20),
       width: 150,
       zIndex: 10
     });
@@ -111,7 +112,7 @@ class PlayScene extends Scene {
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
 
     // Keep UI fixed by moving it with camera
-    this.scoreText.position.x = Engine.camera.position.x + 20;
+    this.scoreText.position.x = Engine.camera.position.x + window.innerWidth / 2 - 75;
     this.scoreText.position.y = Engine.camera.position.y + 20;
 
     // Flip dino based on mouse
@@ -143,7 +144,7 @@ class PlayScene extends Scene {
 
     // Update Meteors & Collision
     this.meteors = this.meteors.filter((meteor) => {
-      if (this.player.hasCollided(meteor)) {
+      if (Physics.checkCollision(this.player, meteor)) {
         this.onGameOver(this.score);
         return false;
       }
