@@ -72,6 +72,10 @@ export default class Input {
     document.addEventListener('keyup', (event: KeyboardEvent) => {
       this.keys.delete(event.key.toLowerCase());
     });
+
+    window.addEventListener('blur', () => {
+      this.keys.clear();
+    });
   }
 
   /**
