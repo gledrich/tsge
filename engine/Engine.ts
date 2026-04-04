@@ -15,6 +15,7 @@ export interface EngineOpts {
 export interface EngineCallbacks {
   onLoad: Function;
   update: Function;
+  fixedUpdate?: Function;
 }
 
 class ObjectSet extends Set<GameObject> {
@@ -59,6 +60,8 @@ export default class Engine {
   fps: number = 0;
   #oldTimestamp: number = 0;
   #secondsPassed: number;
+  #accumulator: number = 0;
+  #fixedDelta: number = 1 / 60;
 
   constructor(callbacks: EngineCallbacks, opts: EngineOpts) {
     const defaultedOpts = {
@@ -117,6 +120,13 @@ export default class Engine {
 
       this.fps = Math.round(1 / this.#secondsPassed);
 
+      // Fixed update loop
+      this.#accumulator += this.#secondsPassed;
+      while (this.#accumulator >= this.#fixedDelta) {
+        this.#fixedUpdate();
+        this.#accumulator -= this.#fixedDelta;
+      }
+
       if (Engine.currentScene) {
         Engine.currentScene.update();
       }
@@ -126,6 +136,24 @@ export default class Engine {
     }
 
     window.requestAnimationFrame(this.#update.bind(this));
+  }
+
+  #fixedUpdate() {
+    const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
+
+    objects.forEach((object) => {
+      // Apply acceleration to velocity
+      object.velocity.x += object.acceleration.x * this.#fixedDelta;
+      object.velocity.y += object.acceleration.y * this.#fixedDelta;
+
+      // Apply velocity to position
+      object.position.x += object.velocity.x * this.#fixedDelta;
+      object.position.y += object.velocity.y * this.#fixedDelta;
+    });
+
+    if (this.callbacks.fixedUpdate) {
+      this.callbacks.fixedUpdate();
+    }
   }
 
   #setBackground() {
