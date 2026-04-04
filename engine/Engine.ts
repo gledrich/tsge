@@ -180,7 +180,6 @@ export default class Engine {
       position,
       startCol,
       endCol,
-      ref,
     } = sprite;
 
     this.#ctx.imageSmoothingEnabled = true;
@@ -188,17 +187,17 @@ export default class Engine {
 
     const maxFrame = endCol - 1;
 
-    while (Engine[ref] < startCol) {
-      Engine[ref] += 1;
+    if (sprite.currentFrame < startCol) {
+      sprite.currentFrame = startCol;
     }
 
-    if (Engine[ref] > maxFrame) {
-      Engine[ref] = startCol;
+    if (sprite.currentFrame > maxFrame) {
+      sprite.currentFrame = startCol;
     }
 
     // Update rows and columns
-    const column = Engine[ref] % cols;
-    const row = Math.floor(Engine[ref] / cols);
+    const column = sprite.currentFrame % cols;
+    const row = Math.floor(sprite.currentFrame / cols);
 
     this.#ctx.drawImage(
       img,
@@ -255,16 +254,11 @@ export default class Engine {
 
   static registerObject(object: GameObject) {
     if (object instanceof Sprite) {
-      const ref = `${object.tag}_${this.objects.size}`;
       const sprite = object;
-
-      this[ref] = 0;
-      sprite.ref = ref;
-      sprite.img.id = ref;
       this.objects.add(sprite);
 
       setInterval(() => {
-        this[ref] += 1;
+        sprite.currentFrame += 1;
       }, 100);
     } else {
       this.objects.add(object);
@@ -272,10 +266,6 @@ export default class Engine {
   }
 
   static destroyObject(object: GameObject) {
-    if (object instanceof Sprite) {
-      delete Engine[object.tag];
-    }
-
     this.objects.delete(object);
   }
 

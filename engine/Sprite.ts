@@ -27,7 +27,7 @@ export default class Sprite extends GameObject {
   frameWidth: number;
   frameHeight: number;
   registered: boolean;
-  ref: string;
+  currentFrame: number;
 
   constructor(props: SpriteProps) {
     if (!props.tag) {
@@ -42,6 +42,7 @@ export default class Sprite extends GameObject {
     this.position = props.position;
     this.startCol = props.startCol;
     this.endCol = props.endCol;
+    this.currentFrame = props.startCol || 0;
 
     sprites.add(this);
 
