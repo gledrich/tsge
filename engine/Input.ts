@@ -40,6 +40,17 @@ export default class Input {
 
       this.clickListeners.forEach((listener) => listener(pos));
     });
+
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+      // Toggle Pause with Space or P
+      if (event.key === ' ' || event.key === 'p' || event.key === 'P') {
+        Engine.paused = !Engine.paused;
+        
+        if (Engine.paused) {
+          document.getElementById('canvas')!.style.cursor = 'default';
+        }
+      }
+    });
   }
 
   static get mouseX() {
