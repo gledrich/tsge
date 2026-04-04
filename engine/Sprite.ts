@@ -3,8 +3,6 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
 
-const sprites = new Set<Sprite>();
-
 /**
  * Properties for creating a new Sprite.
  */
@@ -57,6 +55,9 @@ export default class Sprite extends GameObject {
   currentFrame: number;
   /** Whether the sprite is horizontally flipped. */
   flip: boolean = false;
+  /** Duration of each animation frame in milliseconds. */
+  frameDuration: number = 100;
+  #lastFrameUpdate: number = Date.now();
 
   /**
    * Gets the display width of the sprite (scaled by 3).
@@ -92,8 +93,6 @@ export default class Sprite extends GameObject {
     this.endCol = props.endCol;
     this.currentFrame = props.startCol || 0;
 
-    sprites.add(this);
-
     const setDimensions = () => {
       this.frameWidth = this.img.width / this.cols;
       this.frameHeight = this.img.height / this.rows;
@@ -102,7 +101,7 @@ export default class Sprite extends GameObject {
     if (this.img.complete) {
       setDimensions();
     } else {
-      this.img.addEventListener('load', setDimensions);
+      this.img.addEventListener('load', setDimensions, { once: true });
     }
 
     this.registered = false;
@@ -115,6 +114,12 @@ export default class Sprite extends GameObject {
    */
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.visible || !this.frameWidth || !this.frameHeight) return;
+
+    const now = Date.now();
+    if (this.registered && now - this.#lastFrameUpdate > this.frameDuration) {
+      this.currentFrame += 1;
+      this.#lastFrameUpdate = now;
+    }
 
     const {
       img,
@@ -189,6 +194,5 @@ export default class Sprite extends GameObject {
    */
   stop() {
     Engine.destroyObject(this);
-    sprites.delete(this);
   }
 }
