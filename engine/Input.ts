@@ -8,11 +8,15 @@ export default class Input {
   private static mousePosition: Vector2 = new Vector2(0, 0);
   private static clickListeners: Set<(pos: Vector2) => void> = new Set();
   private static keys: Set<string> = new Set();
+  private static isInitialized = false;
 
   /**
    * Initializes input event listeners.
    */
   static init() {
+    if (this.isInitialized) return;
+    this.isInitialized = true;
+
     document.addEventListener('mousemove', (event: MouseEvent) => {
       this.mousePosition.x = event.clientX;
       this.mousePosition.y = event.clientY;

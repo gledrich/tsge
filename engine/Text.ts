@@ -127,7 +127,6 @@ export default class Text extends GameObject {
 
     if (defaultedProps.onClick) {
       this.onClick = defaultedProps.onClick;
-      Input.addClickListener(this.#onMouseClick);
     }
 
     if (defaultedProps.register) {
