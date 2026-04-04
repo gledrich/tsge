@@ -1,5 +1,6 @@
 import sidebar from '../sidebar/index.js';
 import { getScript, updateScript } from '../helpers.js';
+import createConsole from '../console/index.js';
 import { updatePlayground } from '../index.js';
 import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
 import js from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/languages/javascript.min.js';
@@ -82,6 +83,7 @@ export const createEditor = () => {
   pre.appendChild(textbox);
   div.appendChild(pre);
   container.appendChild(div);
+  container.appendChild(createConsole());
 
   return container;
 };

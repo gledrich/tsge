@@ -23,13 +23,12 @@
   background-color: #011627;
   margin: 1rem;
   border-radius: 1rem;
-  padding: .5rem 0 0 .5rem;
+  padding: 1rem;
   color: white;
   overflow: auto;
   display: flex;
   flex-direction: column;
   transition: all .25s linear;
-  padding-left: 1rem;
   scrollbar-width: none;
   -webkit-user-select: none;
   -ms-user-select: none;

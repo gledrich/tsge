@@ -1,0 +1,50 @@
+.console {
+  font-family: Arial, Helvetica, sans-serif;
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 25%;
+  width: 70%;
+  z-index: 100;
+  background-color: black;
+  border-radius: 1rem;
+  justify-content: space-between;
+  overflow-y: scroll;
+  padding-right: 1rem;
+  margin: 0 1rem;
+}
+
+.title {
+  font-size: small;
+  margin: 1rem;
+  color: white;
+}
+
+.console-text {
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  font-size: x-small;
+  /* padding-left: 1rem; */
+  color: red;
+  background-color: rgb(20, 20, 20);
+  /* width: fit-content; */
+  /* min-width: 80%; */
+  height: fit-content;
+  border-radius: 1rem;
+  padding: .1rem;
+}
+
+.console-text p {
+  line-height: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.console-text span {
+  color: lightgreen;
+  margin-left: 0.25rem;
+  margin-right: 1rem;
+}
