@@ -7,6 +7,7 @@ import Engine from './Engine.js';
 export default class Input {
   private static mousePosition: Vector2 = new Vector2(0, 0);
   private static clickListeners: Set<(pos: Vector2) => void> = new Set();
+  private static keys: Set<string> = new Set();
 
   /**
    * Initializes input event listeners.
@@ -48,6 +49,8 @@ export default class Input {
     });
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {
+      this.keys.add(event.key.toLowerCase());
+
       // Toggle Pause with Space or P
       if (event.key === ' ' || event.key === 'p' || event.key === 'P') {
         Engine.paused = !Engine.paused;
@@ -57,6 +60,18 @@ export default class Input {
         }
       }
     });
+
+    document.addEventListener('keyup', (event: KeyboardEvent) => {
+      this.keys.delete(event.key.toLowerCase());
+    });
+  }
+
+  /**
+   * Checks if a specific key is currently held down.
+   * @param key The key to check (e.g., 'w', 'ArrowUp', ' ').
+   */
+  static isKeyDown(key: string): boolean {
+    return this.keys.has(key.toLowerCase());
   }
 
   /** Current mouse x position in world space. */
