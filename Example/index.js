@@ -7,6 +7,7 @@ import Scene from '../built/Scene.js';
 import Circle from '../built/Circle.js';
 import Physics from '../built/Physics.js';
 import ResourceLoader from '../built/Loader.js';
+import Input from '../built/Input.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -52,6 +53,7 @@ class PlayScene extends Scene {
     this.meteors = [];
     this.startTime = Date.now();
     this.score = 0;
+    this.inputMode = 'mouse'; // 'mouse' or 'keyboard'
   }
 
   onLoad() {
@@ -100,13 +102,50 @@ class PlayScene extends Scene {
   }
 
   update() {
-    // Player follow mouse (velocity-based)
-    const targetX = this.game.mouseX - this.player.width / 2;
-    const targetY = this.game.mouseY - this.player.height / 2;
+    // Determine target velocity from keyboard or mouse
+    const moveSpeed = 300;
+    let targetVX = 0;
+    let targetVY = 0;
 
-    // Dampened movement (multiplied by 5 instead of 10)
-    this.player.velocity.x = (targetX - this.player.position.x) * 5;
-    this.player.velocity.y = (targetY - this.player.position.y) * 5;
+    const keyboardActive = 
+      Input.isKeyDown('w') || Input.isKeyDown('s') || 
+      Input.isKeyDown('a') || Input.isKeyDown('d') ||
+      Input.isKeyDown('arrowup') || Input.isKeyDown('arrowdown') || 
+      Input.isKeyDown('arrowleft') || Input.isKeyDown('arrowright');
+
+    if (keyboardActive) {
+      this.inputMode = 'keyboard';
+    }
+
+    // Note: We don't automatically switch back to mouse mode on key release.
+    // This prevents the player from "snapping" to the mouse cursor when they stop moving with keys.
+
+    if (this.inputMode === 'keyboard') {
+      if (Input.isKeyDown('w') || Input.isKeyDown('arrowup')) targetVY = -moveSpeed;
+      if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown')) targetVY = moveSpeed;
+      if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft')) targetVX = -moveSpeed;
+      if (Input.isKeyDown('d') || Input.isKeyDown('arrowright')) targetVX = moveSpeed;
+      
+      // Basic normalization if moving diagonally
+      if (targetVX !== 0 && targetVY !== 0) {
+        targetVX *= 0.707;
+        targetVY *= 0.707;
+      }
+      
+      this.player.velocity.x = targetVX;
+      this.player.velocity.y = targetVY;
+      
+      if (targetVX !== 0) {
+        this.player.flip = targetVX < 0;
+      }
+    } else {
+      // Mouse follow mode
+      const targetX = this.game.mouseX - this.player.width / 2;
+      const targetY = this.game.mouseY - this.player.height / 2;
+      this.player.velocity.x = (targetX - this.player.position.x) * 5;
+      this.player.velocity.y = (targetY - this.player.position.y) * 5;
+      this.player.flip = this.game.mouseX < this.player.position.x + this.player.width / 2;
+    }
 
     // Camera follows player
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
@@ -114,10 +153,6 @@ class PlayScene extends Scene {
     // Keep UI fixed by moving it with camera
     this.scoreText.position.x = Engine.camera.position.x + window.innerWidth / 2 - 75;
     this.scoreText.position.y = Engine.camera.position.y + 20;
-
-    // Flip dino based on mouse
-    this.player.flip =
-      this.game.mouseX < this.player.position.x + this.player.width / 2;
 
     // Star drift
     this.stars.forEach((star) => {
@@ -135,9 +170,9 @@ class PlayScene extends Scene {
         zIndex: 4,
         tag: 'meteor'
       });
-      // Set initial velocity (Lowered)
+      // Set initial velocity
       meteor.velocity.y = 100 + Math.random() * 200;
-      // Add small gravity (Lowered)
+      // Add small gravity
       meteor.acceleration.y = 50;
       this.meteors.push(meteor);
     }
@@ -243,11 +278,6 @@ class DinoSurvival {
     );
   }
 }
-
-// When not using the Playground
-// window.onload = () => {
-//   new DinoSurvival();
-// };
 
 // When using Playground
 new DinoSurvival();
