@@ -1,4 +1,5 @@
 import Vector2 from './Vector2.js';
+import Engine from './Engine.js';
 
 export default class Input {
   private static mousePosition: Vector2 = new Vector2(0, 0);
@@ -11,17 +12,17 @@ export default class Input {
     });
 
     document.addEventListener('click', (event: MouseEvent) => {
-      const pos = new Vector2(event.clientX, event.clientY);
+      const pos = new Vector2(this.mouseX, this.mouseY);
       this.clickListeners.forEach((listener) => listener(pos));
     });
   }
 
   static get mouseX() {
-    return this.mousePosition.x;
+    return (this.mousePosition.x / Engine.camera.zoom) + Engine.camera.position.x;
   }
 
   static get mouseY() {
-    return this.mousePosition.y;
+    return (this.mousePosition.y / Engine.camera.zoom) + Engine.camera.position.y;
   }
 
   static addClickListener(listener: (pos: Vector2) => void) {
