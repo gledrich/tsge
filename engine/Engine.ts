@@ -4,6 +4,7 @@ import Text from './Text.js';
 import GameObject from './GameObject.js';
 import Rectangle from './Rectangle.js';
 import Sprite from './Sprite.js';
+import Input from './Input.js';
 
 export interface EngineOpts {
   width: string;
@@ -36,8 +37,13 @@ export default class Engine {
   width: number;
   height: number;
 
-  mouseX: number;
-  mouseY: number;
+  get mouseX() {
+    return Input.mouseX;
+  }
+
+  get mouseY() {
+    return Input.mouseY;
+  }
 
   fps: number = 0;
   #oldTimestamp: number = 0;
@@ -79,7 +85,7 @@ export default class Engine {
     this.#window.style.width = defaultedOpts.width;
     this.#window.style.height = defaultedOpts.height;
 
-    document.addEventListener('mousemove', this.#setMousePos.bind(this));
+    Input.init();
 
     document.getElementsByTagName('body')[0].appendChild(this.#window);
     this.#window.appendChild(this.#canvas);
@@ -214,13 +220,6 @@ export default class Engine {
 
   #findAllObjects(tag: string = '') {
     return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
-  }
-
-  #setMousePos(event: MouseEvent) {
-    if (event) {
-      this.mouseX = event.x;
-      this.mouseY = event.y;
-    }
   }
 
   async setTimeout(timeoutFn: Function, time: number) {

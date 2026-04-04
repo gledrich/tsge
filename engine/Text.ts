@@ -1,6 +1,7 @@
 import Engine from './Engine.js';
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
+import Input from './Input.js';
 
 type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
 type VerticalAlign =
@@ -88,7 +89,7 @@ export default class Text extends GameObject {
 
     if (defaultedProps.onClick) {
       this.onClick = defaultedProps.onClick;
-      document.addEventListener('click', this.#onMouseClick);
+      Input.addClickListener(this.#onMouseClick);
     }
 
     if (defaultedProps.register) {
@@ -98,7 +99,7 @@ export default class Text extends GameObject {
 
   registerSelf() {
     if (!this.registered) {
-      document.addEventListener('click', this.#onMouseClick);
+      Input.addClickListener(this.#onMouseClick);
       Engine.registerObject(this);
       this.registered = true;
     }
@@ -106,18 +107,18 @@ export default class Text extends GameObject {
 
   destroySelf() {
     if (this.registered) {
-      document.removeEventListener('click', this.#onMouseClick);
+      Input.removeClickListener(this.#onMouseClick);
       Engine.destroyObject(this);
       this.registered = false;
     }
   }
 
-  #mouseClick(event: MouseEvent) {
+  #mouseClick(pos: Vector2) {
     if (
-      event.x > this.position.x &&
-      event.x < this.position.x + this.width &&
-      event.y > this.position.y &&
-      event.y < this.position.y + this.height
+      pos.x > this.position.x &&
+      pos.x < this.position.x + this.width &&
+      pos.y > this.position.y &&
+      pos.y < this.position.y + this.height
     ) {
       if (this.onClick) {
         this.onClick();
