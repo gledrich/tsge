@@ -1,17 +1,23 @@
-import { createEditor, updateEditor } from './editor/index.js';
+import { createEditor, updateEditor, getEditorValue } from './editor/index.js';
+import { createInspector } from './inspector/index.js';
 import { getScript, updateScript } from './helpers.js';
 import Engine from '../built/Engine.js';
 
 let script;
+let updateInspectorToggleState;
 
 window.onload = async () => {
   const logo = makeLogo();
   const editor = createEditor();
+  const inspector = createInspector(() => {
+    if (updateInspectorToggleState) updateInspectorToggleState(inspector, logo);
+  });
 
   document.body.appendChild(logo);
   document.body.appendChild(editor);
+  document.body.appendChild(inspector);
 
-  setupActionButtons();
+  setupActionButtons(inspector, logo);
   script = await getScript();
 
   await updatePlayground();
@@ -44,9 +50,19 @@ const makeLogo = () => {
   return container;
 };
 
-const setupActionButtons = () => {
+const setupActionButtons = (inspector, logo) => {
   const actionButtons = document.createElement('div');
   actionButtons.className = 'action-buttons';
+
+  const inspectorToggle = document.createElement('i');
+  inspectorToggle.className = 'fa-solid fa-sliders';
+  inspectorToggle.title = 'Toggle Property Inspector';
+
+  updateInspectorToggleState = (insp, lg) => {
+    const isHidden = insp.classList.contains('hidden');
+    inspectorToggle.style.color = isHidden ? 'white' : '#43aa8b';
+    lg.style.display = isHidden ? 'block' : 'none';
+  };
 
   const play = document.createElement('i');
   play.className = 'fa-solid fa-play';
@@ -80,12 +96,23 @@ const setupActionButtons = () => {
   debug.onclick = () => {
     Engine.debug = !Engine.debug;
     debug.style.color = Engine.debug ? '#F94144' : 'white';
+    
+    // Auto-open inspector if turning debug ON and inspector is hidden
+    if (Engine.debug && inspector.classList.contains('hidden')) {
+      inspectorToggle.click();
+    }
+  };
+
+  inspectorToggle.onclick = () => {
+    inspector.classList.toggle('hidden');
+    updateInspectorToggleState(inspector, logo);
   };
 
   actionButtons.appendChild(play);
   actionButtons.appendChild(pause);
   actionButtons.appendChild(refresh);
   actionButtons.appendChild(debug);
+  actionButtons.appendChild(inspectorToggle);
 
   document.body.appendChild(actionButtons);
 

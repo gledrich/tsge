@@ -147,3 +147,11 @@ export const getEditorValue = () => {
   }
   return '';
 };
+
+export const setEditorValue = (text) => {
+  if (editorInstance) {
+    const pos = editorInstance.getCursorPosition();
+    editorInstance.setValue(text, -1);
+    editorInstance.moveCursorToPosition(pos);
+  }
+};
