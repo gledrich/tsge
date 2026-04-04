@@ -65,10 +65,7 @@ const setupActionButtons = () => {
   refresh.className = 'fa-solid fa-rotate';
   refresh.title = 'Refresh (Ctrl+Enter)';
   refresh.onclick = async () => {
-    await updateScript(
-      document.getElementById('editor-textbox').innerText,
-      false
-    );
+    await updateScript(getEditorValue(), false);
     await updatePlayground();
     await updateEditor(true);
 

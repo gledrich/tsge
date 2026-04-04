@@ -1,5 +1,5 @@
 import { updatePlayground } from '../index.js';
-import { updateEditor } from '../editor/index.js';
+import { updateEditor, insertTextToEditor } from '../editor/index.js';
 import { updateScript } from '../helpers.js';
 
 export default () => {
@@ -82,10 +82,7 @@ function snippetFactory(iconClass, label, code) {
   btn.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${label}</span>`;
   
   btn.onclick = () => {
-    const textbox = document.getElementById('editor-textbox');
-    textbox.focus();
-    // Insert at cursor position if possible, otherwise append
-    document.execCommand('insertText', false, code);
+    insertTextToEditor(code);
   };
 
   return btn;

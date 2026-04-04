@@ -2,14 +2,8 @@ import sidebar from '../sidebar/index.js';
 import { getScript, updateScript } from '../helpers.js';
 import createConsole from '../console/index.js';
 import { updatePlayground } from '../index.js';
-import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
-import js from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/languages/javascript.min.js';
 
-hljs.registerLanguage('javascript', js);
-hljs.configure({
-  cssSelector: 'textarea',
-  languages: ['javascript'],
-});
+let editorInstance = null;
 
 export const createEditor = () => {
   const container = document.createElement('div');
@@ -53,41 +47,49 @@ export const createEditor = () => {
   save.id = 'saveIcon';
   save.className = 'fa-solid fa-cloud save';
   save.onclick = async () => {
-    await updateScript(textbox.innerText, false);
-    await updatePlayground();
-    await updateEditor(true);
+    if (editorInstance) {
+      await updateScript(editorInstance.getValue(), false);
+      await updatePlayground();
+      await updateEditor(true);
+    }
   };
 
-  const pre = document.createElement('pre');
-  const textbox = document.createElement('code');
-  textbox.id = 'editor-textbox';
-  textbox.className = 'editor-textbox';
-  textbox.spellcheck = 'false';
-  textbox.contentEditable = 'true';
-  
-  // Tab Support & Shortcuts
-  textbox.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      document.execCommand('insertText', false, '  ');
-    }
-    
-    if (e.ctrlKey && e.key === 's') {
-      e.preventDefault();
-      save.click();
-    }
-  });
-
-  textbox.onchange = async () => await updateEditor(false);
+  const editorDiv = document.createElement('div');
+  editorDiv.id = 'editor-textbox';
+  editorDiv.className = 'editor-textbox';
+  editorDiv.style.width = '100%';
+  editorDiv.style.height = 'calc(100% - 40px)'; // Adjust for banner height
 
   banner.appendChild(title);
   iconsContainer.appendChild(save);
   banner.appendChild(iconsContainer);
   div.appendChild(banner);
-  pre.appendChild(textbox);
-  div.appendChild(pre);
+  div.appendChild(editorDiv);
   container.appendChild(div);
   container.appendChild(createConsole());
+
+  // Initialize Ace Editor after a short delay to ensure DOM attachment
+  setTimeout(() => {
+    editorInstance = ace.edit('editor-textbox');
+    editorInstance.setTheme('ace/theme/tomorrow_night_eighties');
+    editorInstance.session.setMode('ace/mode/javascript');
+    editorInstance.setOptions({
+      fontSize: '10pt',
+      tabSize: 2,
+      useSoftTabs: true,
+      showPrintMargin: false,
+      wrap: true
+    });
+
+    // Save Command
+    editorInstance.commands.addCommand({
+      name: 'save',
+      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+      exec: function () {
+        save.click();
+      }
+    });
+  }, 0);
 
   return container;
 };
@@ -100,28 +102,48 @@ export const updateEditor = async (shouldFetchScript = true) => {
     saveIcon.classList.add('saving');
   }
 
-  let script = document.getElementById('editor-textbox').innerText;
+  let script = '';
 
   if (shouldFetchScript) {
     script = await getScript();
+  } else if (editorInstance) {
+    script = editorInstance.getValue();
   }
 
   const options = {
     indent_size: 2,
     space_in_empty_paren: false,
-    preserve_newlines: true,
+    preserve_newlines: true
   };
-  const b = js_beautify(script, options);
 
-  document.getElementById('editor-textbox').innerHTML = hljs.highlight(
-    b + '\n\n',
-    {
-      language: 'javascript',
-    }
-  ).value;
+  // Only beautify if fetched
+  if (shouldFetchScript && window.js_beautify) {
+    script = js_beautify(script, options) + '\n\n';
+  }
+
+  if (editorInstance && shouldFetchScript) {
+    // Preserve cursor/scroll position if possible
+    const pos = editorInstance.getCursorPosition();
+    editorInstance.setValue(script, -1);
+    editorInstance.moveCursorToPosition(pos);
+  }
 
   if (saveIcon) {
     saveIcon.classList.remove('saving');
     saveIcon.classList.add('save');
   }
+};
+
+export const insertTextToEditor = (text) => {
+  if (editorInstance) {
+    editorInstance.insert(text);
+    editorInstance.focus();
+  }
+};
+
+export const getEditorValue = () => {
+  if (editorInstance) {
+    return editorInstance.getValue();
+  }
+  return '';
 };

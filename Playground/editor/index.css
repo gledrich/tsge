@@ -55,20 +55,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.editor pre {
-  margin: 0;
+.editor-textbox {
   flex: 1;
-  overflow: auto;
-  padding: 1rem;
-}
-
-.editor code {
-  font-family: 'Fira Code', monospace;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  outline: none;
-  white-space: pre;
-  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .editor h2 {
@@ -99,10 +89,6 @@
 
 .icons-container i {
   cursor: pointer;
-}
-
-.editor-textbox:focus-visible,.editor-textbox:focus {
-  outline-style: none;
 }
 
 
