@@ -13,4 +13,12 @@ export default class Canvas {
     this.canvas.style.zIndex = '0';
     this.canvas.style.position = 'fixed';
   }
+
+  /**
+   * Resizes the canvas to match the window dimensions.
+   */
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
 }
