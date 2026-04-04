@@ -11,7 +11,7 @@ export default class Input {
       this.mousePosition.y = event.clientY;
     });
 
-    document.addEventListener('click', (event: MouseEvent) => {
+    document.addEventListener('click', () => {
       const pos = new Vector2(this.mouseX, this.mouseY);
       this.clickListeners.forEach((listener) => listener(pos));
     });

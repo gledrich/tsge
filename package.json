@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
+    "lint": "eslint .",
     "example": "tsc -w & nodemon Example/server",
     "playground": "tsc -w & nodemon Playground/server"
   },

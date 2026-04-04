@@ -26,7 +26,7 @@ interface TextProperties {
   height: number;
   zIndex: string;
   register: boolean;
-  onClick: Function;
+  onClick: () => void;
 }
 
 const defaultProps = {
@@ -61,7 +61,7 @@ export default class Text extends GameObject {
   register: boolean;
   registered: boolean;
 
-  onClick: Function;
+  onClick: () => void;
 
   constructor(props: TextProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);

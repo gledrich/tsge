@@ -13,13 +13,13 @@ export interface EngineOpts {
 }
 
 export interface EngineCallbacks {
-  onLoad: Function;
-  update: Function;
-  fixedUpdate?: Function;
+  onLoad: () => void;
+  update: () => void;
+  fixedUpdate?: () => void;
 }
 
 class ObjectSet extends Set<GameObject> {
-  findAll: Function;
+  findAll: (tag: string) => GameObject[];
 }
 
 export default class Engine {
@@ -226,14 +226,14 @@ export default class Engine {
     return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
   }
 
-  async setTimeout(timeoutFn: Function, time: number) {
+  async setTimeout(timeoutFn: () => void, time: number) {
     await new Promise((resolve) => {
       setTimeout(resolve, time);
     });
     timeoutFn();
   }
 
-  countdown(milliseconds: number, fn: Function, onEnded: Function) {
+  countdown(milliseconds: number, fn: () => void, onEnded: () => void) {
     setTimeout(onEnded, milliseconds);
 
     for (let i = 1; i <= milliseconds; i += 1) {
