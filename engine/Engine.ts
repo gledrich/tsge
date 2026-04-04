@@ -5,6 +5,7 @@ import GameObject from './GameObject.js';
 import Rectangle from './Rectangle.js';
 import Sprite from './Sprite.js';
 import Input from './Input.js';
+import Scene from './Scene.js';
 
 export interface EngineOpts {
   width: string;
@@ -25,6 +26,16 @@ class ObjectSet extends Set<GameObject> {
 export default class Engine {
   public static objects = new ObjectSet();
   public static paused = false;
+  private static _currentScene: Scene;
+
+  public static get currentScene(): Scene {
+    return this._currentScene;
+  }
+
+  public static set currentScene(scene: Scene) {
+    this._currentScene = scene;
+    scene.onLoad();
+  }
 
   #canvas: HTMLCanvasElement;
   #ctx: CanvasRenderingContext2D;
@@ -104,6 +115,10 @@ export default class Engine {
 
       this.fps = Math.round(1 / this.#secondsPassed);
 
+      if (Engine.currentScene) {
+        Engine.currentScene.update();
+      }
+
       this.callbacks.update();
       this.#draw();
     }
@@ -119,7 +134,9 @@ export default class Engine {
   #draw() {
     this.#setBackground();
 
-    Engine.#sortSet().forEach((object) => {
+    const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
+
+    Engine.#sortSet(objects).forEach((object) => {
       if (object instanceof Text) {
         this.#drawText(object);
       }
@@ -243,10 +260,10 @@ export default class Engine {
     document.getElementById('canvas').style.cursor = value;
   }
 
-  static #sortSet() {
-    const arr: GameObject[] = Array.from(Engine.objects);
+  static #sortSet(objects: Set<GameObject> = Engine.objects) {
+    const arr: GameObject[] = Array.from(objects);
 
-    arr.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
+    arr.sort((a, b) => (parseInt(a.zIndex, 10) > parseInt(b.zIndex, 10) ? 1 : -1));
 
     return new Set<GameObject>(arr);
   }
@@ -254,21 +271,37 @@ export default class Engine {
   static registerObject(object: GameObject) {
     if (object instanceof Sprite) {
       const sprite = object;
-      this.objects.add(sprite);
+      if (Engine.currentScene) {
+        Engine.currentScene.add(sprite);
+      } else {
+        this.objects.add(sprite);
+      }
 
       setInterval(() => {
         sprite.currentFrame += 1;
       }, 100);
     } else {
-      this.objects.add(object);
+      if (Engine.currentScene) {
+        Engine.currentScene.add(object);
+      } else {
+        this.objects.add(object);
+      }
     }
   }
 
   static destroyObject(object: GameObject) {
-    this.objects.delete(object);
+    if (Engine.currentScene) {
+      Engine.currentScene.remove(object);
+    } else {
+      this.objects.delete(object);
+    }
   }
 
   static destroyAll() {
-    this.objects.clear();
+    if (Engine.currentScene) {
+      Engine.currentScene.clear();
+    } else {
+      this.objects.clear();
+    }
   }
 }
