@@ -23,6 +23,20 @@ export default class Camera {
   }
 
   /**
+   * Returns the current viewport bounds in world space.
+   * @param width Width of the viewport.
+   * @param height Height of the viewport.
+   */
+  getViewportBounds(width: number, height: number) {
+    return {
+      x: this.position.x,
+      y: this.position.y,
+      width: width / this.zoom,
+      height: height / this.zoom
+    };
+  }
+
+  /**
    * Reset camera position to origin and zoom to 1.
    */
   reset() {
