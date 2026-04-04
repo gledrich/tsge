@@ -14,6 +14,10 @@ export default abstract class GameObject {
   velocity: Vector2 = new Vector2(0, 0);
   /** Current acceleration in pixels per second squared. */
   acceleration: Vector2 = new Vector2(0, 0);
+  /** Mass of the object (used for physics resolution). */
+  mass: number = 1;
+  /** Whether the object is immovable (e.g., walls). */
+  isStatic: boolean = false;
 
   /** Whether the object should be rendered. */
   visible: boolean = true;
