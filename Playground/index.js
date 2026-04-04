@@ -63,6 +63,7 @@ const setupActionButtons = () => {
 
   const refresh = document.createElement('i');
   refresh.className = 'fa-solid fa-rotate';
+  refresh.title = 'Refresh (Ctrl+Enter)';
   refresh.onclick = async () => {
     await updateScript(
       document.getElementById('editor-textbox').innerText,
@@ -76,9 +77,25 @@ const setupActionButtons = () => {
     }
   };
 
+  const debug = document.createElement('i');
+  debug.className = 'fa-solid fa-bug';
+  debug.title = 'Toggle Debug Mode';
+  debug.onclick = () => {
+    Engine.debug = !Engine.debug;
+    debug.style.color = Engine.debug ? '#F94144' : 'white';
+  };
+
   actionButtons.appendChild(play);
   actionButtons.appendChild(pause);
   actionButtons.appendChild(refresh);
+  actionButtons.appendChild(debug);
 
   document.body.appendChild(actionButtons);
+
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') {
+      refresh.click();
+    }
+  });
 };
