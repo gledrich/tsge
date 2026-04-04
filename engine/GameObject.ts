@@ -9,6 +9,8 @@ export default abstract class GameObject {
     this.zIndex = zIndex;
   }
 
+  abstract draw(ctx: CanvasRenderingContext2D): void;
+
   registerSelf() {
     Engine.registerObject(this);
   }

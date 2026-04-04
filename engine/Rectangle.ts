@@ -82,6 +82,16 @@ export default class Rectangle extends GameObject {
     this.registerSelf();
   }
 
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = this.colour;
+    ctx.fillRect(
+      this.position.x,
+      this.position.y,
+      this.width,
+      this.height
+    );
+  }
+
   hasCollided(obj: GameObject) {
     if (obj instanceof Rectangle) {
       let bigger;

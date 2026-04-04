@@ -1,8 +1,5 @@
 import Canvas from './Canvas.js';
-import Line from './Line.js';
-import Text from './Text.js';
 import GameObject from './GameObject.js';
-import Rectangle from './Rectangle.js';
 import Sprite from './Sprite.js';
 import Input from './Input.js';
 import Scene from './Scene.js';
@@ -137,102 +134,8 @@ export default class Engine {
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
     Engine.#sortSet(objects).forEach((object) => {
-      if (object instanceof Text) {
-        this.#drawText(object);
-      }
-
-      if (object instanceof Line) {
-        this.#drawLine(object);
-      }
-
-      if (object instanceof Rectangle) {
-        this.#drawRectangle(object);
-      }
-
-      if (object instanceof Sprite) {
-        this.#drawSprite(object);
-      }
+      object.draw(this.#ctx);
     });
-  }
-
-  #drawText(text: Text) {
-    if (text.backgroundColour) {
-      this.#ctx.fillStyle = text.backgroundColour;
-      this.#ctx.fillRect(
-        text.position.x,
-        text.position.y,
-        text.width,
-        text.height
-      );
-    }
-
-    this.#ctx.font = text.font;
-    this.#ctx.fillStyle = text.colour;
-    this.#ctx.textAlign = text.horizontalAlign;
-    this.#ctx.textBaseline = text.verticalAlign;
-    this.#ctx.fillText(
-      text.text,
-      text.position.x + text.width / 2,
-      text.position.y + text.height / 2
-    );
-  }
-
-  #drawLine(line: Line) {
-    this.#ctx.lineWidth = line.width;
-    this.#ctx.moveTo(line.x1, line.y1);
-    this.#ctx.lineTo(line.x2, line.y2);
-    this.#ctx.stroke();
-  }
-
-  #drawRectangle(rectangle: Rectangle) {
-    this.#ctx.fillStyle = rectangle.colour;
-    this.#ctx.fillRect(
-      rectangle.position.x,
-      rectangle.position.y,
-      rectangle.width,
-      rectangle.height
-    );
-  }
-
-  #drawSprite(sprite: Sprite) {
-    const {
-      img,
-      cols,
-      frameWidth,
-      frameHeight,
-      position,
-      startCol,
-      endCol,
-    } = sprite;
-
-    this.#ctx.imageSmoothingEnabled = true;
-    this.#ctx.imageSmoothingQuality = 'high';
-
-    const maxFrame = endCol - 1;
-
-    if (sprite.currentFrame < startCol) {
-      sprite.currentFrame = startCol;
-    }
-
-    if (sprite.currentFrame > maxFrame) {
-      sprite.currentFrame = startCol;
-    }
-
-    // Update rows and columns
-    const column = sprite.currentFrame % cols;
-    const row = Math.floor(sprite.currentFrame / cols);
-
-    this.#ctx.drawImage(
-      img,
-      column * frameWidth,
-      row * frameHeight,
-      frameWidth,
-      frameHeight,
-      position.x,
-      position.y,
-      frameWidth * 3,
-      frameHeight * 3
-    );
   }
 
   #findAllObjects(tag: string = '') {

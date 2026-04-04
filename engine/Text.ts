@@ -97,6 +97,28 @@ export default class Text extends GameObject {
     }
   }
 
+  draw(ctx: CanvasRenderingContext2D) {
+    if (this.backgroundColour) {
+      ctx.fillStyle = this.backgroundColour;
+      ctx.fillRect(
+        this.position.x,
+        this.position.y,
+        this.width,
+        this.height
+      );
+    }
+
+    ctx.font = this.font;
+    ctx.fillStyle = this.colour;
+    ctx.textAlign = this.horizontalAlign;
+    ctx.textBaseline = this.verticalAlign;
+    ctx.fillText(
+      this.text,
+      this.position.x + this.width / 2,
+      this.position.y + this.height / 2
+    );
+  }
+
   registerSelf() {
     if (!this.registered) {
       Input.addClickListener(this.#onMouseClick);

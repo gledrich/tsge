@@ -42,4 +42,11 @@ export default class Line extends GameObject {
 
     this.registerSelf();
   }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.lineWidth = this.width;
+    ctx.moveTo(this.x1, this.y1);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.stroke();
+  }
 }

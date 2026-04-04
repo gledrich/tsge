@@ -54,6 +54,47 @@ export default class Sprite extends GameObject {
     this.registered = false;
   }
 
+  draw(ctx: CanvasRenderingContext2D) {
+    const {
+      img,
+      cols,
+      frameWidth,
+      frameHeight,
+      position,
+      startCol,
+      endCol,
+    } = this;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    const maxFrame = endCol - 1;
+
+    if (this.currentFrame < startCol) {
+      this.currentFrame = startCol;
+    }
+
+    if (this.currentFrame > maxFrame) {
+      this.currentFrame = startCol;
+    }
+
+    // Update rows and columns
+    const column = this.currentFrame % cols;
+    const row = Math.floor(this.currentFrame / cols);
+
+    ctx.drawImage(
+      img,
+      column * frameWidth,
+      row * frameHeight,
+      frameWidth,
+      frameHeight,
+      position.x,
+      position.y,
+      frameWidth * 3,
+      frameHeight * 3
+    );
+  }
+
   play() {
     if (!this.registered) {
       Engine.registerObject(this);
