@@ -45,6 +45,9 @@ class MenuScene extends Scene {
 }
 
 class PlayScene extends Scene {
+  static WORLD_WIDTH = 2000;
+  static WORLD_HEIGHT = 2000;
+
   constructor(game, onGameOver) {
     super();
     this.game = game;
@@ -54,31 +57,47 @@ class PlayScene extends Scene {
     this.starsNear = [];
     this.meteors = [];
     this.fireballs = [];
+    this.particles = [];
     this.startTime = Date.now();
     this.lastShotTime = 0;
     this.shotCooldown = 250; // ms
     this.score = 0;
+    this.lives = 3;
+    this.isInvulnerable = false;
+    this.invulnerabilityDuration = 1500; // 1.5s
+    this.lastHitTime = 0;
   }
 
   onLoad() {
     this.game.cursor = 'none';
 
-    const worldWidth = 2000;
-    const worldHeight = 2000;
-
     // Distant Stars (Static-ish, very faint)
     for (let i = 0; i < 200; i++) {
-      this.starsFar.push(new Rectangle({
-        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
-        width: 1, height: 1, colour: 'rgba(255, 255, 255, 0.1)', zIndex: 0
-      }));
+      this.starsFar.push(
+        new Rectangle({
+          position: new Vector2(
+            Math.random() * PlayScene.WORLD_WIDTH,
+            Math.random() * PlayScene.WORLD_HEIGHT
+          ),
+          width: 1,
+          height: 1,
+          colour: 'rgba(255, 255, 255, 0.1)',
+          zIndex: 0
+        })
+      );
     }
 
     // Mid Stars (Moderate speed)
     for (let i = 0; i < 100; i++) {
       const star = new Rectangle({
-        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
-        width: 2, height: 2, colour: 'rgba(255, 255, 255, 0.4)', zIndex: 1
+        position: new Vector2(
+          Math.random() * PlayScene.WORLD_WIDTH,
+          Math.random() * PlayScene.WORLD_HEIGHT
+        ),
+        width: 2,
+        height: 2,
+        colour: 'rgba(255, 255, 255, 0.4)',
+        zIndex: 1
       });
       star.speed = 0.5 + Math.random() * 1;
       this.starsMid.push(star);
@@ -87,8 +106,14 @@ class PlayScene extends Scene {
     // Near Stars (Very fast, large, bright)
     for (let i = 0; i < 40; i++) {
       const star = new Rectangle({
-        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
-        width: 3, height: 3, colour: 'rgba(255, 255, 255, 0.9)', zIndex: 2
+        position: new Vector2(
+          Math.random() * PlayScene.WORLD_WIDTH,
+          Math.random() * PlayScene.WORLD_HEIGHT
+        ),
+        width: 3,
+        height: 3,
+        colour: 'rgba(255, 255, 255, 0.9)',
+        zIndex: 2
       });
       star.speed = 3 + Math.random() * 4;
       this.starsNear.push(star);
@@ -98,7 +123,10 @@ class PlayScene extends Scene {
       img: 'dino',
       rows: 1,
       cols: 24,
-      position: new Vector2(worldWidth / 2, worldHeight / 2),
+      position: new Vector2(
+        PlayScene.WORLD_WIDTH / 2,
+        PlayScene.WORLD_HEIGHT / 2
+      ),
       startCol: 4,
       endCol: 10,
       tag: 'player',
@@ -108,36 +136,58 @@ class PlayScene extends Scene {
 
     this.scoreText = new Text({
       tag: 'score',
-      text: 'Time: 0s',
+      text: 'Score: 0',
       fontSize: 24,
       colour: 'white',
       position: new Vector2(window.innerWidth / 2 - 75, 20),
       width: 150,
       zIndex: 10
     });
+
+    this.livesText = new Text({
+      tag: 'lives',
+      text: 'Lives: 3',
+      fontSize: 24,
+      colour: '#F94144',
+      position: new Vector2(20, 60),
+      width: 100,
+      zIndex: 10
+    });
   }
 
   update() {
     // Determine target velocity from keyboard
-    const moveSpeed = 250;
+    const moveSpeed = 200; // Reduced from 250/400
     let targetVX = 0;
     let targetVY = 0;
 
-    if (Input.isKeyDown('w') || Input.isKeyDown('arrowup')) targetVY = -moveSpeed;
-    else if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown')) targetVY = moveSpeed;
-    
-    if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft')) targetVX = -moveSpeed;
-    else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright')) targetVX = moveSpeed;
-    
+    if (Input.isKeyDown('w') || Input.isKeyDown('arrowup'))
+      targetVY = -moveSpeed;
+    else if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown'))
+      targetVY = moveSpeed;
+
+    if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft'))
+      targetVX = -moveSpeed;
+    else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright'))
+      targetVX = moveSpeed;
+
     // Basic normalization if moving diagonally
     if (targetVX !== 0 && targetVY !== 0) {
       targetVX *= 0.707;
       targetVY *= 0.707;
     }
-    
+
     this.player.velocity.x = targetVX;
     this.player.velocity.y = targetVY;
-    
+
+    // Bounds Checking
+    if (this.player.position.x < 0) this.player.position.x = 0;
+    if (this.player.position.x > PlayScene.WORLD_WIDTH - this.player.width)
+      this.player.position.x = PlayScene.WORLD_WIDTH - this.player.width;
+    if (this.player.position.y < 0) this.player.position.y = 0;
+    if (this.player.position.y > PlayScene.WORLD_HEIGHT - this.player.height)
+      this.player.position.y = PlayScene.WORLD_HEIGHT - this.player.height;
+
     if (targetVX < 0) {
       this.player.flip = true;
     } else if (targetVX > 0) {
@@ -173,28 +223,67 @@ class PlayScene extends Scene {
       return true;
     });
 
+    // Fireball Collision with Meteors
+    this.fireballs = this.fireballs.filter((fb) => {
+      let hit = false;
+      this.meteors = this.meteors.filter((m) => {
+        if (Physics.checkCollision(fb, m)) {
+          this.spawnExplosion(m.position, m.radius, m.colour);
+          m.destroySelf();
+          this.score += 10;
+          hit = true;
+          return false;
+        }
+        return true;
+      });
+
+      if (hit) {
+        fb.destroySelf();
+        return false;
+      }
+      return true;
+    });
+
     // Camera follows player
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
 
+    // Update Invulnerability
+    if (this.isInvulnerable) {
+      // Flicker effect
+      this.player.visible = Math.floor(Date.now() / 100) % 2 === 0;
+
+      if (Date.now() - this.lastHitTime > this.invulnerabilityDuration) {
+        this.isInvulnerable = false;
+        this.player.visible = true;
+      }
+    }
+
     // Keep UI fixed by moving it with camera
-    this.scoreText.position.x = Engine.camera.position.x + window.innerWidth / 2 - 75;
+    this.scoreText.position.x =
+      Engine.camera.position.x + window.innerWidth / 2 - 75;
     this.scoreText.position.y = Engine.camera.position.y + 20;
+    this.livesText.position.x = Engine.camera.position.x + 20;
+    this.livesText.position.y = Engine.camera.position.y + 60;
 
     // Star drift (Parallax)
     this.starsMid.forEach((star) => {
       star.position.y += star.speed;
-      if (star.position.y > 2000) star.position.y = 0;
+      if (star.position.y > PlayScene.WORLD_HEIGHT) star.position.y = 0;
     });
     this.starsNear.forEach((star) => {
       star.position.y += star.speed;
-      if (star.position.y > 2000) star.position.y = 0;
+      if (star.position.y > PlayScene.WORLD_HEIGHT) star.position.y = 0;
     });
 
-    // Spawn Meteors (Circles)
-    if (Math.random() < 0.02) {
+    // Spawn Meteors (Spawn within camera view)
+    if (Math.random() < 0.05) {
+      // Increased spawn rate
       const radius = 15 + Math.random() * 20;
+      const spawnX =
+        Engine.camera.position.x + Math.random() * window.innerWidth;
+
       const meteor = new Circle({
-        position: new Vector2(Math.random() * 2000, Engine.camera.position.y - 100),
+        position: new Vector2(spawnX, Engine.camera.position.y - 100),
         radius: radius,
         colour: '#F94144',
         zIndex: 4,
@@ -209,9 +298,21 @@ class PlayScene extends Scene {
 
     // Update Meteors & Collision
     this.meteors = this.meteors.filter((meteor) => {
-      if (Physics.checkCollision(this.player, meteor)) {
-        this.onGameOver(this.score);
-        return false;
+      if (!this.isInvulnerable && Physics.checkCollision(this.player, meteor)) {
+        this.lives -= 1;
+        this.livesText.text = `Lives: ${this.lives}`;
+
+        if (this.lives <= 0) {
+          this.onGameOver(
+            this.score + Math.floor((Date.now() - this.startTime) / 1000)
+          );
+          return false;
+        } else {
+          this.isInvulnerable = true;
+          this.lastHitTime = Date.now();
+          this.spawnExplosion(this.player.position, 20, '#F94144'); // Mini explosion on hit
+          return false; // Destroy the meteor that hit us
+        }
       }
 
       if (
@@ -224,8 +325,25 @@ class PlayScene extends Scene {
       return true;
     });
 
-    this.score = Math.floor((Date.now() - this.startTime) / 1000);
-    this.scoreText.text = `Time: ${this.score}s`;
+    const timeScore = Math.floor((Date.now() - this.startTime) / 1000);
+    this.scoreText.text = `Score: ${this.score + timeScore}`;
+  }
+
+  spawnExplosion(pos, radius, colour) {
+    const particleCount = 8;
+    for (let i = 0; i < particleCount; i++) {
+      const p = new Circle({
+        position: new Vector2(pos.x + radius, pos.y + radius),
+        radius: 2 + Math.random() * 3,
+        colour: colour,
+        zIndex: 3,
+        tag: 'particle'
+      });
+      p.velocity.x = (Math.random() - 0.5) * 400;
+      p.velocity.y = (Math.random() - 0.5) * 400;
+      p.life = 1.0; // Life starts at 1.0 and fades
+      this.particles.push(p);
+    }
   }
 }
 
@@ -278,15 +396,15 @@ class GameOverScene extends Scene {
 class DinoSurvival {
   constructor() {
     this.game = new Engine(
-      { 
+      {
         onLoad: async () => {
           ResourceLoader.queueImage('dino', './sprites/DinoSprites - doux.png');
           await ResourceLoader.loadAll((percent) => {
             console.log(`Loading: ${Math.round(percent)}%`);
           });
           this.showMenu();
-        }, 
-        update: () => {} 
+        },
+        update: () => {}
       },
       { title: 'Dino Survival', backgroundColour: '#264653' }
     );
