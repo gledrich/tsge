@@ -114,7 +114,7 @@ export default class Sprite extends GameObject {
    * @param ctx The canvas 2D rendering context.
    */
   draw(ctx: CanvasRenderingContext2D) {
-    if (!this.frameWidth || !this.frameHeight) return;
+    if (!this.visible || !this.frameWidth || !this.frameHeight) return;
 
     const {
       img,

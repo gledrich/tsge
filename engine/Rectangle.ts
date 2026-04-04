@@ -71,6 +71,7 @@ export default class Rectangle extends GameObject {
 
   /** Draws the rectangle onto the provided rendering context. */
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.visible) return;
     ctx.fillStyle = this.colour;
     ctx.fillRect(
       this.position.x,

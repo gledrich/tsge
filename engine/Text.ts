@@ -137,6 +137,7 @@ export default class Text extends GameObject {
 
   /** Draws the text and its optional background onto the context. */
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.visible) return;
     if (this.backgroundColour) {
       ctx.fillStyle = this.backgroundColour;
       ctx.fillRect(
@@ -149,8 +150,8 @@ export default class Text extends GameObject {
 
     ctx.font = this.font;
     ctx.fillStyle = this.colour;
-    ctx.textAlign = this.horizontalAlign as CanvasTextAlign;
-    ctx.textBaseline = this.verticalAlign as CanvasTextBaseline;
+    ctx.textAlign = this.horizontalAlign;
+    ctx.textBaseline = this.verticalAlign;
     ctx.fillText(
       this.text,
       this.position.x + this.width / 2,

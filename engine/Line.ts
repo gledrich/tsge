@@ -70,6 +70,7 @@ export default class Line extends GameObject {
 
   /** Draws the line onto the provided rendering context. */
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.visible) return;
     ctx.lineWidth = this.strokeWidth;
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);

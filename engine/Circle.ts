@@ -77,6 +77,7 @@ export default class Circle extends GameObject {
 
   /** Draws the circle onto the provided rendering context. */
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.visible) return;
     ctx.beginPath();
     ctx.fillStyle = this.colour;
     const center = this.center;

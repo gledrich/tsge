@@ -15,6 +15,9 @@ export default abstract class GameObject {
   /** Current acceleration in pixels per second squared. */
   acceleration: Vector2 = new Vector2(0, 0);
 
+  /** Whether the object should be rendered. */
+  visible: boolean = true;
+
   constructor(tag: string, zIndex: string) {
     this.tag = tag;
     this.zIndex = zIndex;
