@@ -18,22 +18,51 @@ export interface EngineCallbacks {
   fixedUpdate?: () => void;
 }
 
-class ObjectSet extends Set<GameObject> {
+export class ObjectSet extends Set<GameObject> {
   findAll: (tag: string) => GameObject[];
 }
 
+/**
+ * The core singleton class that manages the game loop, rendering, and scene state.
+ */
 export default class Engine {
+  /**
+   * Global set of game objects if no scene is active.
+   */
   public static objects = new ObjectSet();
+
+  /**
+   * Whether the game loop is currently paused.
+   */
   public static paused = false;
+
+  /**
+   * Toggle for visual debug mode (hitboxes and stats).
+   */
   public static debug = false;
+
+  /**
+   * The currently selected object in debug mode.
+   */
   public static selectedObject: GameObject | null = null;
+
+  /**
+   * The global camera instance.
+   */
   public static camera = new Camera();
+
   private static _currentScene: Scene;
 
+  /**
+   * Gets the currently active scene.
+   */
   public static get currentScene(): Scene {
     return this._currentScene;
   }
 
+  /**
+   * Sets the active scene, resetting the camera and calling the scene's onLoad.
+   */
   public static set currentScene(scene: Scene) {
     this._currentScene = scene;
     this.camera.reset();

@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "lint": "eslint .",
+    "docs": "typedoc --out docs/api engine/ --entryPointStrategy expand",
     "example": "tsc -w & nodemon Example/server",
     "playground": "tsc -w & nodemon Playground/server"
   },
@@ -20,6 +21,7 @@
     "@typescript-eslint/parser": "^8.25.0",
     "eslint": "^9.21.0",
     "nodemon": "^3.1.9",
+    "typedoc": "^0.28.18",
     "typescript": "^5.8.2"
   }
 }

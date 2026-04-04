@@ -4,6 +4,4 @@
 
 ## Reference
 
-[Engine](https://gledrich.github.io/tsge/engine.html)
-
-[Rectangle](https://gledrich.github.io/tsge/rectangle.html)
+[API Reference](api/index.html)

@@ -1,7 +1,7 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 
-interface CircleProps {
+export interface CircleProps {
   tag: string;
   position: Vector2;
   radius: number;

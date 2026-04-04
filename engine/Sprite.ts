@@ -5,36 +5,69 @@ import ResourceLoader from './Loader.js';
 
 const sprites = new Set<Sprite>();
 
-interface SpriteProps {
+/**
+ * Properties for creating a new Sprite.
+ */
+export interface SpriteProps {
+  /** Unique tag for the object. */
   tag: string;
+  /** Image element or tag from ResourceLoader. */
   img: HTMLImageElement | string;
+  /** Number of rows in the spritesheet. */
   rows: number;
+  /** Number of columns in the spritesheet. */
   cols: number;
+  /** Initial world position. */
   position: Vector2;
+  /** Starting frame column for animation. */
   startCol: number;
+  /** Ending frame column for animation. */
   endCol: number;
+  /** Rendering order. */
   zIndex: string;
 }
 
+/**
+ * Represents an animated sprite using a spritesheet.
+ */
 export default class Sprite extends GameObject {
+  /** The tag unique to this object type. */
   tag: string;
+  /** The source image for the sprite. */
   img: HTMLImageElement;
+  /** Number of rows in the spritesheet. */
   rows: number;
+  /** Number of columns in the spritesheet. */
   cols: number;
+  /** The world position of the sprite. */
   position: Vector2;
+  /** The starting column for the current animation loop. */
   startCol: number;
+  /** The ending column for the current animation loop. */
   endCol: number;
+  /** Rendering order (lower is background). */
   zIndex: string;
+  /** The pixel width of a single animation frame (calculated automatically). */
   frameWidth: number = 0;
+  /** The pixel height of a single animation frame (calculated automatically). */
   frameHeight: number = 0;
+  /** Whether the sprite is currently registered with the engine. */
   registered: boolean;
+  /** The current frame index being displayed. */
   currentFrame: number;
+  /** Whether the sprite is horizontally flipped. */
   flip: boolean = false;
 
+  /**
+   * Gets the display width of the sprite (scaled by 3).
+   */
   get width(): number {
     return this.frameWidth * 3;
   }
 
+  /**
+   * Gets the display height of the sprite (scaled by 3).
+   */
   get height(): number {
     return this.frameHeight * 3;
   }
@@ -75,6 +108,11 @@ export default class Sprite extends GameObject {
     this.registered = false;
   }
 
+  /**
+   * Main rendering method for the sprite.
+   * Handles frame calculation and horizontal flipping.
+   * @param ctx The canvas 2D rendering context.
+   */
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.frameWidth || !this.frameHeight) return;
 
@@ -136,6 +174,9 @@ export default class Sprite extends GameObject {
     ctx.restore();
   }
 
+  /**
+   * Registers the sprite with the engine and starts its animation loop.
+   */
   play() {
     if (!this.registered) {
       Engine.registerObject(this);
@@ -143,6 +184,9 @@ export default class Sprite extends GameObject {
     }
   }
 
+  /**
+   * Stops the sprite's animation and removes it from the engine.
+   */
   stop() {
     Engine.destroyObject(this);
     sprites.delete(this);

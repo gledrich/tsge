@@ -1,7 +1,7 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 
-interface RectProps {
+export interface RectProps {
   tag: string;
   position: Vector2;
   width: number;

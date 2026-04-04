@@ -1,7 +1,7 @@
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 
-interface LineProperties {
+export interface LineProperties {
   tag: string;
   width: number;
   p1: Vector2;

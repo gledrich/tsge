@@ -3,8 +3,8 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import Input from './Input.js';
 
-type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
-type VerticalAlign =
+export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
+export type VerticalAlign =
   | 'top'
   | 'hanging'
   | 'middle'
@@ -12,7 +12,7 @@ type VerticalAlign =
   | 'ideographic'
   | 'bottom';
 
-interface TextProperties {
+export interface TextProperties {
   tag: string;
   colour: string;
   backgroundColour: string;
