@@ -5,10 +5,6 @@ import Text from '../built/Text.js';
 import Sprite from '../built/Sprite.js';
 import Scene from '../built/Scene.js';
 
-window.onload = () => {
-  new DinoSurvival();
-};
-
 class MenuScene extends Scene {
   constructor(game, onStart) {
     super();
@@ -241,3 +237,11 @@ class DinoSurvival {
     );
   }
 }
+
+// When not using the Playground
+// window.onload = () => {
+//   new DinoSurvival();
+// };
+
+// When using Playground
+new DinoSurvival();
