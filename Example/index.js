@@ -59,16 +59,19 @@ class PlayScene extends Scene {
   onLoad() {
     this.game.cursor = 'none';
 
+    const worldWidth = 2000;
+    const worldHeight = 2000;
+
     // Drifting Stars
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 200; i++) {
       const star = new Rectangle({
-        position: new Vector2(Math.random() * window.innerWidth, Math.random() * window.innerHeight),
+        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
         width: 2,
         height: 2,
         colour: 'rgba(255, 255, 255, 0.4)',
         zIndex: 0
       });
-      star.speed = 1 + Math.random() * 2;
+      star.speed = 0.5 + Math.random() * 1;
       this.stars.push(star);
     }
 
@@ -76,7 +79,7 @@ class PlayScene extends Scene {
       img: this.dinoImg,
       rows: 1,
       cols: 24,
-      position: new Vector2(window.innerWidth / 2, window.innerHeight / 2),
+      position: new Vector2(worldWidth / 2, worldHeight / 2),
       startCol: 4,
       endCol: 10,
       tag: 'player',
@@ -96,25 +99,32 @@ class PlayScene extends Scene {
   }
 
   update() {
-    // Player follow mouse
-    const targetX = this.game.mouseX - (this.player.frameWidth * 3) / 2;
-    const targetY = this.game.mouseY - (this.player.frameHeight * 3) / 2;
-    this.player.position.x += (targetX - this.player.position.x) * 0.2;
-    this.player.position.y += (targetY - this.player.position.y) * 0.2;
+    // Player follow mouse (world space)
+    const targetX = this.game.mouseX - (this.player.width) / 2;
+    const targetY = this.game.mouseY - (this.player.height) / 2;
+    this.player.position.x += (targetX - this.player.position.x) * 0.1;
+    this.player.position.y += (targetY - this.player.position.y) * 0.1;
+
+    // Camera follows player
+    Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
+
+    // Keep UI fixed by moving it with camera
+    this.scoreText.position.x = Engine.camera.position.x + 20;
+    this.scoreText.position.y = Engine.camera.position.y + 20;
 
     // Flip dino based on mouse
-    this.player.flip = this.game.mouseX < this.player.position.x + (this.player.frameWidth * 3) / 2;
+    this.player.flip = this.game.mouseX < this.player.position.x + (this.player.width) / 2;
 
     // Star drift
     this.stars.forEach(star => {
       star.position.y += star.speed;
-      if (star.position.y > window.innerHeight) star.position.y = -5;
+      if (star.position.y > 2000) star.position.y = 0;
     });
 
-    // Spawn Meteors
+    // Spawn Meteors in world space
     if (Math.random() < 0.05) {
       const meteor = new Rectangle({
-        position: new Vector2(Math.random() * window.innerWidth, -50),
+        position: new Vector2(Math.random() * 2000, Engine.camera.position.y - 100),
         width: 30 + Math.random() * 40,
         height: 30 + Math.random() * 40,
         colour: '#F94144',
@@ -133,7 +143,7 @@ class PlayScene extends Scene {
         return false;
       }
 
-      if (meteor.position.y > window.innerHeight + 100) {
+      if (meteor.position.y > Engine.camera.position.y + window.innerHeight + 100) {
         meteor.destroySelf();
         return false;
       }
