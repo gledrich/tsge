@@ -16,6 +16,21 @@ export const createEditor = () => {
   container.className = 'editor-container';
   container.appendChild(sidebar());
 
+  // Toggle Sidebar Button
+  const toggleBtn = document.createElement('div');
+  toggleBtn.className = 'toggle-sidebar';
+  toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+  toggleBtn.onclick = () => {
+    container.classList.toggle('collapsed');
+    const icon = toggleBtn.querySelector('i');
+    if (container.classList.contains('collapsed')) {
+      icon.className = 'fa-solid fa-chevron-left';
+    } else {
+      icon.className = 'fa-solid fa-chevron-right';
+    }
+  };
+  container.appendChild(toggleBtn);
+
   const div = document.createElement('div');
   div.id = 'editor';
   div.className = 'editor';
@@ -43,40 +58,29 @@ export const createEditor = () => {
     await updateEditor(true);
   };
 
-  const expand = document.createElement('i');
-  expand.className = 'fa-solid fa-window-maximize expand';
-  expand.onclick = () => {
-    if (div.classList.contains('hidden')) {
-      div.classList.remove('hidden');
-    } else if (div.classList.contains('expanded')) {
-      div.classList.remove('expanded');
-    } else {
-      div.classList.add('expanded');
-    }
-  };
-  const close = document.createElement('i');
-  close.className = 'fa-solid fa-rectangle-xmark close';
-  close.onclick = () => {
-    if (div.classList.contains('hidden')) {
-      div.classList.remove('hidden');
-    } else {
-      div.classList.add('hidden');
-    }
-
-    div.classList.remove('expanded');
-  };
-
   const pre = document.createElement('pre');
   const textbox = document.createElement('code');
   textbox.id = 'editor-textbox';
   textbox.className = 'editor-textbox';
-  textbox.spellcheck = 'on';
+  textbox.spellcheck = 'false';
   textbox.contentEditable = 'true';
+  
+  // Tab Support & Shortcuts
+  textbox.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      document.execCommand('insertText', false, '  ');
+    }
+    
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      save.click();
+    }
+  });
+
   textbox.onchange = async () => await updateEditor(false);
 
   banner.appendChild(title);
-  iconsContainer.appendChild(close);
-  iconsContainer.appendChild(expand);
   iconsContainer.appendChild(save);
   banner.appendChild(iconsContainer);
   div.appendChild(banner);

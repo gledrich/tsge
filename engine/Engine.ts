@@ -197,16 +197,24 @@ export default class Engine {
       this.#ctx.fillText(obj.tag || 'obj', obj.position.x, obj.position.y - 5);
     });
 
-    // Draw Stats Overlay (Fixed to screen)
+    // Draw Stats Overlay (Top Right)
     this.#ctx.save();
     this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
+    
+    const overlayWidth = 150;
+    const overlayHeight = 80;
+    const padding = 10;
+    const x = this.#canvas.width - overlayWidth - padding;
+    const y = padding;
+
     this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    this.#ctx.fillRect(10, 10, 150, 80);
+    this.#ctx.fillRect(x, y, overlayWidth, overlayHeight);
+    
     this.#ctx.fillStyle = 'white';
-    this.#ctx.fillText(`FPS: ${this.fps}`, 20, 30);
-    this.#ctx.fillText(`Objects: ${objects.size}`, 20, 50);
-    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, 20, 70);
-    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, 20, 85);
+    this.#ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 20);
+    this.#ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 40);
+    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 60);
+    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 75);
     this.#ctx.restore();
   }
 

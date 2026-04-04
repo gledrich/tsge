@@ -10,27 +10,27 @@ body {
 
 #canvas-container {
   position: fixed;
-  background-color: lightgray;
-  position: fixed;
-  /* left: 1rem; */
-  /* min-height: 80vh; */
-  min-width: 80%;
-  width: 100%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #1a1a1a;
+  z-index: 0;
 }
 
 .logo-container {
   position: fixed;
   z-index: 1000;
-  margin-left: 1rem;
-  margin-top: 1rem;
-  font-family: Arial Rounded MT Bold;
-  padding: .25rem;
-  border-color: #067a69;
-  border-width: .25rem;
-  border-style: inset;
-  border-radius: 1rem;
+  left: 1rem;
+  top: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 0.5rem 1rem;
+  background: rgba(67, 170, 139, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(67, 170, 139, 0.4);
+  border-radius: 0.5rem;
+  color: #43aa8b;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 

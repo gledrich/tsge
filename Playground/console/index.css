@@ -1,50 +1,71 @@
 .console {
-  font-family: Arial, Helvetica, sans-serif;
-  position: sticky;
-  bottom: 0;
+  font-family: 'Courier New', Courier, monospace;
   display: flex;
   flex-direction: column;
-  min-height: 25%;
-  width: 70%;
-  z-index: 100;
-  background-color: black;
-  border-radius: 1rem;
+  flex: 1;
+  min-height: 150px;
+  background-color: #011627;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin: 0 1rem 1rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.console-header {
+  display: flex;
   justify-content: space-between;
-  overflow-y: scroll;
-  padding-right: 1rem;
-  margin: 0 1rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .title {
-  font-size: small;
-  margin: 1rem;
-  color: white;
+  font-size: 0.8rem;
+  color: #43aa8b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.clear-btn {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.clear-btn:hover {
+  color: #F94144;
 }
 
 .console-text {
-  margin-bottom: 1rem;
-  margin-left: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
-  font-size: x-small;
-  /* padding-left: 1rem; */
-  color: red;
-  background-color: rgb(20, 20, 20);
-  /* width: fit-content; */
-  /* min-width: 80%; */
-  height: fit-content;
-  border-radius: 1rem;
-  padding: .1rem;
+  gap: 0.25rem;
 }
 
-.console-text p {
-  line-height: 0;
-  display: inline-block;
-  vertical-align: middle;
+.console-line {
+  display: flex;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding-bottom: 2px;
 }
 
-.console-text span {
-  color: lightgreen;
-  margin-left: 0.25rem;
-  margin-right: 1rem;
+.console-line pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #d1d1d1;
 }
+
+.console-line span.bash {
+  color: #43aa8b;
+  margin-right: 0.75rem;
+  user-select: none;
+  font-weight: bold;
+}
+
