@@ -8,6 +8,7 @@ import Circle from '../built/Circle.js';
 import Physics from '../built/Physics.js';
 import ResourceLoader from '../built/Loader.js';
 import Input from '../built/Input.js';
+import Tilemap from '../built/Tilemap.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -73,6 +74,32 @@ class PlayScene extends Scene {
 
   onLoad() {
     this.game.cursor = 'none';
+
+    // Generate a programmatic Grid Tile for the Tilemap
+    const c = document.createElement('canvas');
+    c.width = 100;
+    c.height = 100;
+    const ctx = c.getContext('2d');
+    ctx.strokeStyle = 'rgba(67, 170, 139, 0.15)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 100, 100);
+    const gridImg = new Image();
+    gridImg.src = c.toDataURL();
+
+    // 20x20 grid of tile index 0
+    const mapData = Array(20)
+      .fill(0)
+      .map(() => Array(20).fill(0));
+
+    new Tilemap({
+      tag: 'grid',
+      tileset: gridImg,
+      data: mapData,
+      tileSize: 100,
+      tilesetCols: 1,
+      position: new Vector2(0, 0),
+      zIndex: -1 // Behind everything
+    });
 
     // Distant Stars (Static-ish, very faint)
     for (let i = 0; i < 200; i++) {
@@ -329,7 +356,8 @@ class PlayScene extends Scene {
         this.shakeIntensity = 20; // Big shake on hit
 
         if (this.lives <= 0) {
-          const finalScore = this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          const finalScore =
+            this.score + Math.floor((Date.now() - this.startTime) / 1000);
           console.log(`Game Over! Final Score: ${finalScore}`);
           if (finalScore > this.highScore) {
             console.log(`New High Score: ${finalScore}!`);
