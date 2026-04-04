@@ -5,20 +5,40 @@ import Input from './Input.js';
 import Scene from './Scene.js';
 import Camera from './Camera.js';
 
+/**
+ * Options for initializing the Engine.
+ */
 export interface EngineOpts {
+  /** Width of the game window (e.g., '800px' or '100%'). */
   width: string;
+  /** Height of the game window (e.g., '600px' or '100%'). */
   height: string;
+  /** Title of the game, set in the document head. */
   title: string;
+  /** Background colour of the canvas. */
   backgroundColour: string;
 }
 
+/**
+ * Lifecycle and update callbacks for the engine.
+ */
 export interface EngineCallbacks {
+  /** Called once after the engine is initialized. */
   onLoad: () => void;
+  /** Called every frame for game logic and rendering. */
   update: () => void;
+  /** Optional callback for physics or fixed-step logic. */
   fixedUpdate?: () => void;
 }
 
+/**
+ * Specialized Set for managing game objects with helper methods.
+ */
 export class ObjectSet extends Set<GameObject> {
+  /**
+   * Find all objects with a specific tag.
+   * @param tag The tag to search for.
+   */
   findAll: (tag: string) => GameObject[];
 }
 
@@ -74,20 +94,27 @@ export default class Engine {
   #window: HTMLDivElement;
   #title: HTMLTitleElement;
 
+  /** Current background colour. */
   backgroundColour: string;
+  /** Registered engine callbacks. */
   callbacks: EngineCallbacks;
 
+  /** Pixel width of the canvas. */
   width: number;
+  /** Pixel height of the canvas. */
   height: number;
 
+  /** Current mouse x position in world space. */
   get mouseX() {
     return Input.mouseX;
   }
 
+  /** Current mouse y position in world space. */
   get mouseY() {
     return Input.mouseY;
   }
 
+  /** Current frames per second. */
   fps: number = 0;
   #oldTimestamp: number = 0;
   #secondsPassed: number;
@@ -292,6 +319,11 @@ export default class Engine {
     return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
   }
 
+  /**
+   * Promisified setTimeout.
+   * @param timeoutFn The function to run after the timeout.
+   * @param time The time in milliseconds to wait.
+   */
   async setTimeout(timeoutFn: () => void, time: number) {
     await new Promise((resolve) => {
       setTimeout(resolve, time);
@@ -299,6 +331,12 @@ export default class Engine {
     timeoutFn();
   }
 
+  /**
+   * Run a function repeatedly for a duration and then run a final function.
+   * @param milliseconds Total duration.
+   * @param fn Function to run every second.
+   * @param onEnded Final function to run.
+   */
   countdown(milliseconds: number, fn: () => void, onEnded: () => void) {
     setTimeout(onEnded, milliseconds);
 
@@ -309,6 +347,7 @@ export default class Engine {
     }
   }
 
+  /** Sets the CSS cursor style for the game canvas. */
   set cursor(value: string) {
     document.getElementById('canvas').style.cursor = value;
   }
@@ -321,6 +360,10 @@ export default class Engine {
     return new Set<GameObject>(arr);
   }
 
+  /**
+   * Register a new game object with the active scene or global engine.
+   * @param object The object to register.
+   */
   static registerObject(object: GameObject) {
     if (object instanceof Sprite) {
       const sprite = object;
@@ -342,6 +385,10 @@ export default class Engine {
     }
   }
 
+  /**
+   * Remove a game object from the active scene or global engine.
+   * @param object The object to destroy.
+   */
   static destroyObject(object: GameObject) {
     if (Engine.currentScene) {
       Engine.currentScene.remove(object);
@@ -350,6 +397,7 @@ export default class Engine {
     }
   }
 
+  /** Destroy all objects in the active scene or global engine. */
   static destroyAll() {
     if (Engine.currentScene) {
       Engine.currentScene.clear();

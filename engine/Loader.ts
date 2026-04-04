@@ -1,3 +1,6 @@
+/**
+ * Handles asynchronous loading of assets like images.
+ */
 export default class ResourceLoader {
   private static assets: Map<string, HTMLImageElement> = new Map();
   private static loadingQueue: Set<string> = new Set();
@@ -6,6 +9,8 @@ export default class ResourceLoader {
 
   /**
    * Queue an image for loading.
+   * @param tag Unique tag to reference the image later.
+   * @param src Path to the image file.
    */
   static queueImage(tag: string, src: string) {
     if (this.assets.has(tag)) return;
@@ -15,6 +20,7 @@ export default class ResourceLoader {
 
   /**
    * Start loading all queued assets.
+   * @param onProgress Optional callback for loading progress updates.
    */
   static async loadAll(onProgress?: (percent: number) => void): Promise<void> {
     if (this.loadingQueue.size === 0) return Promise.resolve();
@@ -46,7 +52,9 @@ export default class ResourceLoader {
   }
 
   /**
-   * Get a loaded asset by tag.
+   * Get a loaded asset by its tag.
+   * @param tag The tag used when queuing the asset.
+   * @returns The loaded HTMLImageElement.
    */
   static getImage(tag: string): HTMLImageElement {
     const asset = this.assets.get(tag);

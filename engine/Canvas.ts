@@ -1,4 +1,8 @@
+/**
+ * Simple wrapper for creating and managing a full-screen canvas element.
+ */
 export default class Canvas {
+  /** The underlying HTMLCanvasElement. */
   canvas: HTMLCanvasElement;
 
   constructor() {

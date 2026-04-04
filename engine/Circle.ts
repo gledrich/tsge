@@ -1,11 +1,19 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 
+/**
+ * Configuration for creating a Circle object.
+ */
 export interface CircleProps {
+  /** Unique tag for identification. */
   tag: string;
+  /** Initial position of the circle. */
   position: Vector2;
+  /** Radius of the circle. */
   radius: number;
+  /** Fill colour. */
   colour: string;
+  /** Render order (lower is background). */
   zIndex: string;
 }
 
@@ -15,17 +23,26 @@ const defaultProps = {
   zIndex: '0',
 };
 
+/**
+ * A basic circle shape that can be drawn to the screen.
+ */
 export default class Circle extends GameObject {
-  _position: Vector2;
+  private _position: Vector2;
+  /** Radius of the circle. */
   radius: number;
+  /** Fill colour. */
   colour: string;
 
+  /** Gets or sets the position of the circle. */
   get position() { return this._position; }
   set position(val) { this._position = val; }
 
+  /** Width of the circle (radius * 2). */
   get width() { return this.radius * 2; }
+  /** Height of the circle (radius * 2). */
   get height() { return this.radius * 2; }
 
+  /** Center point of the circle. */
   get center(): Vector2 {
     return new Vector2(
       this.position.x + this.radius,
@@ -58,6 +75,7 @@ export default class Circle extends GameObject {
     this.registerSelf();
   }
 
+  /** Draws the circle onto the provided rendering context. */
   draw(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
     ctx.fillStyle = this.colour;

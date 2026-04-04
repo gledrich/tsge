@@ -2,7 +2,17 @@ import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import Circle from './Circle.js';
 
+/**
+ * Utility class for collision detection between game objects.
+ */
 export default class Physics {
+  /**
+   * Checks if two game objects are colliding.
+   * Supports Circle-Circle, Circle-Rectangle, and Rectangle-Rectangle (AABB) collisions.
+   * @param obj1 First object.
+   * @param obj2 Second object.
+   * @returns True if the objects are colliding.
+   */
   static checkCollision(obj1: GameObject, obj2: GameObject): boolean {
     const isCircle1 = obj1 instanceof Circle;
     const isCircle2 = obj2 instanceof Circle;

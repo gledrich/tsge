@@ -1,11 +1,19 @@
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 
+/**
+ * Configuration for creating a Line object.
+ */
 export interface LineProperties {
+  /** Unique tag for identification. */
   tag: string;
+  /** Stroke width of the line. */
   width: number;
+  /** Start point of the line. */
   p1: Vector2;
+  /** End point of the line. */
   p2: Vector2;
+  /** Render order (lower is background). */
   zIndex: string;
 }
 
@@ -17,17 +25,30 @@ const defaultProps = {
   p2: new Vector2(),
 };
 
+/**
+ * A basic line object that can be drawn between two points.
+ */
 export default class Line extends GameObject {
+  /** Unique identifier. */
   tag: string;
+  /** Stroke width of the line. */
   strokeWidth: number;
+  /** Start x coordinate. */
   x1: number;
+  /** Start y coordinate. */
   y1: number;
+  /** End x coordinate. */
   x2: number;
+  /** End y coordinate. */
   y2: number;
+  /** Rendering order. */
   zIndex: string;
 
+  /** Gets the starting position of the line. */
   get position() { return new Vector2(this.x1, this.y1); }
+  /** Gets the bounding box width of the line. */
   get width() { return Math.abs(this.x2 - this.x1); }
+  /** Gets the bounding box height of the line. */
   get height() { return Math.abs(this.y2 - this.y1); }
 
   constructor(props: LineProperties) {
@@ -47,6 +68,7 @@ export default class Line extends GameObject {
     this.registerSelf();
   }
 
+  /** Draws the line onto the provided rendering context. */
   draw(ctx: CanvasRenderingContext2D) {
     ctx.lineWidth = this.strokeWidth;
     ctx.moveTo(this.x1, this.y1);

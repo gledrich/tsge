@@ -3,7 +3,9 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import Input from './Input.js';
 
+/** Horizontal alignment options for text. */
 export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
+/** Vertical alignment options for text. */
 export type VerticalAlign =
   | 'top'
   | 'hanging'
@@ -12,20 +14,37 @@ export type VerticalAlign =
   | 'ideographic'
   | 'bottom';
 
+/**
+ * Configuration for creating a Text object.
+ */
 export interface TextProperties {
+  /** Unique tag for identification. */
   tag: string;
+  /** Fill colour of the text. */
   colour: string;
+  /** Optional background box colour. */
   backgroundColour: string;
+  /** Font size in pixels. */
   fontSize: string;
+  /** Font family (e.g., 'Arial', 'Helvetica'). */
   font: string;
+  /** The text content to display. */
   text: string;
+  /** Horizontal alignment relative to the position. */
   horizontalAlign: HorizontalAlign;
+  /** Vertical alignment relative to the position. */
   verticalAlign: VerticalAlign;
+  /** Anchor position for the text. */
   position: Vector2;
+  /** Optional width for background box. */
   width: number;
+  /** Optional height for background box. */
   height: number;
+  /** Render order. */
   zIndex: string;
+  /** Whether to register with the engine immediately. */
   register: boolean;
+  /** Callback for click events. */
   onClick: () => void;
 }
 
@@ -43,24 +62,43 @@ const defaultProps = {
   onClick: () => {},
 };
 
+/**
+ * Represents text that can be drawn to the screen and interact with input.
+ */
 export default class Text extends GameObject {
   #onMouseClick;
+  /** Unique tag. */
   tag: string;
+  /** Text fill colour. */
   colour: string;
+  /** Background box colour. */
   backgroundColour: string;
+  /** Font size in pixels. */
   fontSize: number;
+  /** Compiled font string (e.g., '25px Helvetica'). */
   font: string;
+  /** The text content. */
   text: string;
+  /** Number of characters in the text. */
   length: number;
+  /** Horizontal alignment. */
   horizontalAlign: HorizontalAlign;
+  /** Vertical alignment. */
   verticalAlign: VerticalAlign;
+  /** Anchor position. */
   position: Vector2;
+  /** Width of the background box or interaction area. */
   width: number;
+  /** Height of the background box or interaction area. */
   height: number;
+  /** Render order. */
   zIndex: string;
+  /** Whether the object should be registered. */
   register: boolean;
+  /** Whether the object is currently registered. */
   registered: boolean;
 
+  /** Callback for click events. */
   onClick: () => void;
 
   constructor(props: TextProperties) {
@@ -97,6 +135,7 @@ export default class Text extends GameObject {
     }
   }
 
+  /** Draws the text and its optional background onto the context. */
   draw(ctx: CanvasRenderingContext2D) {
     if (this.backgroundColour) {
       ctx.fillStyle = this.backgroundColour;
@@ -110,8 +149,8 @@ export default class Text extends GameObject {
 
     ctx.font = this.font;
     ctx.fillStyle = this.colour;
-    ctx.textAlign = this.horizontalAlign;
-    ctx.textBaseline = this.verticalAlign;
+    ctx.textAlign = this.horizontalAlign as CanvasTextAlign;
+    ctx.textBaseline = this.verticalAlign as CanvasTextBaseline;
     ctx.fillText(
       this.text,
       this.position.x + this.width / 2,
@@ -119,6 +158,7 @@ export default class Text extends GameObject {
     );
   }
 
+  /** Registers the text object with the engine for rendering and interaction. */
   registerSelf() {
     if (!this.registered) {
       Input.addClickListener(this.#onMouseClick);
@@ -127,6 +167,7 @@ export default class Text extends GameObject {
     }
   }
 
+  /** Removes the text object from the engine. */
   destroySelf() {
     if (this.registered) {
       Input.removeClickListener(this.#onMouseClick);

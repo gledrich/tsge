@@ -1,10 +1,16 @@
 import Vector2 from './Vector2.js';
 import Engine from './Engine.js';
 
+/**
+ * Handles mouse and keyboard input events.
+ */
 export default class Input {
   private static mousePosition: Vector2 = new Vector2(0, 0);
   private static clickListeners: Set<(pos: Vector2) => void> = new Set();
 
+  /**
+   * Initializes input event listeners.
+   */
   static init() {
     document.addEventListener('mousemove', (event: MouseEvent) => {
       this.mousePosition.x = event.clientX;
@@ -53,18 +59,22 @@ export default class Input {
     });
   }
 
+  /** Current mouse x position in world space. */
   static get mouseX() {
     return (this.mousePosition.x / Engine.camera.zoom) + Engine.camera.position.x;
   }
 
+  /** Current mouse y position in world space. */
   static get mouseY() {
     return (this.mousePosition.y / Engine.camera.zoom) + Engine.camera.position.y;
   }
 
+  /** Adds a global click listener. */
   static addClickListener(listener: (pos: Vector2) => void) {
     this.clickListeners.add(listener);
   }
 
+  /** Removes a global click listener. */
   static removeClickListener(listener: (pos: Vector2) => void) {
     this.clickListeners.delete(listener);
   }
