@@ -48,11 +48,19 @@ export default class Input {
       this.clickListeners.forEach((listener) => listener(pos));
     });
 
+    document.addEventListener('mousedown', (event: MouseEvent) => {
+      this.keys.add(`mouse${event.button}`);
+    });
+
+    document.addEventListener('mouseup', (event: MouseEvent) => {
+      this.keys.delete(`mouse${event.button}`);
+    });
+
     document.addEventListener('keydown', (event: KeyboardEvent) => {
       this.keys.add(event.key.toLowerCase());
 
-      // Toggle Pause with Space or P
-      if (event.key === ' ' || event.key === 'p' || event.key === 'P') {
+      // Toggle Pause with P
+      if (event.key === 'p' || event.key === 'P') {
         Engine.paused = !Engine.paused;
         
         if (Engine.paused) {

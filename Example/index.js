@@ -49,9 +49,14 @@ class PlayScene extends Scene {
     super();
     this.game = game;
     this.onGameOver = onGameOver;
-    this.stars = [];
+    this.starsFar = [];
+    this.starsMid = [];
+    this.starsNear = [];
     this.meteors = [];
+    this.fireballs = [];
     this.startTime = Date.now();
+    this.lastShotTime = 0;
+    this.shotCooldown = 250; // ms
     this.score = 0;
     this.inputMode = 'mouse'; // 'mouse' or 'keyboard'
   }
@@ -62,20 +67,32 @@ class PlayScene extends Scene {
     const worldWidth = 2000;
     const worldHeight = 2000;
 
-    // Drifting Stars
+    // Distant Stars (Static-ish, very faint)
     for (let i = 0; i < 200; i++) {
+      this.starsFar.push(new Rectangle({
+        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
+        width: 1, height: 1, colour: 'rgba(255, 255, 255, 0.1)', zIndex: 0
+      }));
+    }
+
+    // Mid Stars (Moderate speed)
+    for (let i = 0; i < 100; i++) {
       const star = new Rectangle({
-        position: new Vector2(
-          Math.random() * worldWidth,
-          Math.random() * worldHeight
-        ),
-        width: 2,
-        height: 2,
-        colour: 'rgba(255, 255, 255, 0.4)',
-        zIndex: 0
+        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
+        width: 2, height: 2, colour: 'rgba(255, 255, 255, 0.4)', zIndex: 1
       });
       star.speed = 0.5 + Math.random() * 1;
-      this.stars.push(star);
+      this.starsMid.push(star);
+    }
+
+    // Near Stars (Very fast, large, bright)
+    for (let i = 0; i < 40; i++) {
+      const star = new Rectangle({
+        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
+        width: 3, height: 3, colour: 'rgba(255, 255, 255, 0.9)', zIndex: 2
+      });
+      star.speed = 3 + Math.random() * 4;
+      this.starsNear.push(star);
     }
 
     this.player = new Sprite({
@@ -147,6 +164,35 @@ class PlayScene extends Scene {
       this.player.flip = this.game.mouseX < this.player.position.x + this.player.width / 2;
     }
 
+    // Shooting System
+    const canShoot = Date.now() - this.lastShotTime > this.shotCooldown;
+    const isShooting = Input.isKeyDown(' ') || Input.isKeyDown('mouse0');
+
+    if (canShoot && isShooting) {
+      const fireball = new Circle({
+        position: new Vector2(
+          this.player.position.x + this.player.width / 2 - 5,
+          this.player.position.y
+        ),
+        radius: 5,
+        colour: '#FFB703',
+        zIndex: 6,
+        tag: 'fireball'
+      });
+      fireball.velocity.y = -600; // Fast upwards
+      this.fireballs.push(fireball);
+      this.lastShotTime = Date.now();
+    }
+
+    // Cleanup off-screen fireballs
+    this.fireballs = this.fireballs.filter((fb) => {
+      if (fb.position.y < Engine.camera.position.y - 50) {
+        fb.destroySelf();
+        return false;
+      }
+      return true;
+    });
+
     // Camera follows player
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
 
@@ -154,8 +200,12 @@ class PlayScene extends Scene {
     this.scoreText.position.x = Engine.camera.position.x + window.innerWidth / 2 - 75;
     this.scoreText.position.y = Engine.camera.position.y + 20;
 
-    // Star drift
-    this.stars.forEach((star) => {
+    // Star drift (Parallax)
+    this.starsMid.forEach((star) => {
+      star.position.y += star.speed;
+      if (star.position.y > 2000) star.position.y = 0;
+    });
+    this.starsNear.forEach((star) => {
       star.position.y += star.speed;
       if (star.position.y > 2000) star.position.y = 0;
     });
