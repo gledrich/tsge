@@ -26,6 +26,7 @@ export default class Engine {
   public static objects = new ObjectSet();
   public static paused = false;
   public static debug = false;
+  public static selectedObject: GameObject | null = null;
   public static camera = new Camera();
   private static _currentScene: Scene;
 
@@ -192,8 +193,12 @@ export default class Engine {
 
     objects.forEach((obj) => {
       // Draw hitbox
+      this.#ctx.strokeStyle = obj === Engine.selectedObject ? '#00ff00' : 'red';
+      this.#ctx.lineWidth = obj === Engine.selectedObject ? 2 : 1;
       this.#ctx.strokeRect(obj.position.x, obj.position.y, obj.width, obj.height);
+      
       // Draw tag
+      this.#ctx.fillStyle = this.#ctx.strokeStyle;
       this.#ctx.fillText(obj.tag || 'obj', obj.position.x, obj.position.y - 5);
     });
 
@@ -201,24 +206,53 @@ export default class Engine {
     this.#ctx.save();
     this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
     
-    const overlayWidth = 150;
-    const overlayHeight = 80;
+    const overlayWidth = 180;
+    const statsHeight = 80;
     const padding = 10;
     const x = this.#canvas.width - overlayWidth - padding;
-    const y = padding;
+    let y = padding;
 
-    this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    this.#ctx.fillRect(x, y, overlayWidth, overlayHeight);
+    // Background for Stats
+    this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.#ctx.fillRect(x, y, overlayWidth, statsHeight);
     
     this.#ctx.fillStyle = 'white';
-    this.#ctx.textAlign = 'center';
-    this.#ctx.textBaseline = 'middle';
+    this.#ctx.textAlign = 'left';
+    this.#ctx.textBaseline = 'top';
     
-    const centerX = x + overlayWidth / 2;
-    this.#ctx.fillText(`FPS: ${this.fps}`, centerX, y + 15);
-    this.#ctx.fillText(`Objects: ${objects.size}`, centerX, y + 35);
-    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, centerX, y + 55);
-    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, centerX, y + 70);
+    this.#ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 10);
+    this.#ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 25);
+    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 45);
+    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 60);
+
+    // Inspector Panel (If object selected)
+    if (Engine.selectedObject) {
+      y += statsHeight + 10;
+      const obj = Engine.selectedObject;
+      const properties = [
+        ['Tag', obj.tag],
+        ['Pos', `${Math.round(obj.position.x)}, ${Math.round(obj.position.y)}`],
+        ['Size', `${Math.round(obj.width)}x${Math.round(obj.height)}`],
+        ['Vel', `${Math.round(obj.velocity.x)}, ${Math.round(obj.velocity.y)}`],
+        ['Acc', `${Math.round(obj.acceleration.x)}, ${Math.round(obj.acceleration.y)}`],
+        ['Z-Index', obj.zIndex]
+      ];
+
+      const inspectorHeight = 20 + (properties.length * 15);
+      this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      this.#ctx.fillRect(x, y, overlayWidth, inspectorHeight);
+      this.#ctx.strokeStyle = '#00ff00';
+      this.#ctx.strokeRect(x, y, overlayWidth, inspectorHeight);
+
+      this.#ctx.fillStyle = '#00ff00';
+      this.#ctx.fillText('INSPECTOR', x + 10, y + 5);
+      
+      this.#ctx.fillStyle = 'white';
+      properties.forEach(([key, val], i) => {
+        this.#ctx.fillText(`${key}: ${val}`, x + 10, y + 20 + (i * 15));
+      });
+    }
+
     this.#ctx.restore();
   }
 

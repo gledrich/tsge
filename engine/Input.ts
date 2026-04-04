@@ -13,6 +13,31 @@ export default class Input {
 
     document.addEventListener('click', () => {
       const pos = new Vector2(this.mouseX, this.mouseY);
+
+      // If debug mode is on, try to select an object
+      if (Engine.debug) {
+        const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
+        let found = false;
+
+        // Check objects from top to bottom (zIndex)
+        const sorted = Array.from(objects).sort((a, b) => (parseInt(b.zIndex, 10) > parseInt(a.zIndex, 10) ? 1 : -1));
+
+        for (const obj of sorted) {
+          if (
+            pos.x > obj.position.x &&
+            pos.x < obj.position.x + obj.width &&
+            pos.y > obj.position.y &&
+            pos.y < obj.position.y + obj.height
+          ) {
+            Engine.selectedObject = obj;
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) Engine.selectedObject = null;
+      }
+
       this.clickListeners.forEach((listener) => listener(pos));
     });
   }
