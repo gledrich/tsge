@@ -66,6 +66,9 @@ class PlayScene extends Scene {
     this.isInvulnerable = false;
     this.invulnerabilityDuration = 1500; // 1.5s
     this.lastHitTime = 0;
+    this.shakeIntensity = 0;
+    this.shakeDecay = 0.9;
+    this.highScore = parseInt(localStorage.getItem('dinoHighScore') || '0', 10);
   }
 
   onLoad() {
@@ -231,6 +234,7 @@ class PlayScene extends Scene {
           this.spawnExplosion(m.position, m.radius, m.colour);
           m.destroySelf();
           this.score += 10;
+          this.shakeIntensity = Math.max(this.shakeIntensity, 5); // Small shake on destroy
           hit = true;
           return false;
         }
@@ -244,8 +248,27 @@ class PlayScene extends Scene {
       return true;
     });
 
+    // Update and Cleanup Particles
+    this.particles = this.particles.filter((p) => {
+      p.life -= 0.02;
+      if (p.life <= 0) {
+        p.destroySelf();
+        return false;
+      }
+      return true;
+    });
+
     // Camera follows player
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
+
+    // Apply Screen Shake
+    if (this.shakeIntensity > 0.1) {
+      Engine.camera.position.x += (Math.random() - 0.5) * this.shakeIntensity;
+      Engine.camera.position.y += (Math.random() - 0.5) * this.shakeIntensity;
+      this.shakeIntensity *= this.shakeDecay;
+    } else {
+      this.shakeIntensity = 0;
+    }
 
     // Update Invulnerability
     if (this.isInvulnerable) {
@@ -301,11 +324,15 @@ class PlayScene extends Scene {
       if (!this.isInvulnerable && Physics.checkCollision(this.player, meteor)) {
         this.lives -= 1;
         this.livesText.text = `Lives: ${this.lives}`;
+        this.shakeIntensity = 20; // Big shake on hit
 
         if (this.lives <= 0) {
-          this.onGameOver(
-            this.score + Math.floor((Date.now() - this.startTime) / 1000)
-          );
+          const finalScore =
+            this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          if (finalScore > this.highScore) {
+            localStorage.setItem('dinoHighScore', finalScore.toString());
+          }
+          this.onGameOver(finalScore);
           return false;
         } else {
           this.isInvulnerable = true;
@@ -353,6 +380,7 @@ class GameOverScene extends Scene {
     this.game = game;
     this.score = score;
     this.onRestart = onRestart;
+    this.highScore = parseInt(localStorage.getItem('dinoHighScore') || '0', 10);
   }
 
   onLoad() {
@@ -370,10 +398,20 @@ class GameOverScene extends Scene {
 
     new Text({
       tag: 'finalScore',
-      text: `You survived ${this.score} seconds!`,
+      text: `Score: ${this.score}`,
       fontSize: 30,
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 200, 250),
+      position: new Vector2(window.innerWidth / 2 - 200, 230),
+      width: 400,
+      zIndex: 10
+    });
+
+    new Text({
+      tag: 'highScore',
+      text: `Best: ${this.highScore}`,
+      fontSize: 24,
+      colour: '#FFB703',
+      position: new Vector2(window.innerWidth / 2 - 200, 280),
       width: 400,
       zIndex: 10
     });
