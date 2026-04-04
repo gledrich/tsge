@@ -25,6 +25,7 @@ class ObjectSet extends Set<GameObject> {
 export default class Engine {
   public static objects = new ObjectSet();
   public static paused = false;
+  public static debug = false;
   public static camera = new Camera();
   private static _currentScene: Scene;
 
@@ -176,6 +177,36 @@ export default class Engine {
       object.draw(this.#ctx);
     });
 
+    if (Engine.debug) {
+      this.#drawDebug(objects);
+    }
+
+    this.#ctx.restore();
+  }
+
+  #drawDebug(objects: Set<GameObject>) {
+    this.#ctx.strokeStyle = 'red';
+    this.#ctx.lineWidth = 1;
+    this.#ctx.font = '12px monospace';
+    this.#ctx.fillStyle = 'red';
+
+    objects.forEach((obj) => {
+      // Draw hitbox
+      this.#ctx.strokeRect(obj.position.x, obj.position.y, obj.width, obj.height);
+      // Draw tag
+      this.#ctx.fillText(obj.tag || 'obj', obj.position.x, obj.position.y - 5);
+    });
+
+    // Draw Stats Overlay (Fixed to screen)
+    this.#ctx.save();
+    this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
+    this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    this.#ctx.fillRect(10, 10, 150, 80);
+    this.#ctx.fillStyle = 'white';
+    this.#ctx.fillText(`FPS: ${this.fps}`, 20, 30);
+    this.#ctx.fillText(`Objects: ${objects.size}`, 20, 50);
+    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, 20, 70);
+    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, 20, 85);
     this.#ctx.restore();
   }
 
