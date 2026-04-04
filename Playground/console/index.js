@@ -31,7 +31,7 @@ export default () => {
     line.className = 'console-line';
     line.innerHTML = '<span class="bash">$</span><pre>' + message + '</pre>';
     consoleText.appendChild(line);
-    container.scrollTop = container.scrollHeight;
+    consoleText.scrollTop = consoleText.scrollHeight;
   };
 
   header.appendChild(title);
