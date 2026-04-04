@@ -6,6 +6,7 @@ import Sprite from '../built/Sprite.js';
 import Scene from '../built/Scene.js';
 import Circle from '../built/Circle.js';
 import Physics from '../built/Physics.js';
+import ResourceLoader from '../built/Loader.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -43,10 +44,9 @@ class MenuScene extends Scene {
 }
 
 class PlayScene extends Scene {
-  constructor(game, dinoImg, onGameOver) {
+  constructor(game, onGameOver) {
     super();
     this.game = game;
-    this.dinoImg = dinoImg;
     this.onGameOver = onGameOver;
     this.stars = [];
     this.meteors = [];
@@ -77,7 +77,7 @@ class PlayScene extends Scene {
     }
 
     this.player = new Sprite({
-      img: this.dinoImg,
+      img: 'dino',
       rows: 1,
       cols: 24,
       position: new Vector2(worldWidth / 2, worldHeight / 2),
@@ -212,11 +212,17 @@ class GameOverScene extends Scene {
 
 class DinoSurvival {
   constructor() {
-    this.dinoImg = new Image();
-    this.dinoImg.src = './sprites/DinoSprites - doux.png';
-
     this.game = new Engine(
-      { onLoad: () => this.showMenu(), update: () => {} },
+      { 
+        onLoad: async () => {
+          ResourceLoader.queueImage('dino', './sprites/DinoSprites - doux.png');
+          await ResourceLoader.loadAll((percent) => {
+            console.log(`Loading: ${Math.round(percent)}%`);
+          });
+          this.showMenu();
+        }, 
+        update: () => {} 
+      },
       { title: 'Dino Survival', backgroundColour: '#264653' }
     );
   }
@@ -226,7 +232,7 @@ class DinoSurvival {
   }
 
   startGame() {
-    Engine.currentScene = new PlayScene(this.game, this.dinoImg, (score) =>
+    Engine.currentScene = new PlayScene(this.game, (score) =>
       this.showGameOver(score)
     );
   }
