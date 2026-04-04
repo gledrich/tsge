@@ -1,6 +1,5 @@
 import Canvas from './Canvas.js';
 import GameObject from './GameObject.js';
-import Sprite from './Sprite.js';
 import Input from './Input.js';
 import Scene from './Scene.js';
 import Camera from './Camera.js';
@@ -234,12 +233,12 @@ export default class Engine {
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
     this.#ctx.save();
-    
+
     // Apply camera transform
     this.#ctx.scale(Engine.camera.zoom, Engine.camera.zoom);
     this.#ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
 
-    Engine.#sortSet(objects).forEach((object) => {
+    Engine.#getSortedArray(objects).forEach((object) => {
       object.draw(this.#ctx);
     });
 
@@ -261,7 +260,7 @@ export default class Engine {
       this.#ctx.strokeStyle = obj === Engine.selectedObject ? '#00ff00' : 'red';
       this.#ctx.lineWidth = obj === Engine.selectedObject ? 2 : 1;
       this.#ctx.strokeRect(obj.position.x, obj.position.y, obj.width, obj.height);
-      
+
       // Draw tag
       this.#ctx.fillStyle = this.#ctx.strokeStyle;
       this.#ctx.fillText(obj.tag || 'obj', obj.position.x, obj.position.y - 5);
@@ -270,7 +269,7 @@ export default class Engine {
     // Draw Stats Overlay (Top Right)
     this.#ctx.save();
     this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
-    
+
     const overlayWidth = 180;
     const statsHeight = 80;
     const padding = 10;
@@ -280,11 +279,11 @@ export default class Engine {
     // Background for Stats
     this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     this.#ctx.fillRect(x, y, overlayWidth, statsHeight);
-    
+
     this.#ctx.fillStyle = 'white';
     this.#ctx.textAlign = 'left';
     this.#ctx.textBaseline = 'top';
-    
+
     this.#ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 10);
     this.#ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 25);
     this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 45);
@@ -311,7 +310,7 @@ export default class Engine {
 
       this.#ctx.fillStyle = '#00ff00';
       this.#ctx.fillText('INSPECTOR', x + 10, y + 5);
-      
+
       this.#ctx.fillStyle = 'white';
       properties.forEach(([key, val], i) => {
         this.#ctx.fillText(`${key}: ${val}`, x + 10, y + 20 + (i * 15));
@@ -358,12 +357,10 @@ export default class Engine {
     document.getElementById('canvas').style.cursor = value;
   }
 
-  static #sortSet(objects: Set<GameObject> = Engine.objects) {
+  static #getSortedArray(objects: Set<GameObject> = Engine.objects) {
     const arr: GameObject[] = Array.from(objects);
-
     arr.sort((a, b) => (parseInt(a.zIndex, 10) > parseInt(b.zIndex, 10) ? 1 : -1));
-
-    return new Set<GameObject>(arr);
+    return arr;
   }
 
   /**
@@ -371,23 +368,10 @@ export default class Engine {
    * @param object The object to register.
    */
   static registerObject(object: GameObject) {
-    if (object instanceof Sprite) {
-      const sprite = object;
-      if (Engine.currentScene) {
-        Engine.currentScene.add(sprite);
-      } else {
-        this.objects.add(sprite);
-      }
-
-      setInterval(() => {
-        sprite.currentFrame += 1;
-      }, 100);
+    if (Engine.currentScene) {
+      Engine.currentScene.add(object);
     } else {
-      if (Engine.currentScene) {
-        Engine.currentScene.add(object);
-      } else {
-        this.objects.add(object);
-      }
+      this.objects.add(object);
     }
   }
 
