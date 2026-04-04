@@ -19,12 +19,16 @@ const defaultProps = {
 
 export default class Line extends GameObject {
   tag: string;
-  width: number;
+  strokeWidth: number;
   x1: number;
   y1: number;
   x2: number;
   y2: number;
   zIndex: string;
+
+  get position() { return new Vector2(this.x1, this.y1); }
+  get width() { return Math.abs(this.x2 - this.x1); }
+  get height() { return Math.abs(this.y2 - this.y1); }
 
   constructor(props: LineProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
@@ -34,7 +38,7 @@ export default class Line extends GameObject {
       ...props,
     };
 
-    this.width = defaultedProps.width;
+    this.strokeWidth = defaultedProps.width;
     this.x1 = defaultedProps.p1.x;
     this.y1 = defaultedProps.p1.y;
     this.x2 = defaultedProps.p2.x;
@@ -44,7 +48,7 @@ export default class Line extends GameObject {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.lineWidth = this.width;
+    ctx.lineWidth = this.strokeWidth;
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);
     ctx.stroke();

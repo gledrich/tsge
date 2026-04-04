@@ -1,41 +1,5 @@
 import Vector2 from './Vector2.js';
-import Sprite from './Sprite.js';
 import GameObject from './GameObject.js';
-
-const checkCollision = (bigger, smaller) => {
-  if (
-    // top left corner
-    (smaller.position.x > bigger.position.x
-      && smaller.position.x < bigger.position.x + bigger.width
-      && smaller.position.y > bigger.position.y
-      && smaller.position.y < bigger.position.y + bigger.height)
-    // top right corner
-    || (
-      smaller.position.x + smaller.width > bigger.position.x
-      && smaller.position.x + smaller.width < bigger.position.x + bigger.width
-      && smaller.position.y > bigger.position.y
-      && smaller.position.y < bigger.position.y + bigger.height
-    )
-    // bottom left corner
-    || (
-      smaller.position.x > bigger.position.x
-      && smaller.position.x < bigger.position.x + bigger.width
-      && smaller.position.y + smaller.height > bigger.position.y
-      && smaller.position.y + smaller.height < bigger.position.y + bigger.height
-    )
-    // bottom right corner
-    || (
-      smaller.position.x + smaller.width > bigger.position.x
-      && smaller.position.x + smaller.width < bigger.position.x + bigger.width
-      && smaller.position.y + smaller.height > bigger.position.y
-      && smaller.position.y + smaller.height < bigger.position.y + bigger.height
-    )
-  ) {
-    return true;
-  }
-
-  return false;
-};
 
 interface RectProps {
   tag: string;
@@ -51,10 +15,17 @@ const defaultProps = {
 }
 
 export default class Rectangle extends GameObject {
-  position: Vector2;
-  width: number;
-  height: number;
+  _position: Vector2;
+  _width: number;
+  _height: number;
   colour: string;
+
+  get position() { return this._position; }
+  set position(val) { this._position = val; }
+  get width() { return this._width; }
+  set width(val) { this._width = val; }
+  get height() { return this._height; }
+  set height(val) { this._height = val; }
 
   constructor(props: RectProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
@@ -73,9 +44,9 @@ export default class Rectangle extends GameObject {
     }
 
     this.tag = defaultedProps.tag;
-    this.position = defaultedProps.position;
-    this.width = defaultedProps.width;
-    this.height = defaultedProps.height;
+    this._position = defaultedProps.position;
+    this._width = defaultedProps.width;
+    this._height = defaultedProps.height;
     this.colour = defaultedProps.colour;
     this.zIndex = defaultedProps.zIndex;
 
@@ -90,44 +61,5 @@ export default class Rectangle extends GameObject {
       this.width,
       this.height
     );
-  }
-
-  hasCollided(obj: GameObject) {
-    if (obj instanceof Rectangle) {
-      let bigger;
-      let smaller;
-
-      if (this.width > obj.width || this.height > obj.height) {
-        bigger = this;
-        smaller = obj;
-      } else {
-        bigger = obj;
-        smaller = this;
-      }
-
-      return checkCollision(bigger, smaller);
-    }
-
-    if (obj instanceof Sprite) {
-      let bigger;
-      let smaller;
-
-      
-      if (this.width > obj.frameWidth || this.height > obj.frameHeight) {
-        bigger = this;
-        smaller = obj;
-        smaller.width = obj.frameWidth * 3;
-        smaller.height = obj.frameHeight * 3;
-      } else {
-        smaller = this;
-        bigger = obj;
-        bigger.width = obj.frameWidth * 3;
-        bigger.height = obj.frameHeight * 3;
-      }
-
-      return checkCollision(bigger, smaller);
-    }
-
-    return false;
   }
 }
