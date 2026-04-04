@@ -58,7 +58,6 @@ class PlayScene extends Scene {
     this.lastShotTime = 0;
     this.shotCooldown = 250; // ms
     this.score = 0;
-    this.inputMode = 'mouse'; // 'mouse' or 'keyboard'
   }
 
   onLoad() {
@@ -119,49 +118,30 @@ class PlayScene extends Scene {
   }
 
   update() {
-    // Determine target velocity from keyboard or mouse
-    const moveSpeed = 300;
+    // Determine target velocity from keyboard
+    const moveSpeed = 250;
     let targetVX = 0;
     let targetVY = 0;
 
-    const keyboardActive = 
-      Input.isKeyDown('w') || Input.isKeyDown('s') || 
-      Input.isKeyDown('a') || Input.isKeyDown('d') ||
-      Input.isKeyDown('arrowup') || Input.isKeyDown('arrowdown') || 
-      Input.isKeyDown('arrowleft') || Input.isKeyDown('arrowright');
-
-    if (keyboardActive) {
-      this.inputMode = 'keyboard';
+    if (Input.isKeyDown('w') || Input.isKeyDown('arrowup')) targetVY = -moveSpeed;
+    else if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown')) targetVY = moveSpeed;
+    
+    if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft')) targetVX = -moveSpeed;
+    else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright')) targetVX = moveSpeed;
+    
+    // Basic normalization if moving diagonally
+    if (targetVX !== 0 && targetVY !== 0) {
+      targetVX *= 0.707;
+      targetVY *= 0.707;
     }
-
-    // Note: We don't automatically switch back to mouse mode on key release.
-    // This prevents the player from "snapping" to the mouse cursor when they stop moving with keys.
-
-    if (this.inputMode === 'keyboard') {
-      if (Input.isKeyDown('w') || Input.isKeyDown('arrowup')) targetVY = -moveSpeed;
-      if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown')) targetVY = moveSpeed;
-      if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft')) targetVX = -moveSpeed;
-      if (Input.isKeyDown('d') || Input.isKeyDown('arrowright')) targetVX = moveSpeed;
-      
-      // Basic normalization if moving diagonally
-      if (targetVX !== 0 && targetVY !== 0) {
-        targetVX *= 0.707;
-        targetVY *= 0.707;
-      }
-      
-      this.player.velocity.x = targetVX;
-      this.player.velocity.y = targetVY;
-      
-      if (targetVX !== 0) {
-        this.player.flip = targetVX < 0;
-      }
-    } else {
-      // Mouse follow mode
-      const targetX = this.game.mouseX - this.player.width / 2;
-      const targetY = this.game.mouseY - this.player.height / 2;
-      this.player.velocity.x = (targetX - this.player.position.x) * 5;
-      this.player.velocity.y = (targetY - this.player.position.y) * 5;
-      this.player.flip = this.game.mouseX < this.player.position.x + this.player.width / 2;
+    
+    this.player.velocity.x = targetVX;
+    this.player.velocity.y = targetVY;
+    
+    if (targetVX < 0) {
+      this.player.flip = true;
+    } else if (targetVX > 0) {
+      this.player.flip = false;
     }
 
     // Shooting System
