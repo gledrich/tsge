@@ -14,13 +14,13 @@ export interface CircleProps {
   /** Fill colour. */
   colour: string;
   /** Render order (lower is background). */
-  zIndex: string;
+  zIndex: number;
 }
 
 const defaultProps = {
   tag: 'circle',
   colour: 'black',
-  zIndex: '0',
+  zIndex: 0,
 };
 
 /**

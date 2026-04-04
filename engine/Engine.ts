@@ -367,7 +367,7 @@ export default class Engine {
 
   static #getSortedArray(objects: Set<GameObject> = Engine.objects) {
     const arr: GameObject[] = Array.from(objects);
-    arr.sort((a, b) => (parseInt(a.zIndex, 10) > parseInt(b.zIndex, 10) ? 1 : -1));
+    arr.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
     return arr;
   }
 

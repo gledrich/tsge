@@ -19,7 +19,7 @@ export interface TilemapProps {
   /** Initial world position. */
   position: Vector2;
   /** Rendering order. */
-  zIndex: string;
+  zIndex: number;
 }
 
 /**

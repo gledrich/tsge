@@ -22,7 +22,7 @@ export interface SpriteProps {
   /** Ending frame column for animation. */
   endCol: number;
   /** Rendering order. */
-  zIndex: string;
+  zIndex: number;
 }
 
 /**
@@ -44,7 +44,7 @@ export default class Sprite extends GameObject {
   /** The ending column for the current animation loop. */
   endCol: number;
   /** Rendering order (lower is background). */
-  zIndex: string;
+  zIndex: number;
   /** The pixel width of a single animation frame (calculated automatically). */
   frameWidth: number = 0;
   /** The pixel height of a single animation frame (calculated automatically). */
@@ -78,7 +78,7 @@ export default class Sprite extends GameObject {
       throw new Error('You must provide a tag for a Sprite');
     }
 
-    super(props.tag, props.zIndex || '1');
+    super(props.tag, props.zIndex || 1);
 
     if (typeof props.img === 'string') {
       this.img = ResourceLoader.getImage(props.img);

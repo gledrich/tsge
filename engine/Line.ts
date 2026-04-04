@@ -14,13 +14,13 @@ export interface LineProperties {
   /** End point of the line. */
   p2: Vector2;
   /** Render order (lower is background). */
-  zIndex: string;
+  zIndex: number;
 }
 
 const defaultProps = {
   tag: 'line',
   width: 1,
-  zIndex: '0',
+  zIndex: 0,
   p1: new Vector2(),
   p2: new Vector2(),
 };
@@ -42,7 +42,7 @@ export default class Line extends GameObject {
   /** End y coordinate. */
   y2: number;
   /** Rendering order. */
-  zIndex: string;
+  zIndex: number;
 
   /** Gets the starting position of the line. */
   get position() { return new Vector2(this.x1, this.y1); }

@@ -22,7 +22,9 @@ export default class Input {
       this.mousePosition.y = event.clientY;
     });
 
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (event: MouseEvent) => {
+      if ((event.target as HTMLElement).tagName !== 'CANVAS') return;
+
       const pos = new Vector2(this.mouseX, this.mouseY);
 
       // If debug mode is on, try to select an object
@@ -31,7 +33,7 @@ export default class Input {
         let found = false;
 
         // Check objects from top to bottom (zIndex)
-        const sorted = Array.from(objects).sort((a, b) => (parseInt(b.zIndex, 10) > parseInt(a.zIndex, 10) ? 1 : -1));
+        const sorted = Array.from(objects).sort((a, b) => (b.zIndex > a.zIndex ? 1 : -1));
 
         for (const obj of sorted) {
           if (
@@ -55,6 +57,7 @@ export default class Input {
     });
 
     document.addEventListener('mousedown', (event: MouseEvent) => {
+      if ((event.target as HTMLElement).tagName !== 'CANVAS') return;
       this.keys.add(`mouse${event.button}`);
     });
 

@@ -16,11 +16,11 @@ export interface RectProps {
   /** Fill colour. */
   colour: string;
   /** Render order. */
-  zIndex: string;
+  zIndex: number;
 }
 
 const defaultProps = {
-  tag: 'rect', colour: 'black', zIndex: '0',
+  tag: 'rect', colour: 'black', zIndex: 0,
 }
 
 /**

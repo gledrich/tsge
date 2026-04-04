@@ -9,7 +9,7 @@ export default abstract class GameObject {
   /** A unique identifier for the object type. */
   tag: string;
   /** Rendering order (lower is background, higher is foreground). */
-  zIndex: string;
+  zIndex: number;
   /** Current velocity in pixels per second. */
   velocity: Vector2 = new Vector2(0, 0);
   /** Current acceleration in pixels per second squared. */
@@ -22,7 +22,7 @@ export default abstract class GameObject {
   /** Whether the object should be rendered. */
   visible: boolean = true;
 
-  constructor(tag: string, zIndex: string) {
+  constructor(tag: string, zIndex: number) {
     this.tag = tag;
     this.zIndex = zIndex;
   }

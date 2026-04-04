@@ -41,7 +41,7 @@ export interface TextProperties {
   /** Optional height for background box. */
   height: number;
   /** Render order. */
-  zIndex: string;
+  zIndex: number;
   /** Whether to register with the engine immediately. */
   register: boolean;
   /** Callback for click events. */
@@ -57,7 +57,7 @@ const defaultProps = {
   horizontalAlign: 'center',
   verticalAlign: 'middle',
   position: new Vector2(0, 0),
-  zIndex: '0',
+  zIndex: 0,
   register: true,
   onClick: () => {},
 };
@@ -92,7 +92,7 @@ export default class Text extends GameObject {
   /** Height of the background box or interaction area. */
   height: number;
   /** Render order. */
-  zIndex: string;
+  zIndex: number;
   /** Whether the object should be registered. */
   register: boolean;
   /** Whether the object is currently registered. */
