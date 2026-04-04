@@ -65,7 +65,10 @@ class PlayScene extends Scene {
     // Drifting Stars
     for (let i = 0; i < 200; i++) {
       const star = new Rectangle({
-        position: new Vector2(Math.random() * worldWidth, Math.random() * worldHeight),
+        position: new Vector2(
+          Math.random() * worldWidth,
+          Math.random() * worldHeight
+        ),
         width: 2,
         height: 2,
         colour: 'rgba(255, 255, 255, 0.4)',
@@ -99,11 +102,13 @@ class PlayScene extends Scene {
   }
 
   update() {
-    // Player follow mouse (world space)
-    const targetX = this.game.mouseX - (this.player.width) / 2;
-    const targetY = this.game.mouseY - (this.player.height) / 2;
-    this.player.position.x += (targetX - this.player.position.x) * 0.1;
-    this.player.position.y += (targetY - this.player.position.y) * 0.1;
+    // Player follow mouse (velocity-based)
+    const targetX = this.game.mouseX - this.player.width / 2;
+    const targetY = this.game.mouseY - this.player.height / 2;
+
+    // Dampened movement (multiplied by 5 instead of 10)
+    this.player.velocity.x = (targetX - this.player.position.x) * 5;
+    this.player.velocity.y = (targetY - this.player.position.y) * 5;
 
     // Camera follows player
     Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
@@ -113,37 +118,45 @@ class PlayScene extends Scene {
     this.scoreText.position.y = Engine.camera.position.y + 20;
 
     // Flip dino based on mouse
-    this.player.flip = this.game.mouseX < this.player.position.x + (this.player.width) / 2;
+    this.player.flip =
+      this.game.mouseX < this.player.position.x + this.player.width / 2;
 
     // Star drift
-    this.stars.forEach(star => {
+    this.stars.forEach((star) => {
       star.position.y += star.speed;
       if (star.position.y > 2000) star.position.y = 0;
     });
 
-    // Spawn Meteors in world space
-    if (Math.random() < 0.05) {
+    // Spawn Meteors (Lowered spawn rate from 0.05 to 0.02)
+    if (Math.random() < 0.02) {
       const meteor = new Rectangle({
-        position: new Vector2(Math.random() * 2000, Engine.camera.position.y - 100),
+        position: new Vector2(
+          Math.random() * 2000,
+          Engine.camera.position.y - 100
+        ),
         width: 30 + Math.random() * 40,
         height: 30 + Math.random() * 40,
         colour: '#F94144',
         zIndex: 4
       });
-      meteor.speed = 4 + Math.random() * 6;
+      // Set initial velocity (Lowered)
+      meteor.velocity.y = 100 + Math.random() * 200;
+      // Add small gravity (Lowered)
+      meteor.acceleration.y = 50;
       this.meteors.push(meteor);
     }
 
     // Update Meteors & Collision
-    this.meteors = this.meteors.filter(meteor => {
-      meteor.position.y += meteor.speed;
-      
+    this.meteors = this.meteors.filter((meteor) => {
       if (this.player.hasCollided(meteor)) {
         this.onGameOver(this.score);
         return false;
       }
 
-      if (meteor.position.y > Engine.camera.position.y + window.innerHeight + 100) {
+      if (
+        meteor.position.y >
+        Engine.camera.position.y + window.innerHeight + 100
+      ) {
         meteor.destroySelf();
         return false;
       }
@@ -217,10 +230,14 @@ class DinoSurvival {
   }
 
   startGame() {
-    Engine.currentScene = new PlayScene(this.game, this.dinoImg, (score) => this.showGameOver(score));
+    Engine.currentScene = new PlayScene(this.game, this.dinoImg, (score) =>
+      this.showGameOver(score)
+    );
   }
 
   showGameOver(score) {
-    Engine.currentScene = new GameOverScene(this.game, score, () => this.showMenu());
+    Engine.currentScene = new GameOverScene(this.game, score, () =>
+      this.showMenu()
+    );
   }
 }
