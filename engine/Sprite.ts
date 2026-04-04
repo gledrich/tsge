@@ -24,10 +24,19 @@ export default class Sprite extends GameObject {
   startCol: number;
   endCol: number;
   zIndex: string;
-  frameWidth: number;
-  frameHeight: number;
+  frameWidth: number = 0;
+  frameHeight: number = 0;
   registered: boolean;
   currentFrame: number;
+  flip: boolean = false;
+
+  get width(): number {
+    return this.frameWidth * 3;
+  }
+
+  get height(): number {
+    return this.frameHeight * 3;
+  }
 
   constructor(props: SpriteProps) {
     if (!props.tag) {
@@ -46,15 +55,23 @@ export default class Sprite extends GameObject {
 
     sprites.add(this);
 
-    this.img.onload = () => {
+    const setDimensions = () => {
       this.frameWidth = this.img.width / this.cols;
       this.frameHeight = this.img.height / this.rows;
     };
+
+    if (this.img.complete) {
+      setDimensions();
+    } else {
+      this.img.addEventListener('load', setDimensions);
+    }
 
     this.registered = false;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.frameWidth || !this.frameHeight) return;
+
     const {
       img,
       cols,
@@ -82,17 +99,35 @@ export default class Sprite extends GameObject {
     const column = this.currentFrame % cols;
     const row = Math.floor(this.currentFrame / cols);
 
-    ctx.drawImage(
-      img,
-      column * frameWidth,
-      row * frameHeight,
-      frameWidth,
-      frameHeight,
-      position.x,
-      position.y,
-      frameWidth * 3,
-      frameHeight * 3
-    );
+    ctx.save();
+    if (this.flip) {
+      ctx.translate(position.x + (frameWidth * 3), position.y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(
+        img,
+        column * frameWidth,
+        row * frameHeight,
+        frameWidth,
+        frameHeight,
+        0,
+        0,
+        frameWidth * 3,
+        frameHeight * 3
+      );
+    } else {
+      ctx.drawImage(
+        img,
+        column * frameWidth,
+        row * frameHeight,
+        frameWidth,
+        frameHeight,
+        position.x,
+        position.y,
+        frameWidth * 3,
+        frameHeight * 3
+      );
+    }
+    ctx.restore();
   }
 
   play() {
