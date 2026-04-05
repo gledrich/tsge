@@ -99,7 +99,7 @@ export default class Engine {
   public static set paused(val: boolean) {
     if (_globalState.paused !== val) {
       _globalState.paused = val;
-      _globalState.events.dispatchEvent(new CustomEvent('paused', { detail: val }));
+      this.emit('paused', val);
     }
   }
 
@@ -110,14 +110,41 @@ export default class Engine {
   public static set debug(val: boolean) {
     if (_globalState.debug !== val) {
       _globalState.debug = val;
-      _globalState.events.dispatchEvent(new CustomEvent('debug', { detail: val }));
+      this.emit('debug', val);
     }
   }
 
   /**
-   * Global event bus for engine events.
+   * Internal event bus for engine events.
    */
-  public static get events(): EventTarget { return _globalState.events; }
+  private static get events(): EventTarget { return _globalState.events; }
+
+  /**
+   * Listens for an event on the global engine bus.
+   * @param type The event type (e.g., 'paused', 'PLAYER_DIED').
+   * @param callback The function to run when the event occurs.
+   */
+  public static on(type: string, callback: (event: CustomEvent) => void) {
+    this.events.addEventListener(type, callback as (e: Event) => void);
+  }
+
+  /**
+   * Stops listening for an event on the global engine bus.
+   * @param type The event type.
+   * @param callback The function to remove.
+   */
+  public static off(type: string, callback: (event: CustomEvent) => void) {
+    this.events.removeEventListener(type, callback as (e: Event) => void);
+  }
+
+  /**
+   * Emits a custom event on the global engine bus.
+   * @param type The event type.
+   * @param detail Optional data to pass with the event.
+   */
+  public static emit(type: string, detail?: unknown) {
+    this.events.dispatchEvent(new CustomEvent(type, { detail }));
+  }
 
   /**
    * The currently selected object in debug mode.

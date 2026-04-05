@@ -5,6 +5,7 @@ import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
 import VisibilityComponent from './VisibilityComponent.js';
+import EventBusComponent from './EventBusComponent.js';
 
 /**
  * Base class for all entities in the game world.
@@ -20,6 +21,7 @@ export default abstract class GameObject {
   private _transform: TransformComponent;
   private _tag: TagComponent;
   private _visibility: VisibilityComponent;
+  private _eventBus: EventBusComponent;
 
   constructor(tag: string, zIndex: number) {
     // Initialize with core components for now to maintain backward compatibility.
@@ -35,6 +37,36 @@ export default abstract class GameObject {
 
     this._transform = new TransformComponent();
     this.addComponent(this._transform);
+
+    this._eventBus = new EventBusComponent();
+    this.addComponent(this._eventBus);
+  }
+
+  /**
+   * Listens for a local event on this entity.
+   * @param type The event type.
+   * @param callback The function to run when the event occurs.
+   */
+  on(type: string, callback: (event: CustomEvent) => void) {
+    this._eventBus.on(type, callback);
+  }
+
+  /**
+   * Stops listening for a local event.
+   * @param type The event type.
+   * @param callback The function to remove.
+   */
+  off(type: string, callback: (event: CustomEvent) => void) {
+    this._eventBus.off(type, callback);
+  }
+
+  /**
+   * Emits a local event on this entity.
+   * @param type The event type.
+   * @param detail Optional data to pass with the event.
+   */
+  emit(type: string, detail?: unknown) {
+    this._eventBus.emit(type, detail);
   }
 
   /**
