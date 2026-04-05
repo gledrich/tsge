@@ -171,6 +171,29 @@ class PlayScene extends Scene {
     });
     this.player.play();
 
+    // Scene Graph Parenting
+    // Create a name tag for the dino
+    this.nameTag = new Text({
+      tag: 'name-tag',
+      text: 'Dino',
+      fontSize: 12,
+      colour: 'white',
+      position: new Vector2(-15, 60), // Centered below player
+      width: 100,
+      zIndex: 6
+    });
+    this.player.addChild(this.nameTag);
+
+    // Group UI elements under a container
+    this.uiContainer = new Rectangle({
+      tag: 'ui-root',
+      position: new Vector2(0, 0),
+      width: 1,
+      height: 1,
+      colour: 'transparent',
+      zIndex: 10
+    });
+
     this.scoreText = new Text({
       tag: 'score',
       text: 'Score: 0',
@@ -178,7 +201,8 @@ class PlayScene extends Scene {
       colour: 'white',
       position: new Vector2(window.innerWidth / 2 - 75, 20),
       width: 150,
-      zIndex: 10
+      zIndex: 10,
+      register: false // Child will be drawn by parent
     });
 
     this.livesText = new Text({
@@ -188,8 +212,12 @@ class PlayScene extends Scene {
       colour: '#F94144',
       position: new Vector2(20, 60),
       width: 100,
-      zIndex: 10
+      zIndex: 10,
+      register: false
     });
+
+    this.uiContainer.addChild(this.scoreText);
+    this.uiContainer.addChild(this.livesText);
   }
 
   update() {
@@ -322,12 +350,9 @@ class PlayScene extends Scene {
       }
     }
 
-    // Keep UI fixed by moving it with camera
-    this.scoreText.position.x =
-      Engine.camera.position.x + window.innerWidth / 2 - 75;
-    this.scoreText.position.y = Engine.camera.position.y + 20;
-    this.livesText.position.x = Engine.camera.position.x + 20;
-    this.livesText.position.y = Engine.camera.position.y + 60;
+    // Keep UI fixed by moving the container with camera
+    this.uiContainer.localPosition.x = Engine.camera.position.x;
+    this.uiContainer.localPosition.y = Engine.camera.position.y;
 
     // Star drift (Parallax)
     this.starsMid.forEach((star) => {
