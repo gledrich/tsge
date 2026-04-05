@@ -4,6 +4,8 @@ export { default as GameObject } from './GameObject.js';
 export { default as Component } from './Component.js';
 export { default as PhysicsComponent } from './PhysicsComponent.js';
 export { default as TransformComponent } from './TransformComponent.js';
+export { default as TagComponent } from './TagComponent.js';
+export { default as VisibilityComponent } from './VisibilityComponent.js';
 export { default as Sprite } from './Sprite.js';
 export { default as Vector2 } from './Vector2.js';
 export { default as Camera } from './Camera.js';

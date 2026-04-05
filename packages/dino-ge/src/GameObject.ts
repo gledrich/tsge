@@ -3,6 +3,8 @@ import Vector2 from './Vector2.js';
 import Component from './Component.js';
 import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
+import TagComponent from './TagComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
 
 /**
  * Base class for all entities in the game world.
@@ -10,33 +12,51 @@ import TransformComponent from './TransformComponent.js';
  * Acts as the 'Entity' in our evolving Entity Component System.
  */
 export default abstract class GameObject {
-  /** A unique identifier for the object type. */
-  tag: string;
-  /** Rendering order (lower is background, higher is foreground). */
-  zIndex: number;
-
   /** Collection of components attached to this entity. */
   private _components: Map<string, Component> = new Map();
-
-  /** Whether the object should be rendered. */
-  visible: boolean = true;
 
   /** Internal components for backward compatibility and core logic. */
   private _physics: PhysicsComponent;
   private _transform: TransformComponent;
+  private _tag: TagComponent;
+  private _visibility: VisibilityComponent;
 
   constructor(tag: string, zIndex: number) {
-    this.tag = tag;
-    this.zIndex = zIndex;
-
     // Initialize with core components for now to maintain backward compatibility.
     // In a pure ECS, components would be added as needed.
+    this._tag = new TagComponent(tag, zIndex);
+    this.addComponent(this._tag);
+
+    this._visibility = new VisibilityComponent();
+    this.addComponent(this._visibility);
+
     this._physics = new PhysicsComponent();
     this.addComponent(this._physics);
 
     this._transform = new TransformComponent();
     this.addComponent(this._transform);
   }
+
+  /**
+   * A unique identifier for the object type.
+   * @deprecated Use getComponent(TagComponent).tag
+   */
+  get tag(): string { return this._tag.tag; }
+  set tag(val: string) { this._tag.tag = val; }
+
+  /**
+   * Rendering order (lower is background, higher is foreground).
+   * @deprecated Use getComponent(TagComponent).zIndex
+   */
+  get zIndex(): number { return this._tag.zIndex; }
+  set zIndex(val: number) { this._tag.zIndex = val; }
+
+  /**
+   * Whether the object should be rendered.
+   * @deprecated Use getComponent(VisibilityComponent).visible
+   */
+  get visible(): boolean { return this._visibility.visible; }
+  set visible(val: boolean) { this._visibility.visible = val; }
 
   /**
    * The world-space position of the object.
@@ -81,6 +101,22 @@ export default abstract class GameObject {
     const key = component.constructor.name;
     this._components.set(key, component);
     component.gameObject = this;
+  }
+
+  /**
+   * Removes a component from this entity by its class.
+   * @param componentClass The class of the component to remove.
+   */
+  removeComponent<T extends Component>(componentClass: { new (...args: any[]): T }) {
+    this._components.delete(componentClass.name);
+  }
+
+  /**
+   * Checks if this entity has a component of the specified class.
+   * @param componentClass The class of the component to check for.
+   */
+  hasComponent<T extends Component>(componentClass: { new (...args: any[]): T }): boolean {
+    return this._components.has(componentClass.name);
   }
 
   /** Gets a component from this entity by its class.
