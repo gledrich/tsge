@@ -105,11 +105,11 @@ export default class Text extends GameObject {
   set verticalAlign(val: VerticalAlign) { this._textComponent.verticalAlign = val; }
 
   /** Width of the background box or interaction area. */
-  get width(): number { return this._textComponent.width; }
+  override get width(): number { return this._textComponent.width; }
   set width(val: number) { this._textComponent.width = val; }
 
   /** Height of the background box or interaction area. */
-  get height(): number { return this._textComponent.height; }
+  override get height(): number { return this._textComponent.height; }
   set height(val: number) { this._textComponent.height = val; }
 
   /** Whether the object should be registered. */
@@ -132,7 +132,7 @@ export default class Text extends GameObject {
     const font = `${this.fontSize}px ${defaultedProps.font}`;
     const text = defaultedProps.text;
     this.length = defaultedProps.text.length;
-    this.position = defaultedProps.position;
+    this.localPosition = defaultedProps.position;
     const horizontalAlign = defaultedProps.horizontalAlign;
     const verticalAlign = defaultedProps.verticalAlign;
     const width = defaultedProps.width || this.fontSize * this.length;

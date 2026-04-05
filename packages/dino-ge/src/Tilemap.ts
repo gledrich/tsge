@@ -58,7 +58,7 @@ export default class Tilemap extends GameObject {
     this.data = props.data;
     this.tileSize = props.tileSize;
     this.tilesetCols = props.tilesetCols;
-    this.position = props.position;
+    this.localPosition = props.position;
 
     this.addComponent(new TilemapComponent(
       this.tileset,

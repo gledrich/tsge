@@ -57,7 +57,7 @@ export default class Rectangle extends GameObject {
     }
 
     this.tag = defaultedProps.tag;
-    this.position = defaultedProps.position;
+    this.localPosition = defaultedProps.position;
     this._width = defaultedProps.width;
     this._height = defaultedProps.height;
     this.colour = defaultedProps.colour;

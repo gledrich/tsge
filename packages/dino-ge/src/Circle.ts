@@ -63,7 +63,7 @@ export default class Circle extends GameObject {
     }
 
     this.tag = defaultedProps.tag;
-    this.position = defaultedProps.position;
+    this.localPosition = defaultedProps.position;
     this.radius = defaultedProps.radius;
     this.colour = defaultedProps.colour;
     this.zIndex = defaultedProps.zIndex;

@@ -226,9 +226,9 @@ export default abstract class GameObject {
   }
 
   /** The width of the object in pixels. */
-  abstract get width(): number;
+  get width(): number { return 0; }
   /** The height of the object in pixels. */
-  abstract get height(): number;
+  get height(): number { return 0; }
 
   /**
    * Registers the object with the active scene or global engine loop.
