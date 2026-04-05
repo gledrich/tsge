@@ -58,19 +58,19 @@ export default class Physics {
     // Push apart
     if (overlapX < overlapY) {
       if (obj1.position.x < obj2.position.x) {
-        if (!obj1.isStatic) obj1.position.x -= overlapX / 2;
-        if (!obj2.isStatic) obj2.position.x += overlapX / 2;
+        if (!obj1.isStatic) obj1.localPosition.x -= overlapX / 2;
+        if (!obj2.isStatic) obj2.localPosition.x += overlapX / 2;
       } else {
-        if (!obj1.isStatic) obj1.position.x += overlapX / 2;
-        if (!obj2.isStatic) obj2.position.x -= overlapX / 2;
+        if (!obj1.isStatic) obj1.localPosition.x += overlapX / 2;
+        if (!obj2.isStatic) obj2.localPosition.x -= overlapX / 2;
       }
     } else {
       if (obj1.position.y < obj2.position.y) {
-        if (!obj1.isStatic) obj1.position.y -= overlapY / 2;
-        if (!obj2.isStatic) obj2.position.y += overlapY / 2;
+        if (!obj1.isStatic) obj1.localPosition.y -= overlapY / 2;
+        if (!obj2.isStatic) obj2.localPosition.y += overlapY / 2;
       } else {
-        if (!obj1.isStatic) obj1.position.y += overlapY / 2;
-        if (!obj2.isStatic) obj2.position.y -= overlapY / 2;
+        if (!obj1.isStatic) obj1.localPosition.y += overlapY / 2;
+        if (!obj2.isStatic) obj2.localPosition.y -= overlapY / 2;
       }
     }
   }

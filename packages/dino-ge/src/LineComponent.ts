@@ -24,11 +24,22 @@ export default class LineComponent extends RenderComponent {
    * @param ctx The canvas 2D rendering context.
    */
   draw(ctx: CanvasRenderingContext2D) {
+    if (!this.gameObject) return;
+
+    const { position, rotation, scale } = this.gameObject;
+
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    if (rotation !== 0) ctx.rotate(rotation);
+    ctx.scale(scale.x, scale.y);
+
     ctx.beginPath();
     ctx.lineWidth = this.strokeWidth;
     ctx.moveTo(this.p1.x, this.p1.y);
     ctx.lineTo(this.p2.x, this.p2.y);
     ctx.stroke();
     ctx.closePath();
+    
+    ctx.restore();
   }
 }

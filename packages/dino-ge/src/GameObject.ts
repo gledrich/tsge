@@ -92,10 +92,68 @@ export default abstract class GameObject {
 
   /**
    * The world-space position of the object.
-   * Proxies to the TransformComponent.
+   * Getter returns world position, setter sets local position.
    */
-  get position(): Vector2 { return this._transform.position; }
+  get position(): Vector2 { return this._transform.worldPosition; }
   set position(val: Vector2) { this._transform.position = val; }
+
+  /**
+   * The local position relative to the parent.
+   */
+  get localPosition(): Vector2 { return this._transform.position; }
+  set localPosition(val: Vector2) { this._transform.position = val; }
+
+  /**
+   * The world-space rotation in radians.
+   */
+  get rotation(): number { return this._transform.worldRotation; }
+  set rotation(val: number) { this._transform.rotation = val; }
+
+  /**
+   * The local rotation in radians relative to the parent.
+   */
+  get localRotation(): number { return this._transform.rotation; }
+  set localRotation(val: number) { this._transform.rotation = val; }
+
+  /**
+   * The local scale relative to the parent.
+   */
+  get scale(): Vector2 { return this._transform.scale; }
+  set scale(val: Vector2) { this._transform.scale = val; }
+
+  /**
+   * Adds a child GameObject to this entity.
+   * @param child The child entity to add.
+   */
+  addChild(child: GameObject) {
+    child._transform.parent = this._transform;
+    this._transform.children.add(child._transform);
+  }
+
+  /**
+   * Removes a child GameObject from this entity.
+   * @param child The child entity to remove.
+   */
+  removeChild(child: GameObject) {
+    if (child._transform.parent === this._transform) {
+      child._transform.parent = undefined;
+      this._transform.children.delete(child._transform);
+    }
+  }
+
+  /**
+   * Gets or sets the parent GameObject.
+   */
+  get parent(): GameObject | undefined {
+    return this._transform.parent?.gameObject;
+  }
+  set parent(val: GameObject | undefined) {
+    if (this._transform.parent) {
+      this._transform.parent.children.delete(this._transform);
+    }
+    this._transform.parent = val?._transform;
+    val?._transform.children.add(this._transform);
+  }
 
   /**
    * Current velocity in pixels per second.

@@ -72,7 +72,7 @@ export default class SpriteComponent extends RenderComponent {
       endCol,
     } = this;
 
-    const { position } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject;
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -92,8 +92,14 @@ export default class SpriteComponent extends RenderComponent {
     const row = Math.floor(this.currentFrame / cols);
 
     ctx.save();
+    
+    // Apply world transform
+    ctx.translate(position.x, position.y);
+    if (rotation !== 0) ctx.rotate(rotation);
+    ctx.scale(scale.x, scale.y);
+
     if (this.flip) {
-      ctx.translate(position.x + (frameWidth * 3), position.y);
+      ctx.translate(frameWidth * 3, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(
         img,
@@ -113,8 +119,8 @@ export default class SpriteComponent extends RenderComponent {
         row * frameHeight,
         frameWidth,
         frameHeight,
-        position.x,
-        position.y,
+        0, // Drawing at 0,0 relative to transform
+        0,
         frameWidth * 3,
         frameHeight * 3
       );

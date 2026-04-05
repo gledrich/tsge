@@ -50,13 +50,18 @@ export default class TextComponent extends RenderComponent {
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.gameObject) return;
 
-    const { position } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject;
+
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    if (rotation !== 0) ctx.rotate(rotation);
+    ctx.scale(scale.x, scale.y);
 
     if (this.backgroundColour) {
       ctx.fillStyle = this.backgroundColour;
       ctx.fillRect(
-        position.x,
-        position.y,
+        0,
+        0,
         this.width,
         this.height
       );
@@ -68,8 +73,10 @@ export default class TextComponent extends RenderComponent {
     ctx.textBaseline = this.verticalAlign;
     ctx.fillText(
       this.text,
-      position.x + this.width / 2,
-      position.y + this.height / 2
+      this.width / 2,
+      this.height / 2
     );
+    
+    ctx.restore();
   }
 }

@@ -28,7 +28,12 @@ export default class TilemapComponent extends RenderComponent {
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.gameObject) return;
 
-    const { position } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject;
+
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    if (rotation !== 0) ctx.rotate(rotation);
+    ctx.scale(scale.x, scale.y);
 
     for (let y = 0; y < this.data.length; y++) {
       for (let x = 0; x < this.data[y].length; x++) {
@@ -44,12 +49,14 @@ export default class TilemapComponent extends RenderComponent {
           sourceY,
           this.tileSize,
           this.tileSize,
-          position.x + x * this.tileSize,
-          position.y + y * this.tileSize,
+          x * this.tileSize, // Drawn relative to translated context
+          y * this.tileSize,
           this.tileSize,
           this.tileSize
         );
       }
     }
+    
+    ctx.restore();
   }
 }

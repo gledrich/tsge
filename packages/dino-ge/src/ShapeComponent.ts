@@ -33,18 +33,25 @@ export default class ShapeComponent extends RenderComponent {
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.gameObject) return;
 
-    const { position } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject;
+    
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    if (rotation !== 0) ctx.rotate(rotation);
+    ctx.scale(scale.x, scale.y);
+    
     ctx.fillStyle = this.colour;
 
     if (this.type === 'rect') {
-      ctx.fillRect(position.x, position.y, this.width, this.height);
+      ctx.fillRect(0, 0, this.width, this.height);
     } else if (this.type === 'circle') {
       ctx.beginPath();
-      const centerX = position.x + this.width; // width is radius
-      const centerY = position.y + this.width;
-      ctx.arc(centerX, centerY, this.width, 0, Math.PI * 2);
+      // width is radius. In local space center is at (radius, radius)
+      ctx.arc(this.width, this.width, this.width, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();
     }
+    
+    ctx.restore();
   }
 }
