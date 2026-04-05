@@ -8,8 +8,10 @@ This document outlines the planned features and milestones for the **Dino Game E
   *   [x] Implement keyboard state tracking (e.g., `Input.isKeyDown('w')`).
   - [ ] Add Gamepad API support for controller input.
 - **Entity Component System (ECS):**
-  *   [x] Implement foundation: `Component`, `PhysicsComponent`, `TransformComponent`.
-  *   [x] Refactor `GameObject` and Engine loop to use Components.
+  *   [x] Implement foundation: `Component`, `PhysicsComponent`, `TransformComponent`, `TagComponent`, `VisibilityComponent`.
+  *   [x] Refactor `GameObject` to act as an Entity.
+  *   [x] Implement `System` architecture and `PhysicsSystem`.
+  *   [x] Refactor Engine loop to use decoupled Systems.
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
   - [ ] Add basic friction and restitution (bounciness) to `Physics`.

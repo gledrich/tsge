@@ -15,6 +15,9 @@ export default defineConfig({
       }
     }
   ],
+  optimizeDeps: {
+    exclude: ['dino-ge']
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:3000',
