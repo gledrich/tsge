@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { updatePlayground } from '../index.js';
 import { updateEditor, insertTextToEditor } from '../editor/index.js';
 import { updateScript } from '../helpers.js';
+/* eslint-enable no-unused-vars */
 
 export default () => {
   const sidebarDiv = document.createElement('div');

@@ -5,16 +5,25 @@ import globals from "globals";
 
 export default [
   js.configs.recommended,
+  // Base config for all JS/TS files in the project
+  {
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
+        ...globals.es2015,
+        ...globals.node,
+      },
+    },
+  },
+  // TypeScript specific config for the engine
   {
     files: ["packages/dino-ge/src/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./packages/dino-ge/tsconfig.json",
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.es2015,
       },
     },
     plugins: {
@@ -24,6 +33,7 @@ export default [
       ...tsPlugin.configs.recommended.rules,
     },
   },
+  // Ignore patterns
   {
     ignores: ["node_modules/", "packages/*/dist/", "packages/*/built/", "docs/api/"],
   },

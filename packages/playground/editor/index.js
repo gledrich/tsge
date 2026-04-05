@@ -70,6 +70,7 @@ export const createEditor = () => {
 
   // Initialize Ace Editor after a short delay to ensure DOM attachment
   setTimeout(() => {
+    /* global ace */
     editorInstance = ace.edit('editor-textbox');
     editorInstance.setTheme('ace/theme/tomorrow_night_eighties');
     editorInstance.session.setMode('ace/mode/javascript');
@@ -118,6 +119,7 @@ export const updateEditor = async (shouldFetchScript = true) => {
 
   // Only beautify if fetched
   if (shouldFetchScript && window.js_beautify) {
+    /* global js_beautify */
     script = js_beautify(script, options) + '\n\n';
   }
 

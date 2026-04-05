@@ -3,7 +3,6 @@ import { createInspector } from './inspector/index.js';
 import { getScript, updateScript } from './helpers.js';
 import Engine from '/built/Engine.js';
 
-let script;
 let updateInspectorToggleState;
 
 window.onload = async () => {
@@ -18,7 +17,6 @@ window.onload = async () => {
   document.body.appendChild(inspector);
 
   setupActionButtons(inspector, logo);
-  script = await getScript();
 
   await updatePlayground();
   await updateEditor();
