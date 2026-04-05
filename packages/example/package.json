@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "dino-ge": "^1.2.2"
+    "dino-ge": "^1.2.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

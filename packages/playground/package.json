@@ -18,7 +18,7 @@
     "scripts/"
   ],
   "dependencies": {
-    "dino-ge": "^1.2.2",
+    "dino-ge": "^1.2.6",
     "express": "^4.21.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
