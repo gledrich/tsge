@@ -14,12 +14,13 @@ This document outlines the planned features and milestones for the **Dino Game E
   *   [x] Decouple Rendering logic into `RenderingSystem` and specialized RenderComponents.
   *   [x] Build out global and local Event Bus (PubSub) system.
   *   [x] Refactor Engine loop to use decoupled Systems.
+  *   [x] Implement Scene Graph (parent-child hierarchy).
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
   - [ ] Add basic friction and restitution (bounciness) to `Physics`.
 - **Rendering Optimization:**
-  - [ ] Implement Viewport Culling (only draw objects within the `Camera` bounds).
-  - [ ] Add support for simple Z-sorting optimizations.
+  *   [x] Implement Viewport Culling (only draw objects within the `Camera` bounds).
+  *   [x] Add support for simple Z-sorting optimizations.
 
 ## Phase 2: Medium-Term (Core Game Systems)
 
