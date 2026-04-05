@@ -55,6 +55,7 @@ interface EngineState {
   camera: Camera;
   systems: System[];
   renderingSystem?: RenderingSystem;
+  events: EventTarget;
 }
 
 /**
@@ -66,7 +67,8 @@ const _globalState: EngineState = (globalThis as unknown as { __DINO_ENGINE_STAT
   debug: false,
   selectedObject: null,
   camera: new Camera(),
-  systems: [new PhysicsSystem()]
+  systems: [new PhysicsSystem()],
+  events: new EventTarget()
 };
 (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ = _globalState;
 
@@ -94,13 +96,28 @@ export default class Engine {
    * Whether the game loop is currently paused.
    */
   public static get paused(): boolean { return _globalState.paused; }
-  public static set paused(val: boolean) { _globalState.paused = val; }
+  public static set paused(val: boolean) {
+    if (_globalState.paused !== val) {
+      _globalState.paused = val;
+      _globalState.events.dispatchEvent(new CustomEvent('paused', { detail: val }));
+    }
+  }
 
   /**
    * Toggle for visual debug mode (hitboxes and stats).
    */
   public static get debug(): boolean { return _globalState.debug; }
-  public static set debug(val: boolean) { _globalState.debug = val; }
+  public static set debug(val: boolean) {
+    if (_globalState.debug !== val) {
+      _globalState.debug = val;
+      _globalState.events.dispatchEvent(new CustomEvent('debug', { detail: val }));
+    }
+  }
+
+  /**
+   * Global event bus for engine events.
+   */
+  public static get events(): EventTarget { return _globalState.events; }
 
   /**
    * The currently selected object in debug mode.

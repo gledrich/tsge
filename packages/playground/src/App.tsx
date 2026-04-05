@@ -20,14 +20,34 @@ function App() {
 
   useEffect(() => {
     (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
+
+    const onPaused = (e: Event) => {
+      setIsPaused((e as CustomEvent).detail);
+    };
+    const onDebug = (e: Event) => {
+      setIsDebug((e as CustomEvent).detail);
+    };
+
+    Engine.events.addEventListener('paused', onPaused);
+    Engine.events.addEventListener('debug', onDebug);
+
+    return () => {
+      Engine.events.removeEventListener('paused', onPaused);
+      Engine.events.removeEventListener('debug', onDebug);
+    };
   }, []);
 
   useEffect(() => {
-    Engine.paused = isPaused;
+    if (Engine.paused !== isPaused) {
+      Engine.paused = isPaused;
+    }
   }, [isPaused]);
 
   useEffect(() => {
-    Engine.debug = isDebug;
+    if (Engine.debug !== isDebug) {
+      Engine.debug = isDebug;
+    }
+    
     if ((globalThis as unknown as { Engine: typeof Engine }).Engine) {
       (globalThis as unknown as { Engine: typeof Engine }).Engine.debug = isDebug;
     }

@@ -5,7 +5,6 @@ import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
 import VisibilityComponent from './VisibilityComponent.js';
-import RenderComponent from './RenderComponent.js';
 
 /**
  * Base class for all entities in the game world.
@@ -104,7 +103,7 @@ export default abstract class GameObject {
 
     // Also index by RenderComponent if it is one, to allow abstract querying.
     // Use flag instead of instanceof to work across potential module duplications.
-    if ((component as any).isRenderComponent) {
+    if ((component as unknown as { isRenderComponent: boolean }).isRenderComponent) {
       this._components.set('RenderComponent', component);
     }
 
