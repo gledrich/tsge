@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "docs": "npm run docs -w dino-ge",
     "example": "npm run start -w dino-ge-example",
-    "playground": "npm run start -w dino-ge-playground"
+    "playground": "npm run start -w dino-ge-playground",
+    "playground:dev": "npm run dev -w dino-ge-playground"
   },
   "author": "Rich <richgled25@gmail.com>",
   "license": "ISC",
@@ -20,6 +21,9 @@
     "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^8.25.0",
     "eslint": "^9.21.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.4.0",
     "typedoc": "^0.28.18",
     "typescript": "^5.8.2"
   }

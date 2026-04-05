@@ -7,29 +7,30 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "echo \"Nothing to build for playground\""
+    "start": "ENVIRONMENT=prod node server.js",
+    "dev": "ENVIRONMENT=dev concurrently \"nodemon server.js\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "files": [
     "server.js",
-    "index.html",
-    "index.js",
-    "index.css",
-    "helpers.js",
-    "scripts/",
-    "console/",
-    "editor/",
-    "inspector/",
-    "sidebar/",
-    "sprites/"
+    "dist/",
+    "scripts/"
   ],
   "dependencies": {
+    "dino-ge": "^1.0.4",
     "express": "^4.21.2",
-    "dino-ge": "^1.0.4"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
   },
   "author": "Rich <richgled25@gmail.com>",
   "license": "ISC"

@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dino GE Playground</title>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "dino-ge": "/built/index.js"
+        }
+      }
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.11/beautify.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.11/beautify-css.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.11/beautify-html.js"></script>
@@ -12,20 +24,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.35.2/ace.js" type="text/javascript" charset="utf-8"></script>
     
     <script src="https://kit.fontawesome.com/d4796734cb.js" crossorigin="anonymous"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "dino-ge": "/built/index.js"
-        }
-      }
-    </script>
-    <link rel="stylesheet" href="/sidebar/index.css">
-    <link rel="stylesheet" href="/editor/index.css">
-    <link rel="stylesheet" href="/console/index.css">
-    <link rel="stylesheet" href="/inspector/index.css">
-    <link rel="stylesheet" href="/index.css">
-    <script type="module" src="/index.js"></script>
   </head>
   <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

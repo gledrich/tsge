@@ -1,0 +1,116 @@
+.playground-root {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-layout {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width 0.3s ease;
+  background: #1e1e1e;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+}
+
+.editor-layout.collapsed {
+  width: 0;
+  box-shadow: none;
+}
+
+.toggle-sidebar {
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #43aa8b;
+  color: white;
+  width: 25px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  z-index: 1000;
+  transition: all 0.3s;
+}
+
+.editor-layout.collapsed .main-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+#canvas-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #1a1a1a;
+  z-index: 0;
+}
+
+.logo-container {
+  position: fixed;
+  z-index: 1000;
+  left: 1rem;
+  top: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 0.5rem 1rem;
+  background: rgba(67, 170, 139, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(67, 170, 139, 0.4);
+  border-radius: 0.5rem;
+  color: #43aa8b;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.logo-container h1 {
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-buttons i {
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.1s ease, color 0.2s ease;
+}
+
+.action-buttons i:hover {
+  transform: scale(1.2);
+  color: #43aa8b;
+}
