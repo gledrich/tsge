@@ -27,15 +27,10 @@ const defaultProps = {
  * A basic circle shape that can be drawn to the screen.
  */
 export default class Circle extends GameObject {
-  private _position: Vector2;
   /** Radius of the circle. */
   radius: number;
   /** Fill colour. */
   colour: string;
-
-  /** Gets or sets the position of the circle. */
-  get position() { return this._position; }
-  set position(val) { this._position = val; }
 
   /** Width of the circle (radius * 2). */
   get width() { return this.radius * 2; }
@@ -67,7 +62,7 @@ export default class Circle extends GameObject {
     }
 
     this.tag = defaultedProps.tag;
-    this._position = defaultedProps.position;
+    this.position = defaultedProps.position;
     this.radius = defaultedProps.radius;
     this.colour = defaultedProps.colour;
     this.zIndex = defaultedProps.zIndex;

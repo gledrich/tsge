@@ -83,8 +83,6 @@ export default class Text extends GameObject {
   horizontalAlign: HorizontalAlign;
   /** Vertical alignment. */
   verticalAlign: VerticalAlign;
-  /** Anchor position. */
-  position: Vector2;
   /** Width of the background box or interaction area. */
   width: number;
   /** Height of the background box or interaction area. */

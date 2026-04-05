@@ -9,6 +9,8 @@ import Physics from '/built/Physics.js';
 import ResourceLoader from '/built/Loader.js';
 import Input from '/built/Input.js';
 import Tilemap from '/built/Tilemap.js';
+import PhysicsComponent from '/built/PhysicsComponent.js';
+import TransformComponent from '/built/TransformComponent.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {
@@ -207,16 +209,19 @@ class PlayScene extends Scene {
       targetVY *= 0.707;
     }
 
-    this.player.velocity.x = targetVX;
-    this.player.velocity.y = targetVY;
+    const playerPhysics = this.player.getComponent(PhysicsComponent);
+    playerPhysics.velocity.x = targetVX;
+    playerPhysics.velocity.y = targetVY;
+
+    const playerTransform = this.player.getComponent(TransformComponent);
 
     // Bounds Checking
-    if (this.player.position.x < 0) this.player.position.x = 0;
-    if (this.player.position.x > PlayScene.WORLD_WIDTH - this.player.width)
-      this.player.position.x = PlayScene.WORLD_WIDTH - this.player.width;
-    if (this.player.position.y < 0) this.player.position.y = 0;
-    if (this.player.position.y > PlayScene.WORLD_HEIGHT - this.player.height)
-      this.player.position.y = PlayScene.WORLD_HEIGHT - this.player.height;
+    if (playerTransform.position.x < 0) playerTransform.position.x = 0;
+    if (playerTransform.position.x > PlayScene.WORLD_WIDTH - this.player.width)
+      playerTransform.position.x = PlayScene.WORLD_WIDTH - this.player.width;
+    if (playerTransform.position.y < 0) playerTransform.position.y = 0;
+    if (playerTransform.position.y > PlayScene.WORLD_HEIGHT - this.player.height)
+      playerTransform.position.y = PlayScene.WORLD_HEIGHT - this.player.height;
 
     if (targetVX < 0) {
       this.player.flip = true;

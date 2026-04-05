@@ -34,8 +34,6 @@ export default class Tilemap extends GameObject {
   tileSize: number;
   /** Number of columns in the tileset image. */
   tilesetCols: number;
-  /** The world position of the tilemap. */
-  position: Vector2;
 
   /** Gets the width of the tilemap in pixels. */
   get width(): number {

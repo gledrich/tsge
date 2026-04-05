@@ -27,15 +27,11 @@ const defaultProps = {
  * A basic rectangle shape that can be drawn to the screen.
  */
 export default class Rectangle extends GameObject {
-  private _position: Vector2;
   private _width: number;
   private _height: number;
   /** Fill colour. */
   colour: string;
 
-  /** Gets or sets the top-left position. */
-  get position() { return this._position; }
-  set position(val) { this._position = val; }
   /** Gets or sets the width. */
   get width() { return this._width; }
   set width(val) { this._width = val; }
@@ -60,7 +56,7 @@ export default class Rectangle extends GameObject {
     }
 
     this.tag = defaultedProps.tag;
-    this._position = defaultedProps.position;
+    this.position = defaultedProps.position;
     this._width = defaultedProps.width;
     this._height = defaultedProps.height;
     this.colour = defaultedProps.colour;

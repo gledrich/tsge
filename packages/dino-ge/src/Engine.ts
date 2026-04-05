@@ -3,6 +3,7 @@ import GameObject from './GameObject.js';
 import Input from './Input.js';
 import Scene from './Scene.js';
 import Camera from './Camera.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /**
  * Options for initializing the Engine.
@@ -208,13 +209,16 @@ export default class Engine {
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
     objects.forEach((object) => {
-      // Apply acceleration to velocity
-      object.velocity.x += object.acceleration.x * this.#fixedDelta;
-      object.velocity.y += object.acceleration.y * this.#fixedDelta;
+      const physics = object.getComponent(PhysicsComponent);
+      if (physics) {
+        // Apply acceleration to velocity
+        physics.velocity.x += physics.acceleration.x * this.#fixedDelta;
+        physics.velocity.y += physics.acceleration.y * this.#fixedDelta;
 
-      // Apply velocity to position
-      object.position.x += object.velocity.x * this.#fixedDelta;
-      object.position.y += object.velocity.y * this.#fixedDelta;
+        // Apply velocity to position
+        object.position.x += physics.velocity.x * this.#fixedDelta;
+        object.position.y += physics.velocity.y * this.#fixedDelta;
+      }
     });
 
     if (this.callbacks.fixedUpdate) {

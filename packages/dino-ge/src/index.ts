@@ -1,6 +1,9 @@
 export { default as Engine } from './Engine.js';
 export { default as Scene } from './Scene.js';
 export { default as GameObject } from './GameObject.js';
+export { default as Component } from './Component.js';
+export { default as PhysicsComponent } from './PhysicsComponent.js';
+export { default as TransformComponent } from './TransformComponent.js';
 export { default as Sprite } from './Sprite.js';
 export { default as Vector2 } from './Vector2.js';
 export { default as Camera } from './Camera.js';

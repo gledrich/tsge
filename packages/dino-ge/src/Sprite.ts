@@ -35,8 +35,6 @@ export default class Sprite extends GameObject {
   rows: number;
   /** Number of columns in the spritesheet. */
   cols: number;
-  /** The world position of the sprite. */
-  position: Vector2;
   /** The starting column for the current animation loop. */
   startCol: number;
   /** The ending column for the current animation loop. */
