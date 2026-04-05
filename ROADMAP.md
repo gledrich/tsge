@@ -12,6 +12,7 @@ This document outlines the planned features and milestones for the **Dino Game E
   *   [x] Refactor `GameObject` to act as an Entity.
   *   [x] Implement `System` architecture and `PhysicsSystem`.
   *   [x] Decouple Rendering logic into `RenderingSystem` and specialized RenderComponents.
+  *   [x] Build out global and local Event Bus (PubSub) system.
   *   [x] Refactor Engine loop to use decoupled Systems.
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
