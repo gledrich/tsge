@@ -1,5 +1,6 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
+import ShapeComponent from './ShapeComponent.js';
 
 /**
  * Configuration for creating a Circle object.
@@ -67,17 +68,8 @@ export default class Circle extends GameObject {
     this.colour = defaultedProps.colour;
     this.zIndex = defaultedProps.zIndex;
 
-    this.registerSelf();
-  }
+    this.addComponent(new ShapeComponent('circle', this.colour, this.radius));
 
-  /** Draws the circle onto the provided rendering context. */
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.visible) return;
-    ctx.beginPath();
-    ctx.fillStyle = this.colour;
-    const center = this.center;
-    ctx.arc(center.x, center.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    this.registerSelf();
   }
 }

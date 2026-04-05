@@ -1,5 +1,6 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
+import ShapeComponent from './ShapeComponent.js';
 
 /**
  * Configuration for creating a Rectangle object.
@@ -62,18 +63,8 @@ export default class Rectangle extends GameObject {
     this.colour = defaultedProps.colour;
     this.zIndex = defaultedProps.zIndex;
 
-    this.registerSelf();
-  }
+    this.addComponent(new ShapeComponent('rect', this.colour, this._width, this._height));
 
-  /** Draws the rectangle onto the provided rendering context. */
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.visible) return;
-    ctx.fillStyle = this.colour;
-    ctx.fillRect(
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    );
+    this.registerSelf();
   }
 }

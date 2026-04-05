@@ -2,6 +2,7 @@ import Engine from './Engine.js';
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
+import SpriteComponent from './SpriteComponent.js';
 
 /**
  * Properties for creating a new Sprite.
@@ -29,29 +30,48 @@ export interface SpriteProps {
  * Represents an animated sprite using a spritesheet.
  */
 export default class Sprite extends GameObject {
+  /** Internal sprite component for rendering and animation. */
+  private _spriteComponent: SpriteComponent;
+
   /** The source image for the sprite. */
-  img: HTMLImageElement;
+  get img(): HTMLImageElement { return this._spriteComponent.img; }
+  set img(val: HTMLImageElement) { this._spriteComponent.img = val; }
+
   /** Number of rows in the spritesheet. */
-  rows: number;
+  get rows(): number { return this._spriteComponent.rows; }
+  set rows(val: number) { this._spriteComponent.rows = val; }
+
   /** Number of columns in the spritesheet. */
-  cols: number;
+  get cols(): number { return this._spriteComponent.cols; }
+  set cols(val: number) { this._spriteComponent.cols = val; }
+
   /** The starting column for the current animation loop. */
-  startCol: number;
+  get startCol(): number { return this._spriteComponent.startCol; }
+  set startCol(val: number) { this._spriteComponent.startCol = val; }
+
   /** The ending column for the current animation loop. */
-  endCol: number;
+  get endCol(): number { return this._spriteComponent.endCol; }
+  set endCol(val: number) { this._spriteComponent.endCol = val; }
+
   /** The pixel width of a single animation frame (calculated automatically). */
-  frameWidth: number = 0;
+  get frameWidth(): number { return this._spriteComponent.frameWidth; }
   /** The pixel height of a single animation frame (calculated automatically). */
-  frameHeight: number = 0;
+  get frameHeight(): number { return this._spriteComponent.frameHeight; }
+
   /** Whether the sprite is currently registered with the engine. */
   registered: boolean = false;
+
   /** The current frame index being displayed. */
-  currentFrame: number = 0;
+  get currentFrame(): number { return this._spriteComponent.currentFrame; }
+  set currentFrame(val: number) { this._spriteComponent.currentFrame = val; }
+
   /** Whether the sprite is horizontally flipped. */
-  flip: boolean = false;
+  get flip(): boolean { return this._spriteComponent.flip; }
+  set flip(val: boolean) { this._spriteComponent.flip = val; }
+
   /** Duration of each animation frame in milliseconds. */
-  frameDuration: number = 100;
-  #lastFrameUpdate: number = Date.now();
+  get frameDuration(): number { return this._spriteComponent.frameDuration; }
+  set frameDuration(val: number) { this._spriteComponent.frameDuration = val; }
 
   /**
    * Gets the display width of the sprite (scaled by 3).
@@ -74,109 +94,31 @@ export default class Sprite extends GameObject {
 
     super(props.tag, props.zIndex || 1);
 
+    let img: HTMLImageElement;
     if (typeof props.img === 'string') {
-      this.img = ResourceLoader.getImage(props.img);
+      img = ResourceLoader.getImage(props.img);
     } else {
-      this.img = props.img;
+      img = props.img;
     }
 
-    this.rows = props.rows;
-    this.cols = props.cols;
-    this.position = props.position;
-    this.startCol = props.startCol;
-    this.endCol = props.endCol;
-    this.currentFrame = props.startCol || 0;
-
-    const setDimensions = () => {
-      this.frameWidth = this.img.width / this.cols;
-      this.frameHeight = this.img.height / this.rows;
-    };
-
-    if (this.img.complete) {
-      setDimensions();
-    } else {
-      this.img.addEventListener('load', setDimensions, { once: true });
-    }
-
-    this.registered = false;
-  }
-
-  /**
-   * Main rendering method for the sprite.
-   * Handles frame calculation and horizontal flipping.
-   * @param ctx The canvas 2D rendering context.
-   */
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.visible || !this.frameWidth || !this.frameHeight) return;
-
-    const now = Date.now();
-    if (this.registered && now - this.#lastFrameUpdate > this.frameDuration) {
-      this.currentFrame += 1;
-      this.#lastFrameUpdate = now;
-    }
-
-    const {
+    this._spriteComponent = new SpriteComponent(
       img,
-      cols,
-      frameWidth,
-      frameHeight,
-      position,
-      startCol,
-      endCol,
-    } = this;
+      props.rows,
+      props.cols,
+      props.startCol,
+      props.endCol
+    );
+    this.addComponent(this._spriteComponent);
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    const maxFrame = endCol - 1;
-
-    if (this.currentFrame < startCol) {
-      this.currentFrame = startCol;
-    }
-
-    if (this.currentFrame > maxFrame) {
-      this.currentFrame = startCol;
-    }
-
-    // Update rows and columns
-    const column = this.currentFrame % cols;
-    const row = Math.floor(this.currentFrame / cols);
-
-    ctx.save();
-    if (this.flip) {
-      ctx.translate(position.x + (frameWidth * 3), position.y);
-      ctx.scale(-1, 1);
-      ctx.drawImage(
-        img,
-        column * frameWidth,
-        row * frameHeight,
-        frameWidth,
-        frameHeight,
-        0,
-        0,
-        frameWidth * 3,
-        frameHeight * 3
-      );
-    } else {
-      ctx.drawImage(
-        img,
-        column * frameWidth,
-        row * frameHeight,
-        frameWidth,
-        frameHeight,
-        position.x,
-        position.y,
-        frameWidth * 3,
-        frameHeight * 3
-      );
-    }
-    ctx.restore();
+    this.position = props.position;
+    this.registered = false;
   }
 
   /**
    * Registers the sprite with the engine and starts its animation loop.
    */
   play() {
+    this._spriteComponent.playing = true;
     if (!this.registered) {
       Engine.registerObject(this);
       this.registered = true;
@@ -187,6 +129,7 @@ export default class Sprite extends GameObject {
    * Stops the sprite's animation and removes it from the engine.
    */
   stop() {
+    this._spriteComponent.playing = false;
     Engine.destroyObject(this);
   }
 }

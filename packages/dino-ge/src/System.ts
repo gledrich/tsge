@@ -9,8 +9,9 @@ export default abstract class System {
    * Called every frame during the main update loop.
    * @param entities The set of entities to process.
    * @param deltaTime Time passed since the last frame in seconds.
+   * @param debug Whether to draw debug information.
    */
-  public update?(entities: Set<GameObject>, deltaTime: number): void;
+  public update?(entities: Set<GameObject>, deltaTime?: number, debug?: boolean): void;
 
   /**
    * Called at a fixed interval for physics and consistent logic.

@@ -1,6 +1,7 @@
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
+import TilemapComponent from './TilemapComponent.js';
 
 /**
  * Properties for creating a new Tilemap.
@@ -58,36 +59,14 @@ export default class Tilemap extends GameObject {
     this.tileSize = props.tileSize;
     this.tilesetCols = props.tilesetCols;
     this.position = props.position;
+
+    this.addComponent(new TilemapComponent(
+      this.tileset,
+      this.data,
+      this.tileSize,
+      this.tilesetCols
+    ));
+
     this.registerSelf();
-  }
-
-  /**
-   * Main rendering method for the tilemap.
-   * @param ctx The canvas 2D rendering context.
-   */
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.visible) return;
-
-    for (let y = 0; y < this.data.length; y++) {
-      for (let x = 0; x < this.data[y].length; x++) {
-        const tileIndex = this.data[y][x];
-        if (tileIndex === -1) continue; // Empty tile
-
-        const sourceX = (tileIndex % this.tilesetCols) * this.tileSize;
-        const sourceY = Math.floor(tileIndex / this.tilesetCols) * this.tileSize;
-
-        ctx.drawImage(
-          this.tileset,
-          sourceX,
-          sourceY,
-          this.tileSize,
-          this.tileSize,
-          this.position.x + x * this.tileSize,
-          this.position.y + y * this.tileSize,
-          this.tileSize,
-          this.tileSize
-        );
-      }
-    }
   }
 }

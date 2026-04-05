@@ -5,6 +5,7 @@ import Scene from './Scene.js';
 import Camera from './Camera.js';
 import System from './System.js';
 import PhysicsSystem from './PhysicsSystem.js';
+import RenderingSystem from './RenderingSystem.js';
 
 /**
  * Options for initializing the Engine.
@@ -53,6 +54,7 @@ interface EngineState {
   selectedObject: GameObject | null;
   camera: Camera;
   systems: System[];
+  renderingSystem?: RenderingSystem;
 }
 
 /**
@@ -81,6 +83,12 @@ export default class Engine {
    * Global list of systems that process game objects.
    */
   private static get _systems(): System[] { return _globalState.systems; }
+
+  /**
+   * The global rendering system.
+   */
+  public static get renderingSystem(): RenderingSystem | undefined { return _globalState.renderingSystem; }
+  public static set renderingSystem(val: RenderingSystem | undefined) { _globalState.renderingSystem = val; }
 
   /**
    * Whether the game loop is currently paused.
@@ -186,6 +194,12 @@ export default class Engine {
     this.width = this.#canvas.canvas.width;
     this.height = this.#canvas.canvas.height;
 
+    if (Engine.renderingSystem) {
+      Engine.renderingSystem.setContext(this.#ctx);
+    } else {
+      Engine.renderingSystem = new RenderingSystem(this.#ctx);
+    }
+
     this.#window = document.createElement('div');
     this.#window.id = 'canvas-container';
     this.#window.style.width = defaultedOpts.width;
@@ -262,49 +276,16 @@ export default class Engine {
     this.#setBackground();
 
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
-    const bounds = Engine.camera.getViewportBounds(this.width, this.height);
 
-    this.#ctx.save();
-
-    // Apply camera transform
-    this.#ctx.scale(Engine.camera.zoom, Engine.camera.zoom);
-    this.#ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
-
-    Engine.#getSortedArray(objects).forEach((object) => {
-      // Frustum Culling
-      if (
-        object.position.x < bounds.x + bounds.width &&
-        object.position.x + object.width > bounds.x &&
-        object.position.y < bounds.y + bounds.height &&
-        object.position.y + object.height > bounds.y
-      ) {
-        object.draw(this.#ctx);
-      }
-    });
+    if (Engine.renderingSystem) {
+      Engine.renderingSystem.update(objects, 0, Engine.debug);
+    }
 
     if (Engine.debug) {
       this.#drawDebug(objects);
     }
-
-    this.#ctx.restore();
   }
   #drawDebug(objects: Set<GameObject>) {
-    this.#ctx.strokeStyle = 'red';
-    this.#ctx.lineWidth = 1;
-    this.#ctx.font = '12px monospace';
-    this.#ctx.fillStyle = 'red';
-
-    objects.forEach((obj) => {
-      // Draw hitbox
-      this.#ctx.strokeStyle = obj === Engine.selectedObject ? '#00ff00' : 'red';
-      this.#ctx.lineWidth = obj === Engine.selectedObject ? 2 : 1;
-      this.#ctx.strokeRect(obj.position.x, obj.position.y, obj.width, obj.height);
-
-      // Draw tag
-      this.#ctx.fillStyle = this.#ctx.strokeStyle;
-      this.#ctx.fillText(obj.tag || 'obj', obj.position.x, obj.position.y - 5);
-    });
-
     // Draw Stats Overlay (Top Right)
     this.#ctx.save();
     this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
@@ -378,7 +359,6 @@ export default class Engine {
   /**
    * Run a function repeatedly for a duration and then run a final function.
    * @param milliseconds Total duration.
-   * @param i Interval in milliseconds (unused, using hardcoded 1000ms logic below).
    * @param fn Function to run every second.
    * @param onEnded Final function to run.
    */
@@ -396,12 +376,6 @@ export default class Engine {
   set cursor(value: string) {
     const canvas = document.getElementById('canvas');
     if (canvas) canvas.style.cursor = value;
-  }
-
-  static #getSortedArray(objects: Set<GameObject> = Engine.objects) {
-    const arr: GameObject[] = Array.from(objects);
-    arr.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
-    return arr;
   }
 
   /**

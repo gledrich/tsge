@@ -4,8 +4,9 @@ A lightweight, developer-friendly 2D game engine built with TypeScript, designed
 
 ## Core Features
 
-- **Entity Component System (ECS):** Flexible, composition-based architecture using Entities, Components, and Systems.
-- **Built-in Physics:** Support for basic AABB collision detection.
+- **Entity Component System (ECS):** Flexible, composition-based architecture using Entities (GameObjects), Components (Data), and Systems (Logic).
+- **Decoupled Systems:** Dedicated `PhysicsSystem` and `RenderingSystem` for modular game logic.
+- **Built-in Physics:** Support for basic AABB collision detection and movement.
 - **Scene Management:** Easily switch between game states.
 - **Asset Loader:** Simplified loading for images and textures.
 - **TypeScript Native:** Full type safety out of the box.

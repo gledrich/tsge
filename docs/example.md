@@ -14,7 +14,11 @@ import {
   Input,
   Tilemap,
   PhysicsComponent,
-  TransformComponent
+  TransformComponent,
+  SpriteComponent,
+  ShapeComponent,
+  TextComponent,
+  TilemapComponent
 } from 'dino-ge';
 
 class MenuScene extends Scene {

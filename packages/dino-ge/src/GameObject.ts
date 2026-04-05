@@ -5,6 +5,7 @@ import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
 import VisibilityComponent from './VisibilityComponent.js';
+import RenderComponent from './RenderComponent.js';
 
 /**
  * Base class for all entities in the game world.
@@ -100,6 +101,13 @@ export default abstract class GameObject {
   addComponent(component: Component) {
     const key = component.constructor.name;
     this._components.set(key, component);
+
+    // Also index by RenderComponent if it is one, to allow abstract querying.
+    // Use flag instead of instanceof to work across potential module duplications.
+    if ((component as any).isRenderComponent) {
+      this._components.set('RenderComponent', component);
+    }
+
     component.gameObject = this;
   }
 
@@ -115,14 +123,16 @@ export default abstract class GameObject {
    * Checks if this entity has a component of the specified class.
    * @param componentClass The class of the component to check for.
    */
-  hasComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  hasComponent<T extends Component>(componentClass: Function & { prototype: T }): boolean {
     return this._components.has(componentClass.name);
   }
 
   /** Gets a component from this entity by its class.
    * @param componentClass The class of the component to retrieve.
    */
-  getComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }): T | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  getComponent<T extends Component>(componentClass: Function & { prototype: T }): T | undefined {
     return this._components.get(componentClass.name) as T;
   }
 
@@ -130,12 +140,6 @@ export default abstract class GameObject {
   abstract get width(): number;
   /** The height of the object in pixels. */
   abstract get height(): number;
-
-  /**
-   * Main rendering method for the object.
-   * @param ctx The canvas 2D rendering context.
-   */
-  abstract draw(ctx: CanvasRenderingContext2D): void;
 
   /**
    * Registers the object with the active scene or global engine loop.

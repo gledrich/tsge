@@ -1,5 +1,6 @@
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
+import LineComponent from './LineComponent.js';
 
 /**
  * Configuration for creating a Line object.
@@ -61,15 +62,8 @@ export default class Line extends GameObject {
     this.x2 = defaultedProps.p2.x;
     this.y2 = defaultedProps.p2.y;
 
-    this.registerSelf();
-  }
+    this.addComponent(new LineComponent(this.strokeWidth, defaultedProps.p1, defaultedProps.p2));
 
-  /** Draws the line onto the provided rendering context. */
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.visible) return;
-    ctx.lineWidth = this.strokeWidth;
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.stroke();
+    this.registerSelf();
   }
 }
