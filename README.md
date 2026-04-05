@@ -1,23 +1,51 @@
-# TSGE - TypeScript Game Engine
+# TSGE: TypeScript Game Engine
 
-## Usage
+A lightweight, developer-friendly 2D game engine built with TypeScript, designed for building expressive web-based games.
+
+## Core Features
+
+- **Composition-based Architecture:** Flexible `GameObject` system.
+- **Built-in Physics:** Support for basic AABB collision detection.
+- **Scene Management:** Easily switch between game states.
+- **Asset Loader:** Simplified loading for images and textures.
+- **TypeScript Native:** Full type safety out of the box.
+
+## Playground Features
+
+The TSGE playground provides a robust environment to prototype and test game logic live:
+
+*   **Live Code Editor:** Modify your game logic in the browser with an integrated code editor.
+*   **Property Inspector:** Toggle the UI to inspect and adjust game object properties in real-time.
+*   **Debug Mode:** Visualize collision boxes and engine state by clicking the bug icon.
+*   **Hot Refresh:** Quickly apply changes to your code (`Ctrl + Enter` or click the refresh icon).
+*   **Play/Pause Controls:** Easily manage the engine state during development.
+
+## Get Started
 
 ### Installation
 
 ```bash
-npm i
+git clone https://github.com/gledrich/tsge.git
+cd tsge
+npm install
 ```
 
-### Playground
+### Run the Playground
+
+Explore the engine capabilities in the interactive playground:
 
 ```bash
 npm run playground
 ```
 
-This will bring up a server running the playground on port [3000](http://localhost:3000). Have a look at the [Example](https://github.com/gledrich/tsge/blob/main/Example/index.js) if you're looking for ideas. The sprite is already included in the playground.
+Once running, access it at [http://localhost:3000](http://localhost:3000).
 
-_Note: No need to call `window.onload`, just create a `new DemoGame()` after the definition._
+### Development
+
+The `Example` directory provides a clean, minimal implementation as a starting point for your own games.
+
+_Note: The engine handles initialization; create your game instance directly in your entry file._
 
 ## Documentation
 
-See [here](https://gledrich.github.io/tsge/index.html)
+Comprehensive API documentation is available [here](https://gledrich.github.io/tsge/index.html).
