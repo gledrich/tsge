@@ -9,52 +9,41 @@ router.use('/built', express.static(path.join(__dirname, '../dino-ge/dist')));
 
 router.use(express.json());
 
+const getFilePath = (id) => {
+  const fileName = id || 'script';
+  return path.join(__dirname, `${fileName}.js`);
+};
+
 router.get('/file/:id', (req, res) => {
-  const sanitisedId = Number(req.params.id);
-  const filePath = `${__dirname}/${sanitisedId}.js`;
+  const filePath = getFilePath(req.params.id);
 
-  fs.readFile(filePath, async (err, file) => {
+  fs.readFile(filePath, (err, file) => {
     if (err) {
-      return fs.writeFile(filePath, '', (err) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-
-        return res.status(404).json({ id: sanitisedId });
-      });
+      return res.status(404).json({ error: 'File not found' });
     }
 
-    const f = file.toString();
-
-    if (f) {
-      return res.status(200).json(file.toString());
-    }
-
-    return res.status(404).json({ sanitisedId });
+    return res.status(200).json(file.toString());
   });
 });
 
 router.put('/file/:id', (req, res) => {
-  const sanitisedId = Number(req.params.id);
-  const filePath = `${__dirname}/${sanitisedId}.js`;
-  const file = String(req.body.data);
+  const filePath = getFilePath(req.params.id);
+  const data = String(req.body.data);
 
   if (req.body.upsert) {
-    return fs.appendFile(filePath, file, (err) => {
+    return fs.appendFile(filePath, data, (err) => {
       if (err) {
         return res.status(500).json(err);
       }
-
-      return res.status(200).json(file.toString());
+      return res.status(200).json({ success: true });
     });
   }
 
-  return fs.writeFile(filePath, file, (err) => {
+  return fs.writeFile(filePath, data, (err) => {
     if (err) {
       return res.status(500).json(err);
     }
-
-    return res.status(200).json(file.toString());
+    return res.status(200).json({ success: true });
   });
 });
 
