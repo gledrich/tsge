@@ -1,6 +1,6 @@
 import { createEditor, updateEditor, getEditorValue } from './editor/index.js';
 import { createInspector } from './inspector/index.js';
-import { getScript, updateScript } from './helpers.js';
+import { getScript, updateScript, getCurrentScriptId } from './helpers.js';
 import * as Dino from 'dino-ge';
 
 // Expose all dino-ge classes to window for snippets and user scripts
@@ -30,14 +30,17 @@ window.onload = async () => {
 };
 
 export const updatePlayground = async () => {
+  const id = getCurrentScriptId();
   Engine.destroyAll();
-  document.getElementById('script.js')?.remove();
+  
+  // Remove any previously injected script
+  document.querySelectorAll('script[data-playground-script]').forEach(s => s.remove());
   document.getElementById('canvas-container')?.remove();
 
   const script = document.createElement('script');
   script.type = 'module';
   script.innerHTML = await getScript();
-  script.id = 'script.js';
+  script.setAttribute('data-playground-script', id);
   document.body.appendChild(script);
 };
 

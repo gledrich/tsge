@@ -1,5 +1,5 @@
 import sidebar from '../sidebar/index.js';
-import { getScript, updateScript } from '../helpers.js';
+import { getScript, updateScript, getFilesList, setCurrentScriptId, getCurrentScriptId } from '../helpers.js';
 import createConsole from '../console/index.js';
 import { updatePlayground } from '../index.js';
 
@@ -40,6 +40,40 @@ export const createEditor = () => {
     }
   };
 
+  const scriptSelector = document.createElement('select');
+  scriptSelector.className = 'script-selector';
+  
+  const refreshScriptList = async () => {
+    const scripts = await getFilesList();
+    scriptSelector.innerHTML = '';
+    scripts.forEach(s => {
+      const option = document.createElement('option');
+      option.value = s;
+      option.text = s;
+      if (s === getCurrentScriptId()) option.selected = true;
+      scriptSelector.appendChild(option);
+    });
+  };
+
+  scriptSelector.onchange = async (e) => {
+    setCurrentScriptId(e.target.value);
+    await updatePlayground();
+    await updateEditor(true);
+  };
+
+  const newScriptBtn = document.createElement('i');
+  newScriptBtn.className = 'fa-solid fa-plus new-script';
+  newScriptBtn.title = 'New Script';
+  newScriptBtn.onclick = async () => {
+    const name = window.prompt('Enter script name:');
+    if (name) {
+      setCurrentScriptId(name);
+      await updatePlayground();
+      await updateEditor(true);
+      await refreshScriptList();
+    }
+  };
+
   const iconsContainer = document.createElement('div');
   iconsContainer.className = 'icons-container';
 
@@ -61,9 +95,13 @@ export const createEditor = () => {
   editorDiv.style.height = 'calc(100% - 40px)'; // Adjust for banner height
 
   banner.appendChild(title);
+  iconsContainer.appendChild(newScriptBtn);
+  iconsContainer.appendChild(scriptSelector);
   iconsContainer.appendChild(save);
   banner.appendChild(iconsContainer);
   div.appendChild(banner);
+
+  refreshScriptList();
   div.appendChild(editorDiv);
   container.appendChild(div);
   container.appendChild(createConsole());
