@@ -34,12 +34,12 @@ const sections: Record<string, PropertyRow[]> = {
     { label: 'Y', type: 'number', propertyPath: 'position.y' }
   ],
   Physics: [
-    { label: 'Velocity X', type: 'number', propertyPath: 'velocity.x' },
-    { label: 'Velocity Y', type: 'number', propertyPath: 'velocity.y' },
-    { label: 'Accel X', type: 'number', propertyPath: 'acceleration.x' },
-    { label: 'Accel Y', type: 'number', propertyPath: 'acceleration.y' },
-    { label: 'Mass', type: 'number', propertyPath: 'mass' },
-    { label: 'Is Static', type: 'checkbox', propertyPath: 'isStatic' }
+    { label: 'Velocity X', type: 'number', propertyPath: '_physics.velocity.x' },
+    { label: 'Velocity Y', type: 'number', propertyPath: '_physics.velocity.y' },
+    { label: 'Accel X', type: 'number', propertyPath: '_physics.acceleration.x' },
+    { label: 'Accel Y', type: 'number', propertyPath: '_physics.acceleration.y' },
+    { label: 'Mass', type: 'number', propertyPath: '_physics.mass' },
+    { label: 'Is Static', type: 'checkbox', propertyPath: '_physics.isStatic' }
   ]
 };
 
@@ -60,7 +60,9 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
             if (input && document.activeElement !== input) {
               let val;
               const paths = propertyPath.split('.');
-              if (paths.length === 2) {
+              if (paths.length === 3) {
+                val = obj[paths[0]]?.[paths[1]]?.[paths[2]];
+              } else if (paths.length === 2) {
                 val = obj[paths[0]]?.[paths[1]];
               } else {
                 val = obj[propertyPath];
@@ -94,7 +96,10 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
     if (type === 'number') val = parseFloat(val);
 
     const paths = propertyPath.split('.');
-    if (paths.length === 2) {
+    if (paths.length === 3) {
+      // eslint-disable-next-line react-hooks/immutability
+      if (obj[paths[0]]?.[paths[1]]) obj[paths[0]][paths[1]][paths[2]] = val;
+    } else if (paths.length === 2) {
       // eslint-disable-next-line react-hooks/immutability
       if (obj[paths[0]]) obj[paths[0]][paths[1]] = val;
     } else {

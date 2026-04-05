@@ -19,11 +19,18 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   useEffect(() => {
+    (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
+  }, []);
+
+  useEffect(() => {
     Engine.paused = isPaused;
   }, [isPaused]);
 
   useEffect(() => {
     Engine.debug = isDebug;
+    if ((globalThis as unknown as { Engine: typeof Engine }).Engine) {
+      (globalThis as unknown as { Engine: typeof Engine }).Engine.debug = isDebug;
+    }
   }, [isDebug]);
 
   const updatePlayground = useCallback(async () => {

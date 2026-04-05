@@ -3,7 +3,8 @@ import GameObject from './GameObject.js';
 import Input from './Input.js';
 import Scene from './Scene.js';
 import Camera from './Camera.js';
-import PhysicsComponent from './PhysicsComponent.js';
+import System from './System.js';
+import PhysicsSystem from './PhysicsSystem.js';
 
 /**
  * Options for initializing the Engine.
@@ -43,33 +44,66 @@ export class ObjectSet extends Set<GameObject> {
 }
 
 /**
+ * Interface for the shared global state of the Engine.
+ */
+interface EngineState {
+  objects: ObjectSet;
+  paused: boolean;
+  debug: boolean;
+  selectedObject: GameObject | null;
+  camera: Camera;
+  systems: System[];
+}
+
+/**
+ * Shared state for the engine to ensure singletons work across different module loads.
+ */
+const _globalState: EngineState = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ || {
+  objects: new ObjectSet(),
+  paused: false,
+  debug: false,
+  selectedObject: null,
+  camera: new Camera(),
+  systems: [new PhysicsSystem()]
+};
+(globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ = _globalState;
+
+/**
  * The core singleton class that manages the game loop, rendering, and scene state.
  */
 export default class Engine {
   /**
    * Global set of game objects if no scene is active.
    */
-  public static objects = new ObjectSet();
+  public static get objects(): ObjectSet { return _globalState.objects; }
+
+  /**
+   * Global list of systems that process game objects.
+   */
+  private static get _systems(): System[] { return _globalState.systems; }
 
   /**
    * Whether the game loop is currently paused.
    */
-  public static paused = false;
+  public static get paused(): boolean { return _globalState.paused; }
+  public static set paused(val: boolean) { _globalState.paused = val; }
 
   /**
    * Toggle for visual debug mode (hitboxes and stats).
    */
-  public static debug = false;
+  public static get debug(): boolean { return _globalState.debug; }
+  public static set debug(val: boolean) { _globalState.debug = val; }
 
   /**
    * The currently selected object in debug mode.
    */
-  public static selectedObject: GameObject | null = null;
+  public static get selectedObject(): GameObject | null { return _globalState.selectedObject; }
+  public static set selectedObject(val: GameObject | null) { _globalState.selectedObject = val; }
 
   /**
    * The global camera instance.
    */
-  public static camera = new Camera();
+  public static get camera(): Camera { return _globalState.camera; }
 
   private static _currentScene: Scene;
 
@@ -208,16 +242,9 @@ export default class Engine {
   #fixedUpdate() {
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
-    objects.forEach((object) => {
-      const physics = object.getComponent(PhysicsComponent);
-      if (physics) {
-        // Apply acceleration to velocity
-        physics.velocity.x += physics.acceleration.x * this.#fixedDelta;
-        physics.velocity.y += physics.acceleration.y * this.#fixedDelta;
-
-        // Apply velocity to position
-        object.position.x += physics.velocity.x * this.#fixedDelta;
-        object.position.y += physics.velocity.y * this.#fixedDelta;
+    Engine._systems.forEach((system) => {
+      if (system.fixedUpdate) {
+        system.fixedUpdate(objects, this.#fixedDelta);
       }
     });
 
@@ -351,6 +378,7 @@ export default class Engine {
   /**
    * Run a function repeatedly for a duration and then run a final function.
    * @param milliseconds Total duration.
+   * @param i Interval in milliseconds (unused, using hardcoded 1000ms logic below).
    * @param fn Function to run every second.
    * @param onEnded Final function to run.
    */
