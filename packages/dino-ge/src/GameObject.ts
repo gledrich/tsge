@@ -107,7 +107,7 @@ export default abstract class GameObject {
    * Removes a component from this entity by its class.
    * @param componentClass The class of the component to remove.
    */
-  removeComponent<T extends Component>(componentClass: { new (...args: any[]): T }) {
+  removeComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }) {
     this._components.delete(componentClass.name);
   }
 
@@ -115,14 +115,14 @@ export default abstract class GameObject {
    * Checks if this entity has a component of the specified class.
    * @param componentClass The class of the component to check for.
    */
-  hasComponent<T extends Component>(componentClass: { new (...args: any[]): T }): boolean {
+  hasComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }): boolean {
     return this._components.has(componentClass.name);
   }
 
   /** Gets a component from this entity by its class.
    * @param componentClass The class of the component to retrieve.
    */
-  getComponent<T extends Component>(componentClass: { new (...args: any[]): T }): T | undefined {
+  getComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }): T | undefined {
     return this._components.get(componentClass.name) as T;
   }
 
