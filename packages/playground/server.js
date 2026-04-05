@@ -1,14 +1,19 @@
 #!/usr/bin/env node
-const express = require('express');
-const path = require('path');
-const fs = require('fs').promises;
+import express from 'express';
+import path from 'path';
+import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PLAYGROUND_DIR = __dirname;
 
 let DINO_GE_DIST;
 try {
-  DINO_GE_DIST = path.join(require.resolve('dino-ge/package.json'), '../dist');
+  DINO_GE_DIST = path.join(path.dirname(require.resolve('dino-ge/package.json')), 'dist');
 } catch {
   DINO_GE_DIST = path.join(__dirname, '../dino-ge/dist');
 }

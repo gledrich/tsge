@@ -1,11 +1,14 @@
-const express = require('express');
-const path = require('path');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const router = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
 
-router.use('/', express.static(__dirname));
-router.use('/built', express.static(path.join(__dirname, '../dino-ge/dist')));
+app.use('/', express.static(__dirname));
+app.use('/built', express.static(path.join(__dirname, '../dino-ge/dist')));
 
-router.listen(3000, () => {
-  console.log('Server running on port 3000');
+const PORT = process.env.PORT || 3001; // Avoid conflict with playground
+app.listen(PORT, () => {
+  console.log(`Dino GE Example: http://localhost:${PORT}`);
 });
