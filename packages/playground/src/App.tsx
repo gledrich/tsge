@@ -21,19 +21,19 @@ function App() {
   useEffect(() => {
     (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
 
-    const onPaused = (e: Event) => {
-      setIsPaused((e as CustomEvent).detail);
+    const onPaused = (e: any) => {
+      setIsPaused(e.detail);
     };
-    const onDebug = (e: Event) => {
-      setIsDebug((e as CustomEvent).detail);
+    const onDebug = (e: any) => {
+      setIsDebug(e.detail);
     };
 
-    Engine.events.addEventListener('paused', onPaused);
-    Engine.events.addEventListener('debug', onDebug);
+    Engine.on('paused', onPaused);
+    Engine.on('debug', onDebug);
 
     return () => {
-      Engine.events.removeEventListener('paused', onPaused);
-      Engine.events.removeEventListener('debug', onDebug);
+      Engine.off('paused', onPaused);
+      Engine.off('debug', onDebug);
     };
   }, []);
 

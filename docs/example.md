@@ -14,11 +14,7 @@ import {
   Input,
   Tilemap,
   PhysicsComponent,
-  TransformComponent,
-  SpriteComponent,
-  ShapeComponent,
-  TextComponent,
-  TilemapComponent
+  TransformComponent
 } from 'dino-ge';
 
 class MenuScene extends Scene {
@@ -229,9 +225,11 @@ class PlayScene extends Scene {
     if (playerTransform.position.x > PlayScene.WORLD_WIDTH - this.player.width)
       playerTransform.position.x = PlayScene.WORLD_WIDTH - this.player.width;
     if (playerTransform.position.y < 0) playerTransform.position.y = 0;
-    if (playerTransform.position.y > PlayScene.WORLD_HEIGHT - this.player.height)
+    if (
+      playerTransform.position.y >
+      PlayScene.WORLD_HEIGHT - this.player.height
+    )
       playerTransform.position.y = PlayScene.WORLD_HEIGHT - this.player.height;
-
 
     if (targetVX < 0) {
       this.player.flip = true;
@@ -486,6 +484,12 @@ class DinoSurvival {
           await ResourceLoader.loadAll((percent) => {
             console.log(`Loading: ${Math.round(percent)}%`);
           });
+
+          // Use Event Bus for Game State management
+          Engine.on('GAME_OVER', (e) => this.showGameOver(e.detail));
+          Engine.on('START_GAME', () => this.startGame());
+          Engine.on('SHOW_MENU', () => this.showMenu());
+
           this.showMenu();
         },
         update: () => {}
@@ -498,18 +502,20 @@ class DinoSurvival {
   }
 
   showMenu() {
-    Engine.currentScene = new MenuScene(this.game, () => this.startGame());
+    Engine.currentScene = new MenuScene(this.game, () =>
+      Engine.emit('START_GAME')
+    );
   }
 
   startGame() {
     Engine.currentScene = new PlayScene(this.game, (score) =>
-      this.showGameOver(score)
+      Engine.emit('GAME_OVER', score)
     );
   }
 
   showGameOver(score) {
     Engine.currentScene = new GameOverScene(this.game, score, () =>
-      this.showMenu()
+      Engine.emit('SHOW_MENU')
     );
   }
 }

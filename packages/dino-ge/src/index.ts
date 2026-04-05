@@ -6,6 +6,7 @@ export { default as PhysicsComponent } from './PhysicsComponent.js';
 export { default as TransformComponent } from './TransformComponent.js';
 export { default as TagComponent } from './TagComponent.js';
 export { default as VisibilityComponent } from './VisibilityComponent.js';
+export { default as EventBusComponent } from './EventBusComponent.js';
 export { default as RenderComponent } from './RenderComponent.js';
 export { default as SpriteComponent } from './SpriteComponent.js';
 export { default as ShapeComponent } from './ShapeComponent.js';
