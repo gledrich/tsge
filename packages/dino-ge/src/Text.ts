@@ -90,7 +90,7 @@ export default class Text extends GameObject {
   /** Height of the background box or interaction area. */
   height: number;
   /** Whether the object should be registered. */
-  register: boolean;
+  register: boolean = true;
   /** Whether the object is currently registered. */
   registered: boolean = false;
 

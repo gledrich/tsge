@@ -4,7 +4,8 @@
   "description": "Minimal example for Dino GE",
   "private": true,
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build": "echo \"Nothing to build for example\""
   },
   "dependencies": {
     "express": "^4.21.2",

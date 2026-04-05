@@ -4,7 +4,8 @@
   "description": "Interactive playground for Dino GE",
   "private": true,
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build": "echo \"Nothing to build for playground\""
   },
   "dependencies": {
     "express": "^4.21.2",
