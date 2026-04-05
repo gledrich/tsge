@@ -1,6 +1,6 @@
 # Documentation
 
-[Example](https://gledrich.github.io/tsge/example.html)
+[Example](https://gledrich.github.io/dino-ge/example.html)
 
 ## Reference
 

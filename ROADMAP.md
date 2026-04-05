@@ -1,6 +1,6 @@
-# TSGE Roadmap
+# Dino GE Roadmap
 
-This document outlines the planned features and milestones for the **TypeScript Game Engine (TSGE)**.
+This document outlines the planned features and milestones for the **Dino Game Engine (Dino GE)**.
 
 ## Phase 1: Short-Term (Foundation & Performance)
 

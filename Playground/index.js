@@ -43,7 +43,7 @@ const makeLogo = () => {
   container.className = 'logo-container';
 
   const logo = document.createElement('h1');
-  logo.innerHTML = 'TSGE';
+  logo.innerHTML = 'DINO-GE';
 
   container.appendChild(logo);
 

@@ -1,4 +1,4 @@
-# TSGE: TypeScript Game Engine
+# Dino GE: Dino Game Engine
 
 A lightweight, developer-friendly 2D game engine built with TypeScript, designed for building expressive web-based games.
 
@@ -12,7 +12,7 @@ A lightweight, developer-friendly 2D game engine built with TypeScript, designed
 
 ## Playground Features
 
-The TSGE playground provides a robust environment to prototype and test game logic live:
+The Dino GE playground provides a robust environment to prototype and test game logic live:
 
 *   **Live Code Editor:** Modify your game logic in the browser with an integrated code editor.
 *   **Property Inspector:** Toggle the UI to inspect and adjust game object properties in real-time.
@@ -25,8 +25,8 @@ The TSGE playground provides a robust environment to prototype and test game log
 ### Installation
 
 ```bash
-git clone https://github.com/gledrich/tsge.git
-cd tsge
+git clone https://github.com/gledrich/dino-ge.git
+cd dino-ge
 npm install
 ```
 
@@ -48,4 +48,4 @@ _Note: The engine handles initialization; create your game instance directly in 
 
 ## Documentation
 
-Comprehensive API documentation is available [here](https://gledrich.github.io/tsge/index.html).
+Comprehensive API documentation is available [here](https://gledrich.github.io/dino-ge/index.html).
