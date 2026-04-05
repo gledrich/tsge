@@ -15,17 +15,20 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Build engine
         run: npm run build -w dino-ge
-      
+
       - name: Publish engine
         run: npm publish -w dino-ge --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Build playground
+        run: npm run build -w dino-ge-playground
 
       - name: Publish playground
         run: npm publish -w dino-ge-playground --access public
