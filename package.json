@@ -1,6 +1,6 @@
 {
   "name": "dino-ge-monorepo",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "description": "Monorepo for Dino GE",
   "private": true,
   "workspaces": [

@@ -14,7 +14,7 @@ const DIST_DIR = path.join(__dirname, 'dist');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SCRIPTS_DIR = path.join(process.cwd(), 'scripts');
 
-const ENV = process.env.ENVIRONMENT || 'dev';
+const ENV = process.env.ENVIRONMENT || 'prod';
 
 // Ensure scripts directory exists
 if (!existsSync(SCRIPTS_DIR)) {
