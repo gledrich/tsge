@@ -1,0 +1,18 @@
+{
+  "name": "dino-ge",
+  "version": "1.0.0",
+  "description": "Lightweight, performant 2D game engine built with TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "typedoc --out ../../docs/api src/ --entryPointStrategy expand"
+  },
+  "author": "Rich <richgled25@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "typedoc": "^0.28.18",
+    "typescript": "^5.8.2"
+  }
+}

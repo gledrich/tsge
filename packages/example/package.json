@@ -1,0 +1,16 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "Minimal example for Dino GE",
+  "private": true,
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "dino-ge": "*"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

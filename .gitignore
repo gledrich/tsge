@@ -1,45 +1,31 @@
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
-*.swp
-
-pids
-logs
-results
-tmp
-
-# Build
-public/css/main.css
-
-# Coverage reports
-coverage
-
-# API keys and secrets
-.env
-
 # Dependency directory
-node_modules
-bower_components
-
-# Editors
-.idea
-*.iml
+node_modules/
 
 # OS metadata
 .DS_Store
 Thumbs.db
 
-# Ignore built ts files
-dist/**/*
+# Build outputs
+dist/
+built/
+packages/*/dist/
+packages/*/built/
 
-# ignore yarn.lock
-yarn.lock
+# Playground temporary files
+packages/playground/*.js
+!packages/playground/server.js
+!packages/playground/index.js
+!packages/playground/helpers.js
+!packages/playground/editor/*.js
+!packages/playground/console/*.js
+!packages/playground/inspector/*.js
+!packages/playground/sidebar/*.js
 
-built
+# API keys and secrets
+.env
 
-Playground/123.js
+# Editors
+.vscode/
+.idea/
+*.swp
+*.iml

@@ -1,7 +1,7 @@
 import { createEditor, updateEditor, getEditorValue } from './editor/index.js';
 import { createInspector } from './inspector/index.js';
 import { getScript, updateScript } from './helpers.js';
-import Engine from '../built/Engine.js';
+import Engine from '/built/Engine.js';
 
 let script;
 let updateInspectorToggleState;

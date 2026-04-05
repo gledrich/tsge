@@ -1,14 +1,14 @@
-import Engine from '../built/Engine.js';
-import Rectangle from '../built/Rectangle.js';
-import Vector2 from '../built/Vector2.js';
-import Text from '../built/Text.js';
-import Sprite from '../built/Sprite.js';
-import Scene from '../built/Scene.js';
-import Circle from '../built/Circle.js';
-import Physics from '../built/Physics.js';
-import ResourceLoader from '../built/Loader.js';
-import Input from '../built/Input.js';
-import Tilemap from '../built/Tilemap.js';
+import Engine from '/built/Engine.js';
+import Rectangle from '/built/Rectangle.js';
+import Vector2 from '/built/Vector2.js';
+import Text from '/built/Text.js';
+import Sprite from '/built/Sprite.js';
+import Scene from '/built/Scene.js';
+import Circle from '/built/Circle.js';
+import Physics from '/built/Physics.js';
+import ResourceLoader from '/built/Loader.js';
+import Input from '/built/Input.js';
+import Tilemap from '/built/Tilemap.js';
 
 class MenuScene extends Scene {
   constructor(game, onStart) {

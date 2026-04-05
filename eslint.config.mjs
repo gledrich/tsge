@@ -6,11 +6,11 @@ import globals from "globals";
 export default [
   js.configs.recommended,
   {
-    files: ["engine/**/*.ts"],
+    files: ["packages/dino-ge/src/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: "./tsconfig.json",
+        project: "./packages/dino-ge/tsconfig.json",
       },
       globals: {
         ...globals.browser,
@@ -25,6 +25,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "built/", "Example/", "Playground/", "docs/api/"],
+    ignores: ["node_modules/", "packages/*/dist/", "packages/*/built/", "docs/api/"],
   },
 ];

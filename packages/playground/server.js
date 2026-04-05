@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const router = express();
 
-router.use('/', express.static(path.join(__dirname, '../Playground')));
-router.use('/built', express.static(path.join(__dirname, '../built')));
+router.use('/', express.static(__dirname));
+router.use('/built', express.static(path.join(__dirname, '../dino-ge/dist')));
 
 router.use(express.json());
 
