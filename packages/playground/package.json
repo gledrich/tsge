@@ -1,17 +1,35 @@
 {
-  "name": "playground",
-  "version": "1.0.0",
-  "description": "Interactive playground for Dino GE",
-  "private": true,
+  "name": "dino-ge-playground",
+  "version": "1.0.1",
+  "description": "Interactive, live-editing playground and inspector for Dino GE",
+  "bin": {
+    "dino-ge-playground": "server.js"
+  },
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "build": "echo \"Nothing to build for playground\""
   },
+  "files": [
+    "server.js",
+    "index.html",
+    "index.js",
+    "index.css",
+    "helpers.js",
+    "script.js",
+    "console/",
+    "editor/",
+    "inspector/",
+    "sidebar/",
+    "sprites/"
+  ],
   "dependencies": {
     "express": "^4.21.2",
-    "dino-ge": "*"
+    "dino-ge": "^1.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-  }
+  },
+  "author": "Rich <richgled25@gmail.com>",
+  "license": "ISC"
 }

@@ -1,6 +1,6 @@
 {
-  "name": "example",
-  "version": "1.0.0",
+  "name": "dino-ge-example",
+  "version": "1.0.1",
   "description": "Minimal example for Dino GE",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "dino-ge": "*"
+    "dino-ge": "^1.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

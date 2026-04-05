@@ -1,52 +1,51 @@
+#!/usr/bin/env node
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 
-const router = express();
+const app = express();
+const PLAYGROUND_DIR = __dirname;
 
-router.use('/', express.static(__dirname));
-router.use('/built', express.static(path.join(__dirname, '../dino-ge/dist')));
+let DINO_GE_DIST;
+try {
+  DINO_GE_DIST = path.join(require.resolve('dino-ge/package.json'), '../dist');
+} catch {
+  DINO_GE_DIST = path.join(__dirname, '../dino-ge/dist');
+}
 
-router.use(express.json());
+app.use(express.json());
+app.use('/', express.static(PLAYGROUND_DIR));
+app.use('/built', express.static(DINO_GE_DIST));
 
-const getFilePath = (id) => {
-  const fileName = id || 'script';
-  return path.join(__dirname, `${fileName}.js`);
-};
+const getFilePath = (id) => path.join(process.cwd(), `${id || 'script'}.js`);
 
-router.get('/file/:id', (req, res) => {
-  const filePath = getFilePath(req.params.id);
-
-  fs.readFile(filePath, (err, file) => {
-    if (err) {
-      return res.status(404).json({ error: 'File not found' });
-    }
-
-    return res.status(200).json(file.toString());
-  });
-});
-
-router.put('/file/:id', (req, res) => {
-  const filePath = getFilePath(req.params.id);
-  const data = String(req.body.data);
-
-  if (req.body.upsert) {
-    return fs.appendFile(filePath, data, (err) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      return res.status(200).json({ success: true });
-    });
+app.get('/file/:id', async (req, res) => {
+  try {
+    const file = await fs.readFile(getFilePath(req.params.id));
+    res.status(200).json(file.toString());
+  } catch (err) {
+    const status = err.code === 'ENOENT' ? 404 : 500;
+    res.status(status).json({ error: err.message });
   }
-
-  return fs.writeFile(filePath, data, (err) => {
-    if (err) {
-      return res.status(500).json(err);
-    }
-    return res.status(200).json({ success: true });
-  });
 });
 
-router.listen(3000, () => {
-  console.log('Server running on port 3000');
+app.put('/file/:id', async (req, res) => {
+  try {
+    const filePath = getFilePath(req.params.id);
+    const data = String(req.body.data);
+    if (req.body.upsert) {
+      await fs.appendFile(filePath, data);
+    } else {
+      await fs.writeFile(filePath, data);
+    }
+    res.status(200).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Dino GE Playground: http://localhost:${PORT}`);
+  console.log(`Scripts directory: ${process.cwd()}`);
 });

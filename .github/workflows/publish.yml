@@ -26,3 +26,8 @@ jobs:
         run: npm publish -w dino-ge --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish playground
+        run: npm publish -w dino-ge-playground --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -11,8 +11,8 @@
     "build": "npm run build --workspaces",
     "lint": "eslint .",
     "docs": "npm run docs -w dino-ge",
-    "example": "npm run start -w example",
-    "playground": "npm run start -w playground"
+    "example": "npm run start -w dino-ge-example",
+    "playground": "npm run start -w dino-ge-playground"
   },
   "author": "Rich <richgled25@gmail.com>",
   "license": "ISC",
