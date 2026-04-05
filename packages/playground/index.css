@@ -64,3 +64,30 @@ body {
   transform: scale(1.2);
   color: #43aa8b;
 }
+
+.script-selector {
+  background: #2d2d2d;
+  color: white;
+  border: 1px solid #444;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  margin: 0 10px;
+  outline: none;
+  cursor: pointer;
+  max-width: 150px;
+}
+
+.script-selector:hover {
+  border-color: #43aa8b;
+}
+
+.new-script {
+  cursor: pointer;
+  color: white;
+  margin-right: 5px;
+}
+
+.new-script:hover {
+  color: #43aa8b;
+}

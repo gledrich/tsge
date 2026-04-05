@@ -1,3 +1,11 @@
+let currentScriptId = 'script';
+
+export const setCurrentScriptId = (id) => {
+  currentScriptId = id;
+};
+
+export const getCurrentScriptId = () => currentScriptId;
+
 export const createTextButton = (text, onclick) => {
   const btn = document.createElement('button');
   btn.textContent = text || 'Text';
@@ -31,7 +39,7 @@ const createInitialFile = async (id) => {
 // Your playground script starts here!
 `;
   
-  await fetch(`/file/${id}`, {
+  await fetch(`/api/scripts/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
       data: defaultContent,
@@ -44,8 +52,16 @@ const createInitialFile = async (id) => {
   return defaultContent;
 };
 
-export const getScript = async (id = 'script') => {
-  const res = await fetch(`/file/${id}`);
+export const getFilesList = async () => {
+  const res = await fetch('/files');
+  if (res.ok) {
+    return await res.json();
+  }
+  return [];
+};
+
+export const getScript = async (id = currentScriptId) => {
+  const res = await fetch(`/api/scripts/${id}`);
 
   if (res.status === 404) {
     return await createInitialFile(id);
@@ -57,8 +73,8 @@ export const getScript = async (id = 'script') => {
   }
 };
 
-export const updateScript = async (data, upsert = true, id = 'script') => {
-  const res = await fetch(`/file/${id}`, {
+export const updateScript = async (data, upsert = true, id = currentScriptId) => {
+  const res = await fetch(`/api/scripts/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
       data,

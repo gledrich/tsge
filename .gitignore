@@ -21,6 +21,11 @@ packages/playground/*.js
 !packages/playground/inspector/*.js
 !packages/playground/sidebar/*.js
 
+# Playground scripts
+scripts/
+packages/*/scripts/*.js
+!packages/*/scripts/.gitkeep
+
 # API keys and secrets
 .env
 
