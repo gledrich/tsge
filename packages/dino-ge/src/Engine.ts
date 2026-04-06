@@ -6,6 +6,8 @@ import Camera from './Camera.js';
 import System from './System.js';
 import PhysicsSystem from './PhysicsSystem.js';
 import RenderingSystem from './RenderingSystem.js';
+import PhysicsComponent from './PhysicsComponent.js';
+import TagComponent from './TagComponent.js';
 
 /**
  * Options for initializing the Engine.
@@ -357,14 +359,22 @@ export default class Engine {
     if (Engine.selectedObject) {
       y += statsHeight + 10;
       const obj = Engine.selectedObject;
-      const properties = [
-        ['Tag', obj.tag],
+      const properties: [string, string | number][] = [
         ['Pos', `${Math.round(obj.position.x)}, ${Math.round(obj.position.y)}`],
-        ['Size', `${Math.round(obj.width)}x${Math.round(obj.height)}`],
-        ['Vel', `${Math.round(obj.velocity.x)}, ${Math.round(obj.velocity.y)}`],
-        ['Acc', `${Math.round(obj.acceleration.x)}, ${Math.round(obj.acceleration.y)}`],
-        ['Z-Index', obj.zIndex]
+        ['Size', `${Math.round(obj.width)}x${Math.round(obj.height)}`]
       ];
+
+      const tagComp = obj.getComponent(TagComponent);
+      if (tagComp) {
+        properties.unshift(['Tag', tagComp.tag]);
+        properties.push(['Z-Index', tagComp.zIndex]);
+      }
+
+      const physComp = obj.getComponent(PhysicsComponent);
+      if (physComp) {
+        properties.push(['Vel', `${Math.round(physComp.velocity.x)}, ${Math.round(physComp.velocity.y)}`]);
+        properties.push(['Acc', `${Math.round(physComp.acceleration.x)}, ${Math.round(physComp.acceleration.y)}`]);
+      }
 
       const inspectorHeight = 20 + (properties.length * 15);
       this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';

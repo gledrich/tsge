@@ -156,34 +156,6 @@ export default abstract class GameObject {
   }
 
   /**
-   * Current velocity in pixels per second.
-   * @deprecated Use getComponent(PhysicsComponent).velocity
-   */
-  get velocity(): Vector2 { return this._physics.velocity; }
-  set velocity(val: Vector2) { this._physics.velocity = val; }
-
-  /**
-   * Current acceleration in pixels per second squared.
-   * @deprecated Use getComponent(PhysicsComponent).acceleration
-   */
-  get acceleration(): Vector2 { return this._physics.acceleration; }
-  set acceleration(val: Vector2) { this._physics.acceleration = val; }
-
-  /**
-   * Mass of the object (used for physics resolution).
-   * @deprecated Use getComponent(PhysicsComponent).mass
-   */
-  get mass(): number { return this._physics.mass; }
-  set mass(val: number) { this._physics.mass = val; }
-
-  /**
-   * Whether the object is immovable (e.g., walls).
-   * @deprecated Use getComponent(PhysicsComponent).isStatic
-   */
-  get isStatic(): boolean { return this._physics.isStatic; }
-  set isStatic(val: boolean) { this._physics.isStatic = val; }
-
-  /**
    * Adds a component to this entity.
    * @param component The component to add.
    */

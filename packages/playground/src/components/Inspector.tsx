@@ -15,12 +15,8 @@ interface PropertyRow {
   propertyPath: string;
 }
 
-/**
- * Interface representing the properties of a GameObject that the inspector can edit.
- * This provides type safety for dynamic property access while avoiding 'any'.
- */
 interface InspectableObject extends Dino.GameObject {
-  [key: string]: any; // Fallback for dynamic access to nested properties like position.x
+  [key: string]: any;
 }
 
 const sections: Record<string, PropertyRow[]> = {
@@ -43,6 +39,34 @@ const sections: Record<string, PropertyRow[]> = {
   ]
 };
 
+const resolveComponentPath = (obj: any, pathStr: string): { target: any, prop: string } | null => {
+  let target = obj;
+  let propPath = pathStr;
+
+  if (pathStr === 'tag' || pathStr === 'zIndex') {
+    target = obj.getComponent(Dino.TagComponent);
+    propPath = pathStr;
+  } else if (pathStr === 'visible') {
+    target = obj.getComponent(Dino.VisibilityComponent);
+    propPath = pathStr;
+  } else if (pathStr.startsWith('_physics.')) {
+    target = obj.getComponent(Dino.PhysicsComponent);
+    propPath = pathStr.replace('_physics.', '');
+  }
+
+  if (!target) return null;
+
+  const paths = propPath.split('.');
+  if (paths.length === 2) {
+    if (paths[0] === 'position') {
+      // Use localPosition so we can read and write to the actual Vector2 reference
+      return { target: obj.localPosition, prop: paths[1] };
+    }
+    return { target: target[paths[0]], prop: paths[1] };
+  }
+  return { target, prop: propPath };
+};
+
 const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
   const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(null);
   const inputsRef = useRef<Record<string, HTMLInputElement | null>>({});
@@ -58,14 +82,10 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
           rows.forEach(({ propertyPath, type }) => {
             const input = inputsRef.current[propertyPath];
             if (input && document.activeElement !== input) {
-              let val;
-              const paths = propertyPath.split('.');
-              if (paths.length === 3) {
-                val = obj[paths[0]]?.[paths[1]]?.[paths[2]];
-              } else if (paths.length === 2) {
-                val = obj[paths[0]]?.[paths[1]];
-              } else {
-                val = obj[propertyPath];
+              const resolved = resolveComponentPath(obj, propertyPath);
+              let val = undefined;
+              if (resolved && resolved.target) {
+                val = resolved.target[resolved.prop];
               }
 
               if (type === 'checkbox') {
@@ -95,22 +115,16 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
     let val: any = type === 'checkbox' ? e.target.checked : e.target.value;
     if (type === 'number') val = parseFloat(val);
 
-    const paths = propertyPath.split('.');
-    if (paths.length === 3) {
-      // eslint-disable-next-line react-hooks/immutability
-      if (obj[paths[0]]?.[paths[1]]) obj[paths[0]][paths[1]][paths[2]] = val;
-    } else if (paths.length === 2) {
-      // eslint-disable-next-line react-hooks/immutability
-      if (obj[paths[0]]) obj[paths[0]][paths[1]] = val;
-    } else {
-      // eslint-disable-next-line react-hooks/immutability
-      obj[propertyPath] = val;
+    const resolved = resolveComponentPath(obj, propertyPath);
+    if (resolved && resolved.target) {
+      resolved.target[resolved.prop] = val;
     }
   };
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>, propertyPath: string, type: string) => {
     const obj = Engine.selectedObject as InspectableObject | null;
-    if (!obj || !obj.tag) return;
+    const tag = obj?.getComponent(Dino.TagComponent)?.tag;
+    if (!obj || !tag) return;
 
     let val: any = type === 'checkbox' ? e.target.checked : e.target.value;
     if (type === 'number') val = parseFloat(val);
@@ -121,7 +135,7 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
       const code = customEvent.detail;
 
       try {
-        const tagRegex = new RegExp(`tag:\\s*['"\`]${obj.tag}['"\`]`, 'g');
+        const tagRegex = new RegExp(`tag:\\s*['"\`]${tag}['"\`]`, 'g');
         const match = tagRegex.exec(code);
 
         if (match) {
@@ -146,6 +160,15 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
             if (propMatch) {
               const formattedVal = typeof val === 'string' ? `'${val}'` : val;
               updatedSnippet = snippet.replace(propRegex, `$1${formattedVal}`);
+            } else if (propertyPath.startsWith('_physics.')) {
+              // Attempt to match physics prop directly if it omits _physics
+              const physicsProp = propertyPath.replace('_physics.', '');
+              const altRegex = new RegExp(`(\\b${physicsProp}\\s*:\\s*)([^,\\n}]+)`);
+              const altMatch = altRegex.exec(snippet);
+              if (altMatch) {
+                const formattedVal = typeof val === 'string' ? `'${val}'` : val;
+                updatedSnippet = snippet.replace(altRegex, `$1${formattedVal}`);
+              }
             }
           }
 

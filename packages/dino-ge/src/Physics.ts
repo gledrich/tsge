@@ -1,6 +1,7 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import Circle from './Circle.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /**
  * Utility class for collision detection between game objects.
@@ -38,13 +39,16 @@ export default class Physics {
        );
      }
 
-     if (isColliding && (!obj1.isStatic || !obj2.isStatic)) {
-       this.resolveCollision(obj1, obj2);
+     const obj1Static = obj1.getComponent(PhysicsComponent)?.isStatic ?? false;
+     const obj2Static = obj2.getComponent(PhysicsComponent)?.isStatic ?? false;
+
+     if (isColliding && (!obj1Static || !obj2Static)) {
+       this.resolveCollision(obj1, obj2, obj1Static, obj2Static);
      }
 
      return isColliding;
    }
-  private static resolveCollision(obj1: GameObject, obj2: GameObject) {
+  private static resolveCollision(obj1: GameObject, obj2: GameObject, obj1Static: boolean, obj2Static: boolean) {
     // Calculate overlap
     const overlapX = Math.min(
       obj1.position.x + obj1.width - obj2.position.x,
@@ -58,19 +62,19 @@ export default class Physics {
     // Push apart
     if (overlapX < overlapY) {
       if (obj1.position.x < obj2.position.x) {
-        if (!obj1.isStatic) obj1.localPosition.x -= overlapX / 2;
-        if (!obj2.isStatic) obj2.localPosition.x += overlapX / 2;
+        if (!obj1Static) obj1.localPosition.x -= overlapX / 2;
+        if (!obj2Static) obj2.localPosition.x += overlapX / 2;
       } else {
-        if (!obj1.isStatic) obj1.localPosition.x += overlapX / 2;
-        if (!obj2.isStatic) obj2.localPosition.x -= overlapX / 2;
+        if (!obj1Static) obj1.localPosition.x += overlapX / 2;
+        if (!obj2Static) obj2.localPosition.x -= overlapX / 2;
       }
     } else {
       if (obj1.position.y < obj2.position.y) {
-        if (!obj1.isStatic) obj1.localPosition.y -= overlapY / 2;
-        if (!obj2.isStatic) obj2.localPosition.y += overlapY / 2;
+        if (!obj1Static) obj1.localPosition.y -= overlapY / 2;
+        if (!obj2Static) obj2.localPosition.y += overlapY / 2;
       } else {
-        if (!obj1.isStatic) obj1.localPosition.y += overlapY / 2;
-        if (!obj2.isStatic) obj2.localPosition.y -= overlapY / 2;
+        if (!obj1Static) obj1.localPosition.y += overlapY / 2;
+        if (!obj2Static) obj2.localPosition.y -= overlapY / 2;
       }
     }
   }

@@ -14,7 +14,8 @@ import {
   Input,
   Tilemap,
   PhysicsComponent,
-  TransformComponent
+  TransformComponent,
+  VisibilityComponent
 } from 'dino-ge';
 
 class MenuScene extends Scene {
@@ -280,7 +281,7 @@ class PlayScene extends Scene {
         zIndex: 6,
         tag: 'fireball'
       });
-      fireball.velocity.y = -600; // Fast upwards
+      fireball.getComponent(PhysicsComponent).velocity.y = -600; // Fast upwards
       this.fireballs.push(fireball);
       this.lastShotTime = Date.now();
     }
@@ -341,12 +342,13 @@ class PlayScene extends Scene {
 
     // Update Invulnerability
     if (this.isInvulnerable) {
+      const visibility = this.player.getComponent(VisibilityComponent);
       // Flicker effect
-      this.player.visible = Math.floor(Date.now() / 100) % 2 === 0;
+      visibility.visible = Math.floor(Date.now() / 100) % 2 === 0;
 
       if (Date.now() - this.lastHitTime > this.invulnerabilityDuration) {
         this.isInvulnerable = false;
-        this.player.visible = true;
+        visibility.visible = true;
       }
     }
 
@@ -379,9 +381,10 @@ class PlayScene extends Scene {
         tag: 'meteor'
       });
       // Set initial velocity
-      meteor.velocity.y = 100 + Math.random() * 200;
+      const meteorPhys = meteor.getComponent(PhysicsComponent);
+      meteorPhys.velocity.y = 100 + Math.random() * 200;
       // Add small gravity
-      meteor.acceleration.y = 50;
+      meteorPhys.acceleration.y = 50;
       this.meteors.push(meteor);
     }
 
@@ -435,8 +438,9 @@ class PlayScene extends Scene {
         zIndex: 3,
         tag: 'particle'
       });
-      p.velocity.x = (Math.random() - 0.5) * 400;
-      p.velocity.y = (Math.random() - 0.5) * 400;
+      const pPhys = p.getComponent(PhysicsComponent);
+      pPhys.velocity.x = (Math.random() - 0.5) * 400;
+      pPhys.velocity.y = (Math.random() - 0.5) * 400;
       p.life = 1.0; // Life starts at 1.0 and fades
       this.particles.push(p);
     }
@@ -519,10 +523,7 @@ class DinoSurvival {
         },
         update: () => {}
       },
-      {
-        title: 'Dino Survival',
-        backgroundColour: '#264653'
-      }
+      { title: 'Dino Survival', backgroundColour: '#264653' }
     );
   }
 
