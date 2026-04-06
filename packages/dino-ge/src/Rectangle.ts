@@ -7,7 +7,7 @@ import ShapeComponent from './ShapeComponent.js';
  */
 export interface RectProps {
   /** Unique tag for identification. */
-  tag: string;
+  tag?: string;
   /** Initial position of the top-left corner. */
   position: Vector2;
   /** Width of the rectangle. */
@@ -15,9 +15,9 @@ export interface RectProps {
   /** Height of the rectangle. */
   height: number;
   /** Fill colour. */
-  colour: string;
+  colour?: string;
   /** Render order. */
-  zIndex: number;
+  zIndex?: number;
 }
 
 const defaultProps = {
