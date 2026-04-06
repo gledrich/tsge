@@ -2,7 +2,11 @@
 export default {
   testEnvironment: "jsdom",
   transform: {
-    "^.+.tsx?$": ["ts-jest",{}],
+    "^.+.tsx?$": ["ts-jest",{
+      tsconfig: {
+        esModuleInterop: true
+      }
+    }],
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
