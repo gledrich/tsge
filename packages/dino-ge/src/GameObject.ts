@@ -1,7 +1,6 @@
 import Engine from './Engine.js';
 import Vector2 from './Vector2.js';
 import Component from './Component.js';
-import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
 import EventBusComponent from './EventBusComponent.js';
@@ -16,7 +15,6 @@ export default abstract class GameObject {
   private _components: Map<string, Component> = new Map();
 
   /** Internal components for backward compatibility and core logic. */
-  private _physics: PhysicsComponent;
   private _transform: TransformComponent;
   private _tag: TagComponent;
   private _eventBus: EventBusComponent;
@@ -24,9 +22,6 @@ export default abstract class GameObject {
   constructor(tag: string, zIndex: number) {
     this._tag = new TagComponent(tag, zIndex);
     this.addComponent(this._tag);
-
-    this._physics = new PhysicsComponent();
-    this.addComponent(this._physics);
 
     this._transform = new TransformComponent();
     this.addComponent(this._transform);

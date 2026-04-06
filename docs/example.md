@@ -171,6 +171,7 @@ class PlayScene extends Scene {
       zIndex: 5
     });
     this.player.addComponent(new VisibilityComponent());
+    this.player.addComponent(new PhysicsComponent());
     this.player.play();
 
     // Scene Graph Parenting
@@ -282,6 +283,7 @@ class PlayScene extends Scene {
         zIndex: 6,
         tag: 'fireball'
       });
+      fireball.addComponent(new PhysicsComponent());
       fireball.getComponent(PhysicsComponent).velocity.y = -600; // Fast upwards
       this.fireballs.push(fireball);
       this.lastShotTime = Date.now();
@@ -384,6 +386,7 @@ class PlayScene extends Scene {
         tag: 'meteor'
       });
       // Set initial velocity
+      meteor.addComponent(new PhysicsComponent());
       const meteorPhys = meteor.getComponent(PhysicsComponent);
       meteorPhys.velocity.y = 100 + Math.random() * 200;
       // Add small gravity
@@ -441,6 +444,7 @@ class PlayScene extends Scene {
         zIndex: 3,
         tag: 'particle'
       });
+      p.addComponent(new PhysicsComponent());
       const pPhys = p.getComponent(PhysicsComponent);
       pPhys.velocity.x = (Math.random() - 0.5) * 400;
       pPhys.velocity.y = (Math.random() - 0.5) * 400;
