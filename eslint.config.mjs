@@ -26,6 +26,9 @@ export default [
       parser: tsParser,
       parserOptions: {
         project: './packages/dino-ge/tsconfig.json'
+      },
+      globals: {
+        ...globals.jest
       }
     },
     plugins: {
