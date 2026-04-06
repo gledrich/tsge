@@ -20,33 +20,33 @@ export type VerticalAlign =
  */
 export interface TextProperties {
   /** Unique tag for identification. */
-  tag: string;
+  tag?: string;
   /** Fill colour of the text. */
-  colour: string;
+  colour?: string;
   /** Optional background box colour. */
-  backgroundColour: string;
+  backgroundColour?: string;
   /** Font size in pixels. */
-  fontSize: string;
+  fontSize?: string;
   /** Font family (e.g., 'Arial', 'Helvetica'). */
-  font: string;
+  font?: string;
   /** The text content to display. */
   text: string;
   /** Horizontal alignment relative to the position. */
-  horizontalAlign: HorizontalAlign;
+  horizontalAlign?: HorizontalAlign;
   /** Vertical alignment relative to the position. */
-  verticalAlign: VerticalAlign;
+  verticalAlign?: VerticalAlign;
   /** Anchor position for the text. */
   position: Vector2;
   /** Optional width for background box. */
-  width: number;
+  width?: number;
   /** Optional height for background box. */
-  height: number;
+  height?: number;
   /** Render order. */
-  zIndex: number;
+  zIndex?: number;
   /** Whether to register with the engine immediately. */
-  register: boolean;
+  register?: boolean;
   /** Callback for click events. */
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 const defaultProps = {
@@ -133,8 +133,8 @@ export default class Text extends GameObject {
     const text = defaultedProps.text;
     this.length = defaultedProps.text.length;
     this.localPosition = defaultedProps.position;
-    const horizontalAlign = defaultedProps.horizontalAlign;
-    const verticalAlign = defaultedProps.verticalAlign;
+    const horizontalAlign: HorizontalAlign = defaultedProps.horizontalAlign as HorizontalAlign;
+    const verticalAlign: VerticalAlign = defaultedProps.verticalAlign as VerticalAlign;
     const width = defaultedProps.width || this.fontSize * this.length;
     const height = defaultedProps.height || this.fontSize * 2;
     const backgroundColour = defaultedProps.backgroundColour || '';
