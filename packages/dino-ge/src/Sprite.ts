@@ -23,7 +23,7 @@ export interface SpriteProps {
   /** Ending frame column for animation. */
   endCol: number;
   /** Rendering order. */
-  zIndex: number;
+  zIndex?: number;
 }
 
 /**
