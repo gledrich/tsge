@@ -17,7 +17,6 @@ export default abstract class GameObject {
   /** Internal components for backward compatibility and core logic. */
   private _transform: TransformComponent;
   private _tag: TagComponent;
-  private _eventBus: EventBusComponent;
 
   constructor(tag: string, zIndex: number) {
     this._tag = new TagComponent(tag, zIndex);
@@ -25,9 +24,6 @@ export default abstract class GameObject {
 
     this._transform = new TransformComponent();
     this.addComponent(this._transform);
-
-    this._eventBus = new EventBusComponent();
-    this.addComponent(this._eventBus);
   }
 
   /**
@@ -36,7 +32,12 @@ export default abstract class GameObject {
    * @param callback The function to run when the event occurs.
    */
   on(type: string, callback: (event: CustomEvent) => void) {
-    this._eventBus.on(type, callback);
+    let bus = this.getComponent(EventBusComponent);
+    if (!bus) {
+      bus = new EventBusComponent();
+      this.addComponent(bus);
+    }
+    bus.on(type, callback);
   }
 
   /**
@@ -45,7 +46,7 @@ export default abstract class GameObject {
    * @param callback The function to remove.
    */
   off(type: string, callback: (event: CustomEvent) => void) {
-    this._eventBus.off(type, callback);
+    this.getComponent(EventBusComponent)?.off(type, callback);
   }
 
   /**
@@ -54,7 +55,7 @@ export default abstract class GameObject {
    * @param detail Optional data to pass with the event.
    */
   emit(type: string, detail?: unknown) {
-    this._eventBus.emit(type, detail);
+    this.getComponent(EventBusComponent)?.emit(type, detail);
   }
 
   /**

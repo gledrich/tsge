@@ -8,7 +8,7 @@ export default abstract class RenderComponent extends Component {
   public readonly isRenderComponent: boolean = true;
 
   /**
-   * The actual rendering logic moved from GameObject.
+   * The actual rendering logic.
    * @param ctx The canvas 2D rendering context.
    */
   abstract draw(ctx: CanvasRenderingContext2D): void;
