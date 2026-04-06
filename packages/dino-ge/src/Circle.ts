@@ -7,15 +7,15 @@ import ShapeComponent from './ShapeComponent.js';
  */
 export interface CircleProps {
   /** Unique tag for identification. */
-  tag: string;
+  tag?: string;
   /** Initial position of the circle. */
   position: Vector2;
   /** Radius of the circle. */
   radius: number;
   /** Fill colour. */
-  colour: string;
+  colour?: string;
   /** Render order (lower is background). */
-  zIndex: number;
+  zIndex?: number;
 }
 
 const defaultProps = {
