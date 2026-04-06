@@ -8,7 +8,7 @@ import TilemapComponent from './TilemapComponent.js';
  */
 export interface TilemapProps {
   /** Unique tag for the object. */
-  tag: string;
+  tag?: string;
   /** Image element or tag from ResourceLoader. */
   tileset: HTMLImageElement | string;
   /** 2D array of tile indices. */
@@ -20,8 +20,13 @@ export interface TilemapProps {
   /** Initial world position. */
   position: Vector2;
   /** Rendering order. */
-  zIndex: number;
+  zIndex?: number;
 }
+
+const defaultProps = {
+  tag: 'tilemap',
+  zIndex: 0
+};
 
 /**
  * Represents a grid-based map rendered from a tileset.
@@ -47,7 +52,7 @@ export default class Tilemap extends GameObject {
   }
 
   constructor(props: TilemapProps) {
-    super(props.tag, props.zIndex);
+    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 
     if (typeof props.tileset === 'string') {
       this.tileset = ResourceLoader.getImage(props.tileset);
