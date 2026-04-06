@@ -9,7 +9,7 @@
   "scripts": {
     "start": "ENVIRONMENT=prod node server.js",
     "dev": "ENVIRONMENT=dev concurrently \"nodemon server.js\" \"vite\"",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "files": [
