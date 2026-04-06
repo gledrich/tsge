@@ -14,7 +14,7 @@
     "docs": "typedoc --out ../../docs/api src/ --entryPointStrategy expand"
   },
   "author": "Rich <richgled25@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "typedoc": "^0.28.18",
     "typescript": "^5.8.2"
