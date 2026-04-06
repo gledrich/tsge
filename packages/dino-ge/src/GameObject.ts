@@ -4,7 +4,6 @@ import Component from './Component.js';
 import PhysicsComponent from './PhysicsComponent.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
-import VisibilityComponent from './VisibilityComponent.js';
 import EventBusComponent from './EventBusComponent.js';
 
 /**
@@ -20,17 +19,11 @@ export default abstract class GameObject {
   private _physics: PhysicsComponent;
   private _transform: TransformComponent;
   private _tag: TagComponent;
-  private _visibility: VisibilityComponent;
   private _eventBus: EventBusComponent;
 
   constructor(tag: string, zIndex: number) {
-    // Initialize with core components for now to maintain backward compatibility.
-    // In a pure ECS, components would be added as needed.
     this._tag = new TagComponent(tag, zIndex);
     this.addComponent(this._tag);
-
-    this._visibility = new VisibilityComponent();
-    this.addComponent(this._visibility);
 
     this._physics = new PhysicsComponent();
     this.addComponent(this._physics);
@@ -82,13 +75,6 @@ export default abstract class GameObject {
    */
   get zIndex(): number { return this._tag.zIndex; }
   set zIndex(val: number) { this._tag.zIndex = val; }
-
-  /**
-   * Whether the object should be rendered.
-   * @deprecated Use getComponent(VisibilityComponent).visible
-   */
-  get visible(): boolean { return this._visibility.visible; }
-  set visible(val: boolean) { this._visibility.visible = val; }
 
   /**
    * The world-space position of the object.
@@ -165,7 +151,7 @@ export default abstract class GameObject {
 
     // Also index by RenderComponent if it is one, to allow abstract querying.
     // Use flag instead of instanceof to work across potential module duplications.
-    if ((component as unknown as { isRenderComponent: boolean }).isRenderComponent) {
+    if ((component as unknown as { isRenderComponent: boolean; }).isRenderComponent) {
       this._components.set('RenderComponent', component);
     }
 
@@ -176,7 +162,7 @@ export default abstract class GameObject {
    * Removes a component from this entity by its class.
    * @param componentClass The class of the component to remove.
    */
-  removeComponent<T extends Component>(componentClass: { new (...args: unknown[]): T }) {
+  removeComponent<T extends Component>(componentClass: { new(...args: unknown[]): T; }) {
     this._components.delete(componentClass.name);
   }
 
@@ -185,7 +171,7 @@ export default abstract class GameObject {
    * @param componentClass The class of the component to check for.
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  hasComponent<T extends Component>(componentClass: Function & { prototype: T }): boolean {
+  hasComponent<T extends Component>(componentClass: Function & { prototype: T; }): boolean {
     return this._components.has(componentClass.name);
   }
 
@@ -193,7 +179,7 @@ export default abstract class GameObject {
    * @param componentClass The class of the component to retrieve.
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  getComponent<T extends Component>(componentClass: Function & { prototype: T }): T | undefined {
+  getComponent<T extends Component>(componentClass: Function & { prototype: T; }): T | undefined {
     return this._components.get(componentClass.name) as T;
   }
 

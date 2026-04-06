@@ -1,6 +1,7 @@
 import System from './System.js';
 import type GameObject from './GameObject.js';
 import RenderComponent from './RenderComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
 import Engine from './Engine.js';
 
 /**
@@ -54,7 +55,10 @@ export default class RenderingSystem extends System {
       ) {
         // Find any RenderComponent on the entity
         const renderable = object.getComponent(RenderComponent);
-        if (renderable && object.visible) {
+        const visibility = object.getComponent(VisibilityComponent);
+        const isVisible = visibility ? visibility.visible : true;
+
+        if (renderable && isVisible) {
           renderable.draw(this.ctx);
         }
         

@@ -170,6 +170,7 @@ class PlayScene extends Scene {
       tag: 'player',
       zIndex: 5
     });
+    this.player.addComponent(new VisibilityComponent());
     this.player.play();
 
     // Scene Graph Parenting
@@ -343,12 +344,14 @@ class PlayScene extends Scene {
     // Update Invulnerability
     if (this.isInvulnerable) {
       const visibility = this.player.getComponent(VisibilityComponent);
-      // Flicker effect
-      visibility.visible = Math.floor(Date.now() / 100) % 2 === 0;
+      if (visibility) {
+        // Flicker effect
+        visibility.visible = Math.floor(Date.now() / 100) % 2 === 0;
 
-      if (Date.now() - this.lastHitTime > this.invulnerabilityDuration) {
-        this.isInvulnerable = false;
-        visibility.visible = true;
+        if (Date.now() - this.lastHitTime > this.invulnerabilityDuration) {
+          this.isInvulnerable = false;
+          visibility.visible = true;
+        }
       }
     }
 
