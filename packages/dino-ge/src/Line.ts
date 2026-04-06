@@ -7,15 +7,15 @@ import LineComponent from './LineComponent.js';
  */
 export interface LineProperties {
   /** Unique tag for identification. */
-  tag: string;
+  tag?: string;
   /** Stroke width of the line. */
-  width: number;
+  width?: number;
   /** Start point of the line. */
   p1: Vector2;
   /** End point of the line. */
   p2: Vector2;
   /** Render order (lower is background). */
-  zIndex: number;
+  zIndex?: number;
 }
 
 const defaultProps = {
