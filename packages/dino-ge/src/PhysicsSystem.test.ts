@@ -36,4 +36,18 @@ describe('PhysicsSystem', () => {
     
     expect(obj.transform.position.x).toBe(5);
   });
+
+  it('ignores objects without PhysicsComponent', () => {
+    const system = new PhysicsSystem();
+    const obj = new MockGameObject('test', 0);
+    // No PhysicsComponent added
+    
+    const entities = new Set<GameObject>([obj]);
+    const initialPos = obj.transform.position.clone();
+    
+    system.fixedUpdate(entities, 0.1);
+    
+    expect(obj.transform.position.x).toBe(initialPos.x);
+    expect(obj.transform.position.y).toBe(initialPos.y);
+  });
 });
