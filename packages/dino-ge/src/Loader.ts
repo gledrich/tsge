@@ -14,6 +14,11 @@ export default class ResourceLoader {
    */
   static queueImage(tag: string, src: string) {
     if (this.assets.has(tag)) return;
+    
+    // Check if tag already exists in queue
+    const isAlreadyQueued = Array.from(this.loadingQueue).some(item => JSON.parse(item).tag === tag);
+    if (isAlreadyQueued) return;
+
     this.loadingQueue.add(JSON.stringify({ tag, src }));
     this.totalToLoad++;
   }
