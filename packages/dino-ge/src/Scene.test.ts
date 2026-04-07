@@ -22,4 +22,11 @@ describe('Scene', () => {
     scene.clear();
     expect(scene.objects.size).toBe(0);
   });
+
+  it('provides default lifecycle methods', () => {
+    const scene = new MockScene();
+    // These should not throw even if they are empty
+    scene.onLoad();
+    scene.update();
+  });
 });
