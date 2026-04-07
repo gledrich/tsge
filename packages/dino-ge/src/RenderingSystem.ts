@@ -61,12 +61,6 @@ export default class RenderingSystem extends System {
         if (renderable && isVisible) {
           renderable.draw(this.ctx);
         }
-        
-        // Backward compatibility: call draw() if it exists on the object itself
-        const legacyObj = object as unknown as { draw?: (ctx: CanvasRenderingContext2D) => void };
-        if (legacyObj.draw && !(object.getComponent(RenderComponent))) {
-           legacyObj.draw(this.ctx);
-        }
 
         // Draw debug overlays in world space
         if (debug) {
