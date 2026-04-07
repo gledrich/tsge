@@ -28,6 +28,8 @@ const SECTIONS: Record<string, PropertyRowDef[]> = {
     { label: 'Accel X', type: 'number', propertyPath: '_physics.acceleration.x' },
     { label: 'Accel Y', type: 'number', propertyPath: '_physics.acceleration.y' },
     { label: 'Mass', type: 'number', propertyPath: '_physics.mass' },
+    { label: 'Restitution', type: 'number', propertyPath: '_physics.restitution' },
+    { label: 'Friction', type: 'number', propertyPath: '_physics.friction' },
     { label: 'Is Static', type: 'checkbox', propertyPath: '_physics.isStatic' }
   ]
 };

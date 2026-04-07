@@ -19,8 +19,8 @@ This document outlines the planned features and milestones for the **Dino Game E
   *   [x] Implement `BoundsComponent` and remove monolithic sizing from `GameObject`.
   *   [x] Implement generic prototype-based component indexing (removing special-casing).
 - **Collision Resolution:**
-  - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
-  - [ ] Add basic friction and restitution (bounciness) to `Physics`.
+  *   [x] Implement robust impulse-based collision response (preventing overlap).
+  *   [x] Add restitution (bounciness) and friction support to `PhysicsComponent`.
 - **Rendering Optimization:**
   *   [x] Implement Viewport Culling (only draw objects within the `Camera` bounds).
   *   [x] Add support for simple Z-sorting optimizations.

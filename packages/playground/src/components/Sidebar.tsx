@@ -49,7 +49,28 @@ const snippets: Snippet[] = [
   p1: new Vector2(0, 0),
   p2: new Vector2(100, 100),
   zIndex: 1
-});` }
+});` },
+  { icon: 'fa-volleyball', label: 'Physics', code: `const ball = new Circle({
+  tag: 'bouncy',
+  position: new Vector2(200, 100),
+  radius: 20,
+  colour: '#f9c74f'
+});
+const phys = new PhysicsComponent();
+phys.velocity = new Vector2(150, 150);
+phys.restitution = 0.8;
+ball.addComponent(phys);
+
+const floor = new Rectangle({
+  tag: 'floor',
+  position: new Vector2(0, 400),
+  width: 800,
+  height: 50,
+  colour: '#90be6d'
+});
+const floorPhys = new PhysicsComponent();
+floorPhys.isStatic = true;
+floor.addComponent(floorPhys);` }
 ];
 
 const Sidebar: React.FC<Record<string, never>> = () => {

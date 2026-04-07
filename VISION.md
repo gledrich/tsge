@@ -9,7 +9,7 @@ This document outlines the strategic roadmap for evolving the **Dino Game Engine
 
 ## Phase 2: High-Performance Rendering & Physics
 *   **Advanced Rendering Backend:** Explore WebGL or WebGPU rendering (potentially utilizing a lightweight wrapper or custom batching) to enable hardware acceleration, thousands of sprites, and custom shaders.
-*   **Advanced Physics:** Upgrade from basic AABB overlapping to Separating Axis Theorem (SAT) to support rotated hitboxes and polygonal collisions, or integrate a lightweight physics library.
+*   **Advanced Physics (Completed):** Upgraded from basic AABB overlapping to a robust impulse-based resolution system with support for restitution (bounciness) and positional correction to prevent jitter.
 *   **Spatial Partitioning:** Implement a QuadTree or Spatial Hash grid to reduce collision checks from O(n²) complexity to manageable levels for large scenes.
 
 ## Phase 3: Asset Pipeline & Ecosystem

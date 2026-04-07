@@ -118,5 +118,54 @@ describe('Physics', () => {
       // r1 should remain at 0
       expect(r1.transform.position.x).toBe(0);
     });
+
+    it('applies impulse to change velocities on collision', () => {
+      const r1 = new Rectangle({
+        position: new Vector2(0, 0),
+        width: 50,
+        height: 50
+      });
+      const r2 = new Rectangle({
+        position: new Vector2(40, 0),
+        width: 50,
+        height: 50
+      });
+      
+      const phys1 = new PhysicsComponent();
+      phys1.velocity = new Vector2(100, 0);
+      r1.addComponent(phys1);
+      
+      const phys2 = new PhysicsComponent();
+      phys2.velocity = new Vector2(-100, 0);
+      r2.addComponent(phys2);
+      
+      Physics.checkCollision(r1, r2);
+      
+      // With restitution 0.5 (default), they should bounce back
+      // Relative velocity was 200. After impulse it should be reversed and scaled by e.
+      expect(phys1.velocity.x).toBeLessThan(100);
+      expect(phys2.velocity.x).toBeGreaterThan(-100);
+    });
+
+    it('respects restitution (bounciness) values', () => {
+      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
+      const r2 = new Rectangle({ position: new Vector2(40, 0), width: 50, height: 50 });
+      
+      const phys1 = new PhysicsComponent();
+      phys1.velocity = new Vector2(100, 0);
+      phys1.restitution = 1.0; // Perfectly elastic
+      r1.addComponent(phys1);
+      
+      const phys2 = new PhysicsComponent();
+      phys2.velocity = new Vector2(0, 0);
+      phys2.restitution = 1.0;
+      phys2.isStatic = true;
+      r2.addComponent(phys2);
+      
+      Physics.checkCollision(r1, r2);
+      
+      // Should bounce back with exactly same speed (100 -> -100)
+      expect(phys1.velocity.x).toBeCloseTo(-100);
+    });
   });
 });

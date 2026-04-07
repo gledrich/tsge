@@ -4,89 +4,226 @@ import Circle from './Circle.js';
 import PhysicsComponent from './PhysicsComponent.js';
 
 /**
+ * Holds data about a collision between two objects.
+ */
+export interface CollisionManifold {
+  /** First object in the collision. */
+  obj1: GameObject;
+  /** Second object in the collision. */
+  obj2: GameObject;
+  /** Normalized direction of the collision from obj1 to obj2. */
+  normal: Vector2;
+  /** Penetration depth. */
+  depth: number;
+}
+
+/**
  * Utility class for collision detection between game objects.
  */
 export default class Physics {
   /**
    * Checks if two game objects are colliding.
-   /**
-    * Checks if two game objects are colliding and resolves it if not static.
-    * @param obj1 First object.
-    * @param obj2 Second object.
-    * @returns True if the objects are colliding.
-    */
-   static checkCollision(obj1: GameObject, obj2: GameObject): boolean {
-     const isCircle1 = obj1 instanceof Circle;
-     const isCircle2 = obj2 instanceof Circle;
-     let isColliding = false;
+   * @param obj1 First object.
+   * @param obj2 Second object.
+   * @returns A manifold if colliding, else null.
+   */
+  static getCollisionManifold(obj1: GameObject, obj2: GameObject): CollisionManifold | null {
+    const isCircle1 = obj1 instanceof Circle;
+    const isCircle2 = obj2 instanceof Circle;
 
-     if (isCircle1 && isCircle2) {
-       const c1 = obj1 as Circle;
-       const c2 = obj2 as Circle;
-       isColliding = Vector2.distance(c1.center, c2.center) < c1.radius + c2.radius;
-     } else if (isCircle1 || isCircle2) {
-       const circle = (isCircle1 ? obj1 : obj2) as Circle;
-       const rect = (isCircle1 ? obj2 : obj1);
-       const rectWidth = rect.bounds?.width ?? 0;
-       const rectHeight = rect.bounds?.height ?? 0;
-       const closestX = Math.max(rect.transform.position.x, Math.min(circle.center.x, rect.transform.position.x + rectWidth));
-       const closestY = Math.max(rect.transform.position.y, Math.min(circle.center.y, rect.transform.position.y + rectHeight));
-       isColliding = Vector2.distance(circle.center, new Vector2(closestX, closestY)) < circle.radius;
-     } else {
-       const w1 = obj1.bounds?.width ?? 0;
-       const h1 = obj1.bounds?.height ?? 0;
-       const w2 = obj2.bounds?.width ?? 0;
-       const h2 = obj2.bounds?.height ?? 0;
-       isColliding = (
-         obj1.transform.position.x < obj2.transform.position.x + w2 &&
-         obj1.transform.position.x + w1 > obj2.transform.position.x &&
-         obj1.transform.position.y < obj2.transform.position.y + h2 &&
-         obj1.transform.position.y + h1 > obj2.transform.position.y
-       );
-     }
+    if (isCircle1 && isCircle2) {
+      return this.circleVsCircle(obj1 as Circle, obj2 as Circle);
+    } else if (isCircle1 || isCircle2) {
+      const circle = (isCircle1 ? obj1 : obj2) as Circle;
+      const rect = (isCircle1 ? obj2 : obj1);
+      const manifold = this.circleVsRect(circle, rect);
+      if (manifold && isCircle2) {
+        // Flip normal if obj1 was the rect
+        manifold.normal.multiply(-1);
+      }
+      return manifold;
+    } else {
+      return this.aabbVsAabb(obj1, obj2);
+    }
+  }
 
-     const obj1Static = obj1.getComponent(PhysicsComponent)?.isStatic ?? false;
-     const obj2Static = obj2.getComponent(PhysicsComponent)?.isStatic ?? false;
+  private static circleVsCircle(c1: Circle, c2: Circle): CollisionManifold | null {
+    const combinedRadius = c1.radius + c2.radius;
+    const diff = c2.center.clone().subtract(c1.center);
+    const distSq = diff.x * diff.x + diff.y * diff.y;
 
-     if (isColliding && (!obj1Static || !obj2Static)) {
-       this.resolveCollision(obj1, obj2, obj1Static, obj2Static);
-     }
+    if (distSq > combinedRadius * combinedRadius) return null;
 
-     return isColliding;
-   }
-  private static resolveCollision(obj1: GameObject, obj2: GameObject, obj1Static: boolean, obj2Static: boolean) {
+    const dist = Math.sqrt(distSq);
+    const normal = dist !== 0 ? diff.multiply(1 / dist) : new Vector2(0, 1);
+    
+    return {
+      obj1: c1,
+      obj2: c2,
+      normal,
+      depth: combinedRadius - dist
+    };
+  }
+
+  private static aabbVsAabb(obj1: GameObject, obj2: GameObject): CollisionManifold | null {
     const w1 = obj1.bounds?.width ?? 0;
     const h1 = obj1.bounds?.height ?? 0;
     const w2 = obj2.bounds?.width ?? 0;
     const h2 = obj2.bounds?.height ?? 0;
 
-    // Calculate overlap
-    const overlapX = Math.min(
-      obj1.transform.position.x + w1 - obj2.transform.position.x,
-      obj2.transform.position.x + w2 - obj1.transform.position.x
-    );
-    const overlapY = Math.min(
-      obj1.transform.position.y + h1 - obj2.transform.position.y,
-      obj2.transform.position.y + h2 - obj1.transform.position.y
-    );
+    const pos1 = obj1.transform.position;
+    const pos2 = obj2.transform.position;
 
-    // Push apart
+    // Center to center distance
+    const center1 = new Vector2(pos1.x + w1 / 2, pos1.y + h1 / 2);
+    const center2 = new Vector2(pos2.x + w2 / 2, pos2.y + h2 / 2);
+    const diff = center2.clone().subtract(center1);
+
+    // Overlap on x and y axes
+    const overlapX = (w1 / 2 + w2 / 2) - Math.abs(diff.x);
+    if (overlapX <= 0) return null;
+
+    const overlapY = (h1 / 2 + h2 / 2) - Math.abs(diff.y);
+    if (overlapY <= 0) return null;
+
+    // Resolve on the axis of least penetration
     if (overlapX < overlapY) {
-      if (obj1.transform.position.x < obj2.transform.position.x) {
-        if (!obj1Static) obj1.transform.position.x -= overlapX / 2;
-        if (!obj2Static) obj2.transform.position.x += overlapX / 2;
-      } else {
-        if (!obj1Static) obj1.transform.position.x += overlapX / 2;
-        if (!obj2Static) obj2.transform.position.x -= overlapX / 2;
-      }
+      return {
+        obj1,
+        obj2,
+        normal: new Vector2(diff.x > 0 ? 1 : -1, 0),
+        depth: overlapX
+      };
     } else {
-      if (obj1.transform.position.y < obj2.transform.position.y) {
-        if (!obj1Static) obj1.transform.position.y -= overlapY / 2;
-        if (!obj2Static) obj2.transform.position.y += overlapY / 2;
-      } else {
-        if (!obj1Static) obj1.transform.position.y += overlapY / 2;
-        if (!obj2Static) obj2.transform.position.y -= overlapY / 2;
-      }
+      return {
+        obj1,
+        obj2,
+        normal: new Vector2(0, diff.y > 0 ? 1 : -1),
+        depth: overlapY
+      };
+    }
+  }
+
+  private static circleVsRect(circle: Circle, rect: GameObject): CollisionManifold | null {
+    const rectWidth = rect.bounds?.width ?? 0;
+    const rectHeight = rect.bounds?.height ?? 0;
+    const rectPos = rect.transform.position;
+
+    const closestX = Math.max(rectPos.x, Math.min(circle.center.x, rectPos.x + rectWidth));
+    const closestY = Math.max(rectPos.y, Math.min(circle.center.y, rectPos.y + rectHeight));
+
+    const diff = new Vector2(closestX, closestY).subtract(circle.center);
+    const distSq = diff.x * diff.x + diff.y * diff.y;
+
+    if (distSq > circle.radius * circle.radius) return null;
+
+    const dist = Math.sqrt(distSq);
+    let normal: Vector2;
+    let depth: number;
+
+    if (dist === 0) {
+      // Circle center is inside the rectangle
+      const center = circle.center;
+      const dLeft = center.x - rectPos.x;
+      const dRight = rectPos.x + rectWidth - center.x;
+      const dTop = center.y - rectPos.y;
+      const dBottom = rectPos.y + rectHeight - center.y;
+
+      const minDist = Math.min(dLeft, dRight, dTop, dBottom);
+      depth = circle.radius + minDist;
+
+      if (minDist === dLeft) normal = new Vector2(-1, 0);
+      else if (minDist === dRight) normal = new Vector2(1, 0);
+      else if (minDist === dTop) normal = new Vector2(0, -1);
+      else normal = new Vector2(0, 1);
+    } else {
+      normal = diff.multiply(1 / dist);
+      depth = circle.radius - dist;
+    }
+
+    return {
+      obj1: circle,
+      obj2: rect,
+      normal,
+      depth
+    };
+  }
+
+  /**
+   * Checks if two game objects are colliding and resolves it.
+   * @param obj1 First object.
+   * @param obj2 Second object.
+   * @returns True if the objects were colliding.
+   */
+  static checkCollision(obj1: GameObject, obj2: GameObject): boolean {
+    const manifold = this.getCollisionManifold(obj1, obj2);
+    if (!manifold) return false;
+
+    const phys1 = obj1.getComponent(PhysicsComponent);
+    const phys2 = obj2.getComponent(PhysicsComponent);
+    const obj1Static = phys1?.isStatic ?? false;
+    const obj2Static = phys2?.isStatic ?? false;
+
+    if (!obj1Static || !obj2Static) {
+      this.resolveCollision(manifold, phys1, phys2);
+    }
+
+    return true;
+  }
+  private static resolveCollision(manifold: CollisionManifold, phys1?: PhysicsComponent, phys2?: PhysicsComponent) {
+    const { obj1, obj2, normal, depth } = manifold;
+    const isStatic1 = phys1?.isStatic ?? true; // Assume static if no physics component
+    const isStatic2 = phys2?.isStatic ?? true;
+
+    // 1. Positional Correction (to prevent sinking/jitter)
+    const percent = 0.8; // How much of the penetration to resolve
+    const slop = 0.01; // Allowable penetration
+    const correctionMagnitude = Math.max(depth - slop, 0) / ((isStatic1 ? 0 : 1) + (isStatic2 ? 0 : 1)) * percent;
+    const correction = normal.clone().multiply(correctionMagnitude);
+
+    if (!isStatic1) obj1.transform.position.subtract(correction);
+    if (!isStatic2) obj2.transform.position.add(correction);
+
+    // 2. Impulse-based Velocity Response
+    if (phys1 && phys2) {
+      // Relative velocity along normal
+      const rv = phys2.velocity.clone().subtract(phys1.velocity);
+      const velAlongNormal = Vector2.dot(rv, normal);
+
+      // Do not resolve if velocities are separating
+      if (velAlongNormal > 0) return;
+
+      // Calculate restitution (bounciness) - use the minimum of both objects
+      const e = Math.min(phys1.restitution, phys2.restitution);
+
+      // Calculate impulse scalar
+      // Impulse j = -(1 + e) * (Vrel . n) / (1/m1 + 1/m2)
+      const invMass1 = isStatic1 ? 0 : (1 / phys1.mass);
+      const invMass2 = isStatic2 ? 0 : (1 / phys2.mass);
+
+      let j = -(1 + e) * velAlongNormal;
+      j /= invMass1 + invMass2;
+
+      // Apply impulse
+      const impulse = normal.clone().multiply(j);
+      if (!isStatic1) phys1.velocity.subtract(impulse.clone().multiply(invMass1));
+      if (!isStatic2) phys2.velocity.add(impulse.clone().multiply(invMass2));
+    } else if (phys1 || phys2) {
+      // Only one object has physics, treat the other as static infinity mass
+      const activePhys = phys1 || phys2;
+      const n = phys1 ? normal.clone().multiply(-1) : normal;
+
+      const rv = activePhys!.velocity.clone().multiply(-1); // Relative to static (0,0)
+      const velAlongNormal = Vector2.dot(rv, n);
+
+      if (velAlongNormal > 0) return;
+
+      const e = activePhys!.restitution;
+      let j = -(1 + e) * velAlongNormal;
+      j /= (1 / activePhys!.mass);
+
+      const impulse = n.clone().multiply(j);
+      activePhys!.velocity.add(impulse.clone().multiply(1 / activePhys!.mass));
     }
   }
 }

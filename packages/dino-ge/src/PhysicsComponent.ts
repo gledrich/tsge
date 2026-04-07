@@ -13,4 +13,8 @@ export default class PhysicsComponent extends Component {
   mass: number = 1;
   /** Whether the object is immovable (e.g., walls). */
   isStatic: boolean = false;
+  /** Bounciness of the object (0 = inelastic, 1 = perfectly elastic). */
+  restitution: number = 0.5;
+  /** Resistance to sliding. */
+  friction: number = 0.2;
 }
