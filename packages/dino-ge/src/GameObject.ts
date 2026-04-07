@@ -66,13 +66,15 @@ export default abstract class GameObject {
    * @param component The component to add.
    */
   addComponent(component: Component) {
-    const key = component.constructor.name;
-    this._components.set(key, component);
-
-    // Also index by RenderComponent if it is one, to allow abstract querying.
-    // Use flag instead of instanceof to work across potential module duplications.
-    if ((component as unknown as { isRenderComponent: boolean; }).isRenderComponent) {
-      this._components.set('RenderComponent', component);
+    // Index the component by its class name and all base class names up to Component.
+    let proto = Object.getPrototypeOf(component);
+    while (proto && proto.constructor.name !== 'Object') {
+      const key = proto.constructor.name;
+      this._components.set(key, component);
+      
+      // Stop walking once we've indexed up to the base Component class.
+      if (key === 'Component') break;
+      proto = Object.getPrototypeOf(proto);
     }
 
     component.gameObject = this;
@@ -83,7 +85,15 @@ export default abstract class GameObject {
    * @param componentClass The class of the component to remove.
    */
   removeComponent<T extends Component>(componentClass: { new(...args: unknown[]): T; }) {
-    this._components.delete(componentClass.name);
+    const component = this.getComponent(componentClass);
+    if (!component) return;
+
+    // Remove all keys that point to this specific component instance.
+    for (const [key, value] of this._components.entries()) {
+      if (value === component) {
+        this._components.delete(key);
+      }
+    }
   }
 
   /**

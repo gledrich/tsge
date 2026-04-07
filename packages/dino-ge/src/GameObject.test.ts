@@ -7,6 +7,18 @@ import Component from './Component';
 class MockGameObject extends GameObject {}
 class MockComponent extends Component {}
 
+abstract class BaseComponent extends Component {
+  abstract value: string;
+}
+
+class DerivedComponent extends BaseComponent {
+  value = 'derived';
+}
+
+class AnotherDerivedComponent extends BaseComponent {
+  value = 'another';
+}
+
 describe('GameObject', () => {
   it('initialises with required default components', () => {
     const obj = new MockGameObject('player', 10);
@@ -59,5 +71,41 @@ describe('GameObject', () => {
     parent.transform.removeChild(child.transform);
     expect(child.transform.parent).toBeUndefined();
     expect(parent.transform.children.has(child.transform)).toBe(false);
+  });
+
+  it('retrieves a component by its base class', () => {
+    const obj = new MockGameObject('test', 0);
+    const derived = new DerivedComponent();
+    obj.addComponent(derived);
+
+    const retrieved = obj.getComponent(BaseComponent);
+    expect(retrieved).toBe(derived);
+  });
+
+  it('overwrites base class index when a newer component of same family is added', () => {
+    const obj = new MockGameObject('test', 0);
+    const d1 = new DerivedComponent();
+    const d2 = new AnotherDerivedComponent();
+    
+    obj.addComponent(d1);
+    obj.addComponent(d2);
+
+    expect(obj.getComponent(DerivedComponent)).toBe(d1);
+    expect(obj.getComponent(AnotherDerivedComponent)).toBe(d2);
+    expect(obj.getComponent(BaseComponent)).toBe(d2); // Overwritten
+  });
+
+  it('removes all indexed keys when a component is removed', () => {
+    const obj = new MockGameObject('test', 0);
+    const derived = new DerivedComponent();
+    obj.addComponent(derived);
+
+    expect(obj.getComponent(DerivedComponent)).toBe(derived);
+    expect(obj.getComponent(BaseComponent)).toBe(derived);
+
+    obj.removeComponent(DerivedComponent);
+
+    expect(obj.getComponent(DerivedComponent)).toBeUndefined();
+    expect(obj.getComponent(BaseComponent)).toBeUndefined();
   });
 });

@@ -5,8 +5,8 @@ class MockRenderComponent extends RenderComponent {
 }
 
 describe('RenderComponent', () => {
-  it('identifies as a render component', () => {
+  it('is an instance of RenderComponent', () => {
     const component = new MockRenderComponent();
-    expect(component.isRenderComponent).toBe(true);
+    expect(component).toBeInstanceOf(RenderComponent);
   });
 });
