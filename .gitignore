@@ -10,6 +10,7 @@ dist/
 built/
 packages/*/dist/
 packages/*/built/
+coverage/
 
 # Playground temporary files
 packages/playground/*.js
