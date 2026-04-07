@@ -2,6 +2,7 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
 import TilemapComponent from './TilemapComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Properties for creating a new Tilemap.
@@ -41,16 +42,6 @@ export default class Tilemap extends GameObject {
   /** Number of columns in the tileset image. */
   tilesetCols: number;
 
-  /** Gets the width of the tilemap in pixels. */
-  get width(): number {
-    return this.data[0].length * this.tileSize;
-  }
-
-  /** Gets the height of the tilemap in pixels. */
-  get height(): number {
-    return this.data.length * this.tileSize;
-  }
-
   constructor(props: TilemapProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 
@@ -63,6 +54,12 @@ export default class Tilemap extends GameObject {
     this.data = props.data;
     this.tileSize = props.tileSize;
     this.tilesetCols = props.tilesetCols;
+
+    const width = this.data[0].length * this.tileSize;
+    const height = this.data.length * this.tileSize;
+    this.bounds = new BoundsComponent(width, height);
+    this.addComponent(this.bounds);
+
     this.transform.position = props.position;
 
     this.addComponent(new TilemapComponent(

@@ -1,6 +1,7 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import ShapeComponent from './ShapeComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Configuration for creating a Rectangle object.
@@ -28,17 +29,8 @@ const defaultProps = {
  * A basic rectangle shape that can be drawn to the screen.
  */
 export default class Rectangle extends GameObject {
-  private _width: number;
-  private _height: number;
   /** Fill colour. */
   colour: string;
-
-  /** Gets or sets the width. */
-  get width() { return this._width; }
-  set width(val) { this._width = val; }
-  /** Gets or sets the height. */
-  get height() { return this._height; }
-  set height(val) { this._height = val; }
 
   constructor(props: RectProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
@@ -58,12 +50,12 @@ export default class Rectangle extends GameObject {
 
     this.metadata.tag = defaultedProps.tag;
     this.transform.position = defaultedProps.position;
-    this._width = defaultedProps.width;
-    this._height = defaultedProps.height;
+    this.bounds = new BoundsComponent(defaultedProps.width, defaultedProps.height);
+    this.addComponent(this.bounds);
     this.colour = defaultedProps.colour;
     this.metadata.zIndex = defaultedProps.zIndex;
 
-    this.addComponent(new ShapeComponent('rect', this.colour, this._width, this._height));
+    this.addComponent(new ShapeComponent('rect', this.colour, this.bounds.width, this.bounds.height));
 
     this.registerSelf();
   }

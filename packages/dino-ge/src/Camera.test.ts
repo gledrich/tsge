@@ -2,9 +2,13 @@ import Camera from './Camera';
 import Vector2 from './Vector2';
 import GameObject from './GameObject';
 
+import BoundsComponent from './BoundsComponent';
+
 class MockGameObject extends GameObject {
-  get width() { return 50; }
-  get height() { return 50; }
+  constructor(tag: string, zIndex: number) {
+    super(tag, zIndex);
+    this.bounds = new BoundsComponent(50, 50);
+  }
 }
 
 describe('Camera', () => {

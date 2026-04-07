@@ -36,11 +36,13 @@ export default class Input {
         const sorted = Array.from(objects).sort((a, b) => (b.metadata.zIndex > a.metadata.zIndex ? 1 : -1));
 
         for (const obj of sorted) {
+          const width = obj.bounds?.width ?? 0;
+          const height = obj.bounds?.height ?? 0;
           if (
             pos.x > obj.transform.position.x &&
-            pos.x < obj.transform.position.x + obj.width &&
+            pos.x < obj.transform.position.x + width &&
             pos.y > obj.transform.position.y &&
-            pos.y < obj.transform.position.y + obj.height
+            pos.y < obj.transform.position.y + height
           ) {
             Engine.selectedObject = obj;
             found = true;

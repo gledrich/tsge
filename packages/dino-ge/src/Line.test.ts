@@ -29,8 +29,8 @@ describe('Line', () => {
       p2: new Vector2(100, 50)
     });
     
-    expect(line.width).toBe(100);
-    expect(line.height).toBe(50);
+    expect(line.bounds?.width).toBe(100);
+    expect(line.bounds?.height).toBe(50);
   });
 
   it('adds LineComponent on creation', () => {

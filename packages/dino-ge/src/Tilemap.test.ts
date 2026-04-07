@@ -51,8 +51,8 @@ describe('Tilemap', () => {
     const tilemap = new Tilemap(mockProps);
     // 3 columns * 16px = 48px width
     // 2 rows * 16px = 32px height
-    expect(tilemap.width).toBe(48);
-    expect(tilemap.height).toBe(32);
+    expect(tilemap.bounds?.width).toBe(48);
+    expect(tilemap.bounds?.height).toBe(32);
   });
 
   it('uses provided image object without calling ResourceLoader', () => {

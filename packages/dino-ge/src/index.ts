@@ -5,6 +5,7 @@ export { default as Component } from './Component.js';
 export { default as PhysicsComponent } from './PhysicsComponent.js';
 export { default as TransformComponent } from './TransformComponent.js';
 export { default as TagComponent } from './TagComponent.js';
+export { default as BoundsComponent } from './BoundsComponent.js';
 export { default as VisibilityComponent } from './VisibilityComponent.js';
 export { default as EventBusComponent } from './EventBusComponent.js';
 export { default as RenderComponent } from './RenderComponent.js';

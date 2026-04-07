@@ -248,14 +248,14 @@ class PlayScene extends Scene {
 
     // Bounds Checking
     if (playerTransform.position.x < 0) playerTransform.position.x = 0;
-    if (playerTransform.position.x > PlayScene.WORLD_WIDTH - this.player.width)
-      playerTransform.position.x = PlayScene.WORLD_WIDTH - this.player.width;
+    if (playerTransform.position.x > PlayScene.WORLD_WIDTH - this.player.bounds.width)
+      playerTransform.position.x = PlayScene.WORLD_WIDTH - this.player.bounds.width;
     if (playerTransform.position.y < 0) playerTransform.position.y = 0;
     if (
       playerTransform.position.y >
-      PlayScene.WORLD_HEIGHT - this.player.height
+      PlayScene.WORLD_HEIGHT - this.player.bounds.height
     )
-      playerTransform.position.y = PlayScene.WORLD_HEIGHT - this.player.height;
+      playerTransform.position.y = PlayScene.WORLD_HEIGHT - this.player.bounds.height;
 
     if (targetVX < 0) {
       this.player.flip = true;
@@ -270,7 +270,7 @@ class PlayScene extends Scene {
     if (canShoot && isShooting) {
       const fireball = new Circle({
         position: new Vector2(
-          this.player.transform.position.x + this.player.width / 2 - 5,
+          this.player.transform.position.x + this.player.bounds.width / 2 - 5,
           this.player.transform.position.y
         ),
         radius: 5,

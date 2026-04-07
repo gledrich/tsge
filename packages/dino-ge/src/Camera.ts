@@ -19,8 +19,10 @@ export default class Camera {
    * @param viewportHeight Height of the viewport.
    */
   follow(target: GameObject, viewportWidth: number, viewportHeight: number) {
-    this.position.x = (target.transform.position.x + target.width / 2) - (viewportWidth / 2) / this.zoom;
-    this.position.y = (target.transform.position.y + target.height / 2) - (viewportHeight / 2) / this.zoom;
+    const width = target.bounds?.width ?? 0;
+    const height = target.bounds?.height ?? 0;
+    this.position.x = (target.transform.position.x + width / 2) - (viewportWidth / 2) / this.zoom;
+    this.position.y = (target.transform.position.y + height / 2) - (viewportHeight / 2) / this.zoom;
   }
 
   /**

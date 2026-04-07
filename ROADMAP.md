@@ -16,6 +16,7 @@ This document outlines the planned features and milestones for the **Dino Game E
   *   [x] Refactor Engine loop to use decoupled Systems.
   *   [x] Implement Scene Graph (parent-child hierarchy in `TransformComponent`).
   *   [x] Decouple `GameObject` delegation (direct component access).
+  *   [x] Implement `BoundsComponent` and remove monolithic sizing from `GameObject`.
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
   - [ ] Add basic friction and restitution (bounciness) to `Physics`.

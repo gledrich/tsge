@@ -25,6 +25,9 @@ export const resolveComponentPath = (obj: InspectableObject, pathStr: string): {
   } else if (pathStr === 'visible') {
     target = obj.getComponent(Dino.VisibilityComponent);
     propPath = pathStr;
+  } else if (pathStr === 'width' || pathStr === 'height') {
+    target = obj.bounds;
+    propPath = pathStr;
   } else if (pathStr.startsWith('_physics.')) {
     target = obj.getComponent(Dino.PhysicsComponent);
     propPath = pathStr.replace('_physics.', '');

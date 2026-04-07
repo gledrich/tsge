@@ -18,7 +18,9 @@ const SECTIONS: Record<string, PropertyRowDef[]> = {
   ],
   Transform: [
     { label: 'X', type: 'number', propertyPath: 'position.x' },
-    { label: 'Y', type: 'number', propertyPath: 'position.y' }
+    { label: 'Y', type: 'number', propertyPath: 'position.y' },
+    { label: 'Width', type: 'number', propertyPath: 'width' },
+    { label: 'Height', type: 'number', propertyPath: 'height' }
   ],
   Physics: [
     { label: 'Velocity X', type: 'number', propertyPath: '_physics.velocity.x' },

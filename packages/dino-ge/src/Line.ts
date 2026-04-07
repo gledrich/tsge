@@ -1,6 +1,7 @@
 import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import LineComponent from './LineComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Configuration for creating a Line object.
@@ -43,10 +44,6 @@ export default class Line extends GameObject {
 
   /** Gets the starting position of the line. */
   get startPosition() { return new Vector2(this.x1, this.y1); }
-  /** Gets the bounding box width of the line. */
-  get width() { return Math.abs(this.x2 - this.x1); }
-  /** Gets the bounding box height of the line. */
-  get height() { return Math.abs(this.y2 - this.y1); }
 
   constructor(props: LineProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
@@ -64,6 +61,11 @@ export default class Line extends GameObject {
     this.y2 = defaultedProps.p2.y;
     this.metadata.zIndex = defaultedProps.zIndex;
     this.transform.position = defaultedProps.p1;
+
+    const width = Math.abs(this.x2 - this.x1);
+    const height = Math.abs(this.y2 - this.y1);
+    this.bounds = new BoundsComponent(width, height);
+    this.addComponent(this.bounds);
 
     this.addComponent(new LineComponent(this.strokeWidth, defaultedProps.p1, defaultedProps.p2));
 

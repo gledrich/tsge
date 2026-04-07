@@ -3,6 +3,7 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
 import SpriteComponent from './SpriteComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Properties for creating a new Sprite.
@@ -73,20 +74,6 @@ export default class Sprite extends GameObject {
   get frameDuration(): number { return this._spriteComponent.frameDuration; }
   set frameDuration(val: number) { this._spriteComponent.frameDuration = val; }
 
-  /**
-   * Gets the display width of the sprite (scaled by 3).
-   */
-  get width(): number {
-    return this.frameWidth * 3;
-  }
-
-  /**
-   * Gets the display height of the sprite (scaled by 3).
-   */
-  get height(): number {
-    return this.frameHeight * 3;
-  }
-
   constructor(props: SpriteProps) {
     if (!props.tag) {
       throw new Error('You must provide a tag for a Sprite');
@@ -109,6 +96,9 @@ export default class Sprite extends GameObject {
       props.endCol
     );
     this.addComponent(this._spriteComponent);
+
+    this.bounds = new BoundsComponent(this.frameWidth * 3, this.frameHeight * 3);
+    this.addComponent(this.bounds);
 
     this.transform.position = props.position;
     this.registered = false;

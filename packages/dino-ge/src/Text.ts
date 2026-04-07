@@ -3,6 +3,7 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import Input from './Input.js';
 import TextComponent from './TextComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /** Horizontal alignment options for text. */
 export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
@@ -104,14 +105,6 @@ export default class Text extends GameObject {
   get verticalAlign(): VerticalAlign { return this._textComponent.verticalAlign; }
   set verticalAlign(val: VerticalAlign) { this._textComponent.verticalAlign = val; }
 
-  /** Width of the background box or interaction area. */
-  override get width(): number { return this._textComponent.width; }
-  set width(val: number) { this._textComponent.width = val; }
-
-  /** Height of the background box or interaction area. */
-  override get height(): number { return this._textComponent.height; }
-  set height(val: number) { this._textComponent.height = val; }
-
   /** Whether the object should be registered. */
   register: boolean = true;
   /** Whether the object is currently registered. */
@@ -157,6 +150,9 @@ export default class Text extends GameObject {
     );
     this.addComponent(this._textComponent);
 
+    this.bounds = new BoundsComponent(width, height);
+    this.addComponent(this.bounds);
+
     if (defaultedProps.register) {
       this.registerSelf();
     }
@@ -181,11 +177,13 @@ export default class Text extends GameObject {
   }
 
   #mouseClick(pos: Vector2) {
+    const width = this.bounds?.width ?? 0;
+    const height = this.bounds?.height ?? 0;
     if (
       pos.x > this.transform.position.x &&
-      pos.x < this.transform.position.x + this.width &&
+      pos.x < this.transform.position.x + width &&
       pos.y > this.transform.position.y &&
-      pos.y < this.transform.position.y + this.height
+      pos.y < this.transform.position.y + height
     ) {
       if (this.onClick) {
         this.onClick();

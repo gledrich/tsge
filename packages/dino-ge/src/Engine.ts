@@ -360,7 +360,7 @@ export default class Engine {
       const obj = Engine.selectedObject;
       const properties: [string, string | number][] = [
         ['Pos', `${Math.round(obj.transform.position.x)}, ${Math.round(obj.transform.position.y)}`],
-        ['Size', `${Math.round(obj.width)}x${Math.round(obj.height)}`]
+        ['Size', `${Math.round(obj.bounds?.width ?? 0)}x${Math.round(obj.bounds?.height ?? 0)}`]
       ];
 
       const tagComp = obj.metadata;

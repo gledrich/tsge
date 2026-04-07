@@ -2,6 +2,7 @@ import Engine from './Engine.js';
 import Component from './Component.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 import EventBusComponent from './EventBusComponent.js';
 
 /**
@@ -17,6 +18,8 @@ export default abstract class GameObject {
   public readonly transform: TransformComponent;
   /** Component that holds metadata like tags and z-index. */
   public readonly metadata: TagComponent;
+  /** Component that holds dimensions (width and height). */
+  public bounds?: BoundsComponent;
 
   constructor(tag: string, zIndex: number) {
     this.metadata = new TagComponent(tag, zIndex);
@@ -99,11 +102,6 @@ export default abstract class GameObject {
   getComponent<T extends Component>(componentClass: Function & { prototype: T; }): T | undefined {
     return this._components.get(componentClass.name) as T;
   }
-
-  /** The width of the object in pixels. */
-  get width(): number { return 0; }
-  /** The height of the object in pixels. */
-  get height(): number { return 0; }
 
   /**
    * Registers the object with the active scene or global engine loop.

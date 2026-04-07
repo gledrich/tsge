@@ -3,7 +3,7 @@
 This document outlines the strategic roadmap for evolving the **Dino Game Engine (Dino GE)** from a functional prototype into a robust, developer-friendly framework capable of supporting commercial-quality 2D web games.
 
 ## Phase 1: Architectural Overhaul (The Foundation)
-*   **Entity Component System (ECS) (Completed):** Transitioned from strict inheritance to a pure composition-based model. `GameObject` now acts as a thin entity wrapper providing direct access to core components like `TransformComponent` and `TagComponent`. Logic decoupled into `System` architecture (e.g., `PhysicsSystem`, `RenderingSystem`).
+*   **Entity Component System (ECS) (Completed):** Transitioned from strict inheritance to a pure composition-based model. `GameObject` now acts as a thin entity wrapper providing direct access to core components like `TransformComponent`, `TagComponent`, and `BoundsComponent`. Logic decoupled into `System` architecture (e.g., `PhysicsSystem`, `RenderingSystem`).
 *   **Scene Graph Hierarchy (Completed):** Integrated into `TransformComponent` to allow hierarchical propagation of transformations (position, rotation, scale) down the tree.
 *   **Event System / PubSub (Completed):** Decoupled systems using a global event bus (`Engine.on/emit`). Implemented `EventBusComponent` for local entity events. Refactored examples to use event-driven architecture.
 

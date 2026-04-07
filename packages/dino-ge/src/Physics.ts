@@ -27,15 +27,21 @@ export default class Physics {
      } else if (isCircle1 || isCircle2) {
        const circle = (isCircle1 ? obj1 : obj2) as Circle;
        const rect = (isCircle1 ? obj2 : obj1);
-       const closestX = Math.max(rect.transform.position.x, Math.min(circle.center.x, rect.transform.position.x + rect.width));
-       const closestY = Math.max(rect.transform.position.y, Math.min(circle.center.y, rect.transform.position.y + rect.height));
+       const rectWidth = rect.bounds?.width ?? 0;
+       const rectHeight = rect.bounds?.height ?? 0;
+       const closestX = Math.max(rect.transform.position.x, Math.min(circle.center.x, rect.transform.position.x + rectWidth));
+       const closestY = Math.max(rect.transform.position.y, Math.min(circle.center.y, rect.transform.position.y + rectHeight));
        isColliding = Vector2.distance(circle.center, new Vector2(closestX, closestY)) < circle.radius;
      } else {
+       const w1 = obj1.bounds?.width ?? 0;
+       const h1 = obj1.bounds?.height ?? 0;
+       const w2 = obj2.bounds?.width ?? 0;
+       const h2 = obj2.bounds?.height ?? 0;
        isColliding = (
-         obj1.transform.position.x < obj2.transform.position.x + obj2.width &&
-         obj1.transform.position.x + obj1.width > obj2.transform.position.x &&
-         obj1.transform.position.y < obj2.transform.position.y + obj2.height &&
-         obj1.transform.position.y + obj1.height > obj2.transform.position.y
+         obj1.transform.position.x < obj2.transform.position.x + w2 &&
+         obj1.transform.position.x + w1 > obj2.transform.position.x &&
+         obj1.transform.position.y < obj2.transform.position.y + h2 &&
+         obj1.transform.position.y + h1 > obj2.transform.position.y
        );
      }
 
@@ -49,14 +55,19 @@ export default class Physics {
      return isColliding;
    }
   private static resolveCollision(obj1: GameObject, obj2: GameObject, obj1Static: boolean, obj2Static: boolean) {
+    const w1 = obj1.bounds?.width ?? 0;
+    const h1 = obj1.bounds?.height ?? 0;
+    const w2 = obj2.bounds?.width ?? 0;
+    const h2 = obj2.bounds?.height ?? 0;
+
     // Calculate overlap
     const overlapX = Math.min(
-      obj1.transform.position.x + obj1.width - obj2.transform.position.x,
-      obj2.transform.position.x + obj2.width - obj1.transform.position.x
+      obj1.transform.position.x + w1 - obj2.transform.position.x,
+      obj2.transform.position.x + w2 - obj1.transform.position.x
     );
     const overlapY = Math.min(
-      obj1.transform.position.y + obj1.height - obj2.transform.position.y,
-      obj2.transform.position.y + obj2.height - obj1.transform.position.y
+      obj1.transform.position.y + h1 - obj2.transform.position.y,
+      obj2.transform.position.y + h2 - obj1.transform.position.y
     );
 
     // Push apart

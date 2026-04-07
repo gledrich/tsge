@@ -11,8 +11,8 @@ describe('Circle', () => {
     
     expect(circle.transform.position.x).toBe(10);
     expect(circle.radius).toBe(25);
-    expect(circle.width).toBe(50);
-    expect(circle.height).toBe(50);
+    expect(circle.bounds?.width).toBe(50);
+    expect(circle.bounds?.height).toBe(50);
     expect(circle.colour).toBe('black');
     expect(circle.metadata.zIndex).toBe(0);
   });

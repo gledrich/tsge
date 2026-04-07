@@ -11,8 +11,8 @@ describe('Rectangle', () => {
     });
     
     expect(rect.transform.position.x).toBe(10);
-    expect(rect.width).toBe(100);
-    expect(rect.height).toBe(50);
+    expect(rect.bounds?.width).toBe(100);
+    expect(rect.bounds?.height).toBe(50);
     expect(rect.colour).toBe('black');
     expect(rect.metadata.zIndex).toBe(0);
   });

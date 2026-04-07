@@ -1,6 +1,7 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import ShapeComponent from './ShapeComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Configuration for creating a Circle object.
@@ -33,11 +34,6 @@ export default class Circle extends GameObject {
   /** Fill colour. */
   colour: string;
 
-  /** Width of the circle (radius * 2). */
-  get width() { return this.radius * 2; }
-  /** Height of the circle (radius * 2). */
-  get height() { return this.radius * 2; }
-
   /** Center point of the circle. */
   get center(): Vector2 {
     return new Vector2(
@@ -65,6 +61,8 @@ export default class Circle extends GameObject {
     this.metadata.tag = defaultedProps.tag;
     this.transform.position = defaultedProps.position;
     this.radius = defaultedProps.radius;
+    this.bounds = new BoundsComponent(this.radius * 2, this.radius * 2);
+    this.addComponent(this.bounds);
     this.colour = defaultedProps.colour;
     this.metadata.zIndex = defaultedProps.zIndex;
 

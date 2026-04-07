@@ -15,16 +15,13 @@ jest.mock('./Engine', () => ({
   }
 }));
 
+import BoundsComponent from './BoundsComponent';
+
 class MockGameObject extends GameObject {
   constructor(tag: string, zIndex: number, width: number = 10, height: number = 10) {
     super(tag, zIndex);
-    this._width = width;
-    this._height = height;
+    this.bounds = new BoundsComponent(width, height);
   }
-  private _width: number;
-  private _height: number;
-  get width() { return this._width; }
-  get height() { return this._height; }
 }
 
 class MockRenderComponent extends RenderComponent {
