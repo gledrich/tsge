@@ -60,14 +60,12 @@ export default abstract class GameObject {
 
   /**
    * A unique identifier for the object type.
-   * @deprecated Use getComponent(TagComponent).tag
    */
   get tag(): string { return this._tag.tag; }
   set tag(val: string) { this._tag.tag = val; }
 
   /**
    * Rendering order (lower is background, higher is foreground).
-   * @deprecated Use getComponent(TagComponent).zIndex
    */
   get zIndex(): number { return this._tag.zIndex; }
   set zIndex(val: number) { this._tag.zIndex = val; }
