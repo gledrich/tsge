@@ -9,12 +9,13 @@ This document outlines the planned features and milestones for the **Dino Game E
   - [ ] Add Gamepad API support for controller input.
 - **Entity Component System (ECS):**
   *   [x] Implement foundation: `Component`, `PhysicsComponent`, `TransformComponent`, `TagComponent`, `VisibilityComponent`.
-  *   [x] Refactor `GameObject` to act as an Entity.
+  *   [x] Refactor `GameObject` to act as an Entity (Pure ECS access).
   *   [x] Implement `System` architecture and `PhysicsSystem`.
   *   [x] Decouple Rendering logic into `RenderingSystem` and specialized RenderComponents.
   *   [x] Build out global and local Event Bus (PubSub) system.
   *   [x] Refactor Engine loop to use decoupled Systems.
-  *   [x] Implement Scene Graph (parent-child hierarchy).
+  *   [x] Implement Scene Graph (parent-child hierarchy in `TransformComponent`).
+  *   [x] Decouple `GameObject` delegation (direct component access).
 - **Collision Resolution:**
   - [ ] Move beyond Boolean checks to basic AABB collision response (preventing overlap).
   - [ ] Add basic friction and restitution (bounciness) to `Physics`.
