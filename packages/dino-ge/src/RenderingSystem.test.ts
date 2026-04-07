@@ -87,7 +87,7 @@ describe('RenderingSystem', () => {
     
     // Object way off screen
     const obj = new MockGameObject('offscreen', 0);
-    obj.position = new Vector2(1000, 1000);
+    obj.transform.position = new Vector2(1000, 1000);
     const render = new MockRenderComponent();
     obj.addComponent(render);
 

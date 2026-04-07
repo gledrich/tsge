@@ -23,7 +23,7 @@ describe('ShapeComponent', () => {
   it('draws a rectangle to the context', () => {
     const component = new ShapeComponent('rect', 'green', 10, 20);
     const obj = new MockGameObject('test', 0);
-    obj.position = new Vector2(100, 100);
+    obj.transform.position = new Vector2(100, 100);
     component.gameObject = obj;
 
     const mockCtx = {

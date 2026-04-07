@@ -41,8 +41,8 @@ export default class Circle extends GameObject {
   /** Center point of the circle. */
   get center(): Vector2 {
     return new Vector2(
-      this.position.x + this.radius,
-      this.position.y + this.radius
+      this.transform.position.x + this.radius,
+      this.transform.position.y + this.radius
     );
   }
 
@@ -62,11 +62,11 @@ export default class Circle extends GameObject {
       throw new Error('You must provide a radius for Circle');
     }
 
-    this.tag = defaultedProps.tag;
-    this.localPosition = defaultedProps.position;
+    this.metadata.tag = defaultedProps.tag;
+    this.transform.position = defaultedProps.position;
     this.radius = defaultedProps.radius;
     this.colour = defaultedProps.colour;
-    this.zIndex = defaultedProps.zIndex;
+    this.metadata.zIndex = defaultedProps.zIndex;
 
     this.addComponent(new ShapeComponent('circle', this.colour, this.radius));
 

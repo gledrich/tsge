@@ -1,5 +1,11 @@
 import Camera from './Camera';
 import Vector2 from './Vector2';
+import GameObject from './GameObject';
+
+class MockGameObject extends GameObject {
+  get width() { return 50; }
+  get height() { return 50; }
+}
 
 describe('Camera', () => {
   it('initialises with default values', () => {
@@ -11,11 +17,8 @@ describe('Camera', () => {
 
   it('follows a target correctly', () => {
     const camera = new Camera();
-    const target = {
-      position: new Vector2(100, 100),
-      width: 50,
-      height: 50
-    };
+    const target = new MockGameObject('test', 0);
+    target.transform.position = new Vector2(100, 100);
     
     // Viewport 800x600. Target center is (125, 125).
     // Camera pos should be 125 - 400 = -275, 125 - 300 = -175

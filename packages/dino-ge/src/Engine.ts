@@ -7,7 +7,6 @@ import System from './System.js';
 import PhysicsSystem from './PhysicsSystem.js';
 import RenderingSystem from './RenderingSystem.js';
 import PhysicsComponent from './PhysicsComponent.js';
-import TagComponent from './TagComponent.js';
 
 /**
  * Options for initializing the Engine.
@@ -360,11 +359,11 @@ export default class Engine {
       y += statsHeight + 10;
       const obj = Engine.selectedObject;
       const properties: [string, string | number][] = [
-        ['Pos', `${Math.round(obj.position.x)}, ${Math.round(obj.position.y)}`],
+        ['Pos', `${Math.round(obj.transform.position.x)}, ${Math.round(obj.transform.position.y)}`],
         ['Size', `${Math.round(obj.width)}x${Math.round(obj.height)}`]
       ];
 
-      const tagComp = obj.getComponent(TagComponent);
+      const tagComp = obj.metadata;
       if (tagComp) {
         properties.unshift(['Tag', tagComp.tag]);
         properties.push(['Z-Index', tagComp.zIndex]);
@@ -395,7 +394,7 @@ export default class Engine {
   }
 
   #findAllObjects(tag: string = '') {
-    return Array.from(Engine.objects).filter((obj) => obj.tag === tag);
+    return Array.from(Engine.objects).filter((obj) => obj.metadata.tag === tag);
   }
 
   /**

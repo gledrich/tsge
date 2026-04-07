@@ -110,7 +110,7 @@ export default class Sprite extends GameObject {
     );
     this.addComponent(this._spriteComponent);
 
-    this.localPosition = props.position;
+    this.transform.position = props.position;
     this.registered = false;
   }
 

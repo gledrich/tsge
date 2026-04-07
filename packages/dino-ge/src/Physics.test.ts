@@ -110,13 +110,13 @@ describe('Physics', () => {
       
       r2.addComponent(new PhysicsComponent());
       
-      const initialR2X = r2.position.x;
+      const initialR2X = r2.transform.position.x;
       Physics.checkCollision(r1, r2);
       
       // r2 should have been pushed right
-      expect(r2.position.x).toBeGreaterThan(initialR2X);
+      expect(r2.transform.position.x).toBeGreaterThan(initialR2X);
       // r1 should remain at 0
-      expect(r1.position.x).toBe(0);
+      expect(r1.transform.position.x).toBe(0);
     });
   });
 });

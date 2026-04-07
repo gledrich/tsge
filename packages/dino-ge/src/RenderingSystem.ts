@@ -43,15 +43,15 @@ export default class RenderingSystem extends System {
     this.ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
 
     // Sort entities by zIndex for correct draw order
-    const sorted = Array.from(entities).sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
+    const sorted = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
 
     sorted.forEach((object) => {
       // Frustum Culling
       if (
-        object.position.x < bounds.x + bounds.width &&
-        object.position.x + object.width > bounds.x &&
-        object.position.y < bounds.y + bounds.height &&
-        object.position.y + object.height > bounds.y
+        object.transform.position.x < bounds.x + bounds.width &&
+        object.transform.position.x + object.width > bounds.x &&
+        object.transform.position.y < bounds.y + bounds.height &&
+        object.transform.position.y + object.height > bounds.y
       ) {
         // Find any RenderComponent on the entity
         const renderable = object.getComponent(RenderComponent);
@@ -67,11 +67,11 @@ export default class RenderingSystem extends System {
           this.ctx.save();
           this.ctx.strokeStyle = object === Engine.selectedObject ? '#00ff00' : 'red';
           this.ctx.lineWidth = (object === Engine.selectedObject ? 2 : 1) / Engine.camera.zoom;
-          this.ctx.strokeRect(object.position.x, object.position.y, object.width, object.height);
+          this.ctx.strokeRect(object.transform.position.x, object.transform.position.y, object.width, object.height);
 
           this.ctx.font = `${12 / Engine.camera.zoom}px monospace`;
           this.ctx.fillStyle = this.ctx.strokeStyle;
-          this.ctx.fillText(object.tag || 'obj', object.position.x, object.position.y - (5 / Engine.camera.zoom));
+          this.ctx.fillText(object.metadata.tag || 'obj', object.transform.position.x, object.transform.position.y - (5 / Engine.camera.zoom));
           this.ctx.restore();
         }
       }

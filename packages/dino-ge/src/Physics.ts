@@ -27,15 +27,15 @@ export default class Physics {
      } else if (isCircle1 || isCircle2) {
        const circle = (isCircle1 ? obj1 : obj2) as Circle;
        const rect = (isCircle1 ? obj2 : obj1);
-       const closestX = Math.max(rect.position.x, Math.min(circle.center.x, rect.position.x + rect.width));
-       const closestY = Math.max(rect.position.y, Math.min(circle.center.y, rect.position.y + rect.height));
+       const closestX = Math.max(rect.transform.position.x, Math.min(circle.center.x, rect.transform.position.x + rect.width));
+       const closestY = Math.max(rect.transform.position.y, Math.min(circle.center.y, rect.transform.position.y + rect.height));
        isColliding = Vector2.distance(circle.center, new Vector2(closestX, closestY)) < circle.radius;
      } else {
        isColliding = (
-         obj1.position.x < obj2.position.x + obj2.width &&
-         obj1.position.x + obj1.width > obj2.position.x &&
-         obj1.position.y < obj2.position.y + obj2.height &&
-         obj1.position.y + obj1.height > obj2.position.y
+         obj1.transform.position.x < obj2.transform.position.x + obj2.width &&
+         obj1.transform.position.x + obj1.width > obj2.transform.position.x &&
+         obj1.transform.position.y < obj2.transform.position.y + obj2.height &&
+         obj1.transform.position.y + obj1.height > obj2.transform.position.y
        );
      }
 
@@ -51,30 +51,30 @@ export default class Physics {
   private static resolveCollision(obj1: GameObject, obj2: GameObject, obj1Static: boolean, obj2Static: boolean) {
     // Calculate overlap
     const overlapX = Math.min(
-      obj1.position.x + obj1.width - obj2.position.x,
-      obj2.position.x + obj2.width - obj1.position.x
+      obj1.transform.position.x + obj1.width - obj2.transform.position.x,
+      obj2.transform.position.x + obj2.width - obj1.transform.position.x
     );
     const overlapY = Math.min(
-      obj1.position.y + obj1.height - obj2.position.y,
-      obj2.position.y + obj2.height - obj1.position.y
+      obj1.transform.position.y + obj1.height - obj2.transform.position.y,
+      obj2.transform.position.y + obj2.height - obj1.transform.position.y
     );
 
     // Push apart
     if (overlapX < overlapY) {
-      if (obj1.position.x < obj2.position.x) {
-        if (!obj1Static) obj1.localPosition.x -= overlapX / 2;
-        if (!obj2Static) obj2.localPosition.x += overlapX / 2;
+      if (obj1.transform.position.x < obj2.transform.position.x) {
+        if (!obj1Static) obj1.transform.position.x -= overlapX / 2;
+        if (!obj2Static) obj2.transform.position.x += overlapX / 2;
       } else {
-        if (!obj1Static) obj1.localPosition.x += overlapX / 2;
-        if (!obj2Static) obj2.localPosition.x -= overlapX / 2;
+        if (!obj1Static) obj1.transform.position.x += overlapX / 2;
+        if (!obj2Static) obj2.transform.position.x -= overlapX / 2;
       }
     } else {
-      if (obj1.position.y < obj2.position.y) {
-        if (!obj1Static) obj1.localPosition.y -= overlapY / 2;
-        if (!obj2Static) obj2.localPosition.y += overlapY / 2;
+      if (obj1.transform.position.y < obj2.transform.position.y) {
+        if (!obj1Static) obj1.transform.position.y -= overlapY / 2;
+        if (!obj2Static) obj2.transform.position.y += overlapY / 2;
       } else {
-        if (!obj1Static) obj1.localPosition.y += overlapY / 2;
-        if (!obj2Static) obj2.localPosition.y -= overlapY / 2;
+        if (!obj1Static) obj1.transform.position.y += overlapY / 2;
+        if (!obj2Static) obj2.transform.position.y -= overlapY / 2;
       }
     }
   }

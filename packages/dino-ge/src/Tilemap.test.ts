@@ -30,7 +30,7 @@ describe('Tilemap', () => {
 
   it('initialises correctly and calls ResourceLoader', () => {
     const tilemap = new Tilemap(mockProps);
-    expect(tilemap.tag).toBe('background');
+    expect(tilemap.metadata.tag).toBe('background');
     expect(ResourceLoader.getImage).toHaveBeenCalledWith('tiles');
     expect(tilemap.hasComponent(TilemapComponent)).toBe(true);
   });
@@ -43,8 +43,8 @@ describe('Tilemap', () => {
       tilesetCols: 1,
       position: new Vector2(0, 0)
     });
-    expect(tm.tag).toBe('tilemap');
-    expect(tm.zIndex).toBe(0);
+    expect(tm.metadata.tag).toBe('tilemap');
+    expect(tm.metadata.zIndex).toBe(0);
   });
 
   it('calculates width and height correctly', () => {

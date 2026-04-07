@@ -34,6 +34,6 @@ describe('PhysicsSystem', () => {
     // 50 velocity * 0.1 delta = 5 units movement
     system.fixedUpdate(entities, 0.1);
     
-    expect(obj.localPosition.x).toBe(5);
+    expect(obj.transform.position.x).toBe(5);
   });
 });

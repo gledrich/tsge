@@ -14,11 +14,13 @@ describe('Line', () => {
       zIndex: 2
     });
     
-    expect(line.tag).toBe('boundary');
-    expect(line.zIndex).toBe(2);
+    expect(line.metadata.tag).toBe('boundary');
+    expect(line.metadata.zIndex).toBe(2);
     expect(line.strokeWidth).toBe(5);
-    expect(line.position.x).toBe(10);
-    expect(line.position.y).toBe(10);
+    expect(line.transform.position.x).toBe(10);
+    expect(line.transform.position.y).toBe(10);
+    expect(line.startPosition.x).toBe(10);
+    expect(line.startPosition.y).toBe(10);
   });
 
   it('calculates bounding box width and height correctly', () => {

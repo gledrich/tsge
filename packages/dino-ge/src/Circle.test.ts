@@ -9,12 +9,12 @@ describe('Circle', () => {
       radius: 25
     });
     
-    expect(circle.position.x).toBe(10);
+    expect(circle.transform.position.x).toBe(10);
     expect(circle.radius).toBe(25);
     expect(circle.width).toBe(50);
     expect(circle.height).toBe(50);
     expect(circle.colour).toBe('black');
-    expect(circle.zIndex).toBe(0);
+    expect(circle.metadata.zIndex).toBe(0);
   });
 
   it('calculates center point correctly', () => {

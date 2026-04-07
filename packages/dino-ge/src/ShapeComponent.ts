@@ -33,7 +33,7 @@ export default class ShapeComponent extends RenderComponent {
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.gameObject) return;
 
-    const { position, rotation, scale } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject.transform;
     
     ctx.save();
     ctx.translate(position.x, position.y);

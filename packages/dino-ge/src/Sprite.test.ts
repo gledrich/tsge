@@ -36,7 +36,7 @@ describe('Sprite', () => {
 
   it('initialises correctly', () => {
     const sprite = new Sprite(mockProps);
-    expect(sprite.tag).toBe('player');
+    expect(sprite.metadata.tag).toBe('player');
     expect(sprite.rows).toBe(1);
     expect(sprite.cols).toBe(10);
     expect(sprite.hasComponent(SpriteComponent)).toBe(true);

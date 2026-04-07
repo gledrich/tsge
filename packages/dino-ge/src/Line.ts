@@ -42,7 +42,7 @@ export default class Line extends GameObject {
   y2: number;
 
   /** Gets the starting position of the line. */
-  get position() { return new Vector2(this.x1, this.y1); }
+  get startPosition() { return new Vector2(this.x1, this.y1); }
   /** Gets the bounding box width of the line. */
   get width() { return Math.abs(this.x2 - this.x1); }
   /** Gets the bounding box height of the line. */
@@ -56,11 +56,14 @@ export default class Line extends GameObject {
       ...props,
     };
 
+    this.metadata.tag = defaultedProps.tag;
     this.strokeWidth = defaultedProps.width;
     this.x1 = defaultedProps.p1.x;
     this.y1 = defaultedProps.p1.y;
     this.x2 = defaultedProps.p2.x;
     this.y2 = defaultedProps.p2.y;
+    this.metadata.zIndex = defaultedProps.zIndex;
+    this.transform.position = defaultedProps.p1;
 
     this.addComponent(new LineComponent(this.strokeWidth, defaultedProps.p1, defaultedProps.p2));
 

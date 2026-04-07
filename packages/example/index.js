@@ -180,7 +180,7 @@ class PlayScene extends Scene {
       width: 100,
       zIndex: 6
     });
-    this.player.addChild(this.nameTag);
+    this.player.transform.addChild(this.nameTag);
 
     // Group UI elements under a container
     this.uiContainer = new Rectangle({
@@ -214,8 +214,8 @@ class PlayScene extends Scene {
       register: false
     });
 
-    this.uiContainer.addChild(this.scoreText);
-    this.uiContainer.addChild(this.livesText);
+    this.uiContainer.transform.addChild(this.scoreText);
+    this.uiContainer.transform.addChild(this.livesText);
   }
 
   update() {
@@ -270,8 +270,8 @@ class PlayScene extends Scene {
     if (canShoot && isShooting) {
       const fireball = new Circle({
         position: new Vector2(
-          this.player.position.x + this.player.width / 2 - 5,
-          this.player.position.y
+          this.player.transform.position.x + this.player.width / 2 - 5,
+          this.player.transform.position.y
         ),
         radius: 5,
         colour: '#FFB703',
@@ -286,7 +286,7 @@ class PlayScene extends Scene {
 
     // Cleanup off-screen fireballs
     this.fireballs = this.fireballs.filter((fb) => {
-      if (fb.position.y < Engine.camera.position.y - 50) {
+      if (fb.transform.position.y < Engine.camera.position.y - 50) {
         fb.destroySelf();
         return false;
       }
@@ -299,7 +299,7 @@ class PlayScene extends Scene {
       this.meteors = this.meteors.filter((m) => {
         if (Physics.checkCollision(fb, m)) {
           console.log(`Meteor destroyed! Score +10. Total: ${this.score + 10}`);
-          this.spawnExplosion(m.position, m.radius, m.colour);
+          this.spawnExplosion(m.transform.position, m.radius, m.colour);
           m.destroySelf();
           this.score += 10;
           this.shakeIntensity = Math.max(this.shakeIntensity, 5); // Small shake on destroy
@@ -353,17 +353,17 @@ class PlayScene extends Scene {
     }
 
     // Keep UI fixed by moving the container with camera
-    this.uiContainer.localPosition.x = Engine.camera.position.x;
-    this.uiContainer.localPosition.y = Engine.camera.position.y;
+    this.uiContainer.transform.position.x = Engine.camera.position.x;
+    this.uiContainer.transform.position.y = Engine.camera.position.y;
 
     // Star drift (Parallax)
     this.starsMid.forEach((star) => {
-      star.position.y += star.speed;
-      if (star.position.y > PlayScene.WORLD_HEIGHT) star.position.y = 0;
+      star.transform.position.y += star.speed;
+      if (star.transform.position.y > PlayScene.WORLD_HEIGHT) star.transform.position.y = 0;
     });
     this.starsNear.forEach((star) => {
-      star.position.y += star.speed;
-      if (star.position.y > PlayScene.WORLD_HEIGHT) star.position.y = 0;
+      star.transform.position.y += star.speed;
+      if (star.transform.position.y > PlayScene.WORLD_HEIGHT) star.transform.position.y = 0;
     });
 
     // Spawn Meteors (Spawn within camera view)
@@ -410,13 +410,13 @@ class PlayScene extends Scene {
         } else {
           this.isInvulnerable = true;
           this.lastHitTime = Date.now();
-          this.spawnExplosion(this.player.position, 20, '#F94144'); // Mini explosion on hit
+          this.spawnExplosion(this.player.transform.position, 20, '#F94144'); // Mini explosion on hit
           return false; // Destroy the meteor that hit us
         }
       }
 
       if (
-        meteor.position.y >
+        meteor.transform.position.y >
         Engine.camera.position.y + window.innerHeight + 100
       ) {
         meteor.destroySelf();

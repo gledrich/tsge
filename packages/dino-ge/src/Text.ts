@@ -132,7 +132,7 @@ export default class Text extends GameObject {
     const font = `${this.fontSize}px ${defaultedProps.font}`;
     const text = defaultedProps.text;
     this.length = defaultedProps.text.length;
-    this.localPosition = defaultedProps.position;
+    this.transform.position = defaultedProps.position;
     const horizontalAlign: HorizontalAlign = defaultedProps.horizontalAlign as HorizontalAlign;
     const verticalAlign: VerticalAlign = defaultedProps.verticalAlign as VerticalAlign;
     const width = defaultedProps.width || this.fontSize * this.length;
@@ -182,10 +182,10 @@ export default class Text extends GameObject {
 
   #mouseClick(pos: Vector2) {
     if (
-      pos.x > this.position.x &&
-      pos.x < this.position.x + this.width &&
-      pos.y > this.position.y &&
-      pos.y < this.position.y + this.height
+      pos.x > this.transform.position.x &&
+      pos.x < this.transform.position.x + this.width &&
+      pos.y > this.transform.position.y &&
+      pos.y < this.transform.position.y + this.height
     ) {
       if (this.onClick) {
         this.onClick();

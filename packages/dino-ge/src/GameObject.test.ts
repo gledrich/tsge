@@ -3,7 +3,6 @@ import TagComponent from './TagComponent';
 import TransformComponent from './TransformComponent';
 import EventBusComponent from './EventBusComponent';
 import Component from './Component';
-import Vector2 from './Vector2';
 
 class MockGameObject extends GameObject {}
 class MockComponent extends Component {}
@@ -41,43 +40,24 @@ describe('GameObject', () => {
     expect(callback).toHaveBeenCalled();
   });
 
-  it('synchronises legacy properties with TagComponent', () => {
+  it('provides direct access to core components', () => {
     const obj = new MockGameObject('player', 10);
-    expect(obj.tag).toBe('player');
-    expect(obj.zIndex).toBe(10);
-    
-    obj.tag = 'enemy';
-    obj.zIndex = 5;
-    
-    const tagComp = obj.getComponent(TagComponent)!;
-    expect(tagComp.tag).toBe('enemy');
-    expect(tagComp.zIndex).toBe(5);
+    expect(obj.metadata).toBeInstanceOf(TagComponent);
+    expect(obj.transform).toBeInstanceOf(TransformComponent);
+    expect(obj.metadata.tag).toBe('player');
+    expect(obj.metadata.zIndex).toBe(10);
   });
 
-  it('synchronises transformation properties with TransformComponent', () => {
-    const obj = new MockGameObject('test', 0);
-    obj.position = new Vector2(10, 20);
-    obj.rotation = 1.5;
-    obj.scale = new Vector2(2, 2);
-    
-    const transform = obj.getComponent(TransformComponent)!;
-    expect(transform.position.x).toBe(10);
-    expect(transform.position.y).toBe(20);
-    expect(transform.rotation).toBe(1.5);
-    expect(transform.scale.x).toBe(2);
-    expect(transform.scale.y).toBe(2);
-  });
-
-  it('manages parent-child relationships', () => {
+  it('manages parent-child relationships via transform', () => {
     const parent = new MockGameObject('parent', 0);
     const child = new MockGameObject('child', 0);
     
-    parent.addChild(child);
-    expect(child.parent).toBe(parent);
-    expect(parent.getComponent(TransformComponent)!.children.size).toBe(1);
+    parent.transform.addChild(child.transform);
+    expect(child.transform.parent).toBe(parent.transform);
+    expect(parent.transform.children.has(child.transform)).toBe(true);
     
-    parent.removeChild(child);
-    expect(child.parent).toBeUndefined();
-    expect(parent.getComponent(TransformComponent)!.children.size).toBe(0);
+    parent.transform.removeChild(child.transform);
+    expect(child.transform.parent).toBeUndefined();
+    expect(parent.transform.children.has(child.transform)).toBe(false);
   });
 });

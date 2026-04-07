@@ -19,6 +19,32 @@ export default class TransformComponent extends Component {
   children: Set<TransformComponent> = new Set();
 
   /**
+   * Adds a child transform to this one.
+   * @param child The child transform to add.
+   */
+  addChild(child: TransformComponent) {
+    if (child.parent === this) return;
+    
+    if (child.parent) {
+      child.parent.children.delete(child);
+    }
+    
+    child.parent = this;
+    this.children.add(child);
+  }
+
+  /**
+   * Removes a child transform from this one.
+   * @param child The child transform to remove.
+   */
+  removeChild(child: TransformComponent) {
+    if (child.parent === this) {
+      child.parent = undefined;
+      this.children.delete(child);
+    }
+  }
+
+  /**
    * Calculates the world-space position.
    */
   get worldPosition(): Vector2 {

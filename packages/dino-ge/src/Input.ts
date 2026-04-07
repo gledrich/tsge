@@ -33,14 +33,14 @@ export default class Input {
         let found = false;
 
         // Check objects from top to bottom (zIndex)
-        const sorted = Array.from(objects).sort((a, b) => (b.zIndex > a.zIndex ? 1 : -1));
+        const sorted = Array.from(objects).sort((a, b) => (b.metadata.zIndex > a.metadata.zIndex ? 1 : -1));
 
         for (const obj of sorted) {
           if (
-            pos.x > obj.position.x &&
-            pos.x < obj.position.x + obj.width &&
-            pos.y > obj.position.y &&
-            pos.y < obj.position.y + obj.height
+            pos.x > obj.transform.position.x &&
+            pos.x < obj.transform.position.x + obj.width &&
+            pos.y > obj.transform.position.y &&
+            pos.y < obj.transform.position.y + obj.height
           ) {
             Engine.selectedObject = obj;
             found = true;

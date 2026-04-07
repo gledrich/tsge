@@ -1,5 +1,4 @@
 import Engine from './Engine.js';
-import Vector2 from './Vector2.js';
 import Component from './Component.js';
 import TransformComponent from './TransformComponent.js';
 import TagComponent from './TagComponent.js';
@@ -14,16 +13,17 @@ export default abstract class GameObject {
   /** Collection of components attached to this entity. */
   private _components: Map<string, Component> = new Map();
 
-  /** Internal components for backward compatibility and core logic. */
-  private _transform: TransformComponent;
-  private _tag: TagComponent;
+  /** Component that holds spatial transformation data. */
+  public readonly transform: TransformComponent;
+  /** Component that holds metadata like tags and z-index. */
+  public readonly metadata: TagComponent;
 
   constructor(tag: string, zIndex: number) {
-    this._tag = new TagComponent(tag, zIndex);
-    this.addComponent(this._tag);
+    this.metadata = new TagComponent(tag, zIndex);
+    this.addComponent(this.metadata);
 
-    this._transform = new TransformComponent();
-    this.addComponent(this._transform);
+    this.transform = new TransformComponent();
+    this.addComponent(this.transform);
   }
 
   /**
@@ -56,83 +56,6 @@ export default abstract class GameObject {
    */
   emit(type: string, detail?: unknown) {
     this.getComponent(EventBusComponent)?.emit(type, detail);
-  }
-
-  /**
-   * A unique identifier for the object type.
-   */
-  get tag(): string { return this._tag.tag; }
-  set tag(val: string) { this._tag.tag = val; }
-
-  /**
-   * Rendering order (lower is background, higher is foreground).
-   */
-  get zIndex(): number { return this._tag.zIndex; }
-  set zIndex(val: number) { this._tag.zIndex = val; }
-
-  /**
-   * The world-space position of the object.
-   * Getter returns world position, setter sets local position.
-   */
-  get position(): Vector2 { return this._transform.worldPosition; }
-  set position(val: Vector2) { this._transform.position = val; }
-
-  /**
-   * The local position relative to the parent.
-   */
-  get localPosition(): Vector2 { return this._transform.position; }
-  set localPosition(val: Vector2) { this._transform.position = val; }
-
-  /**
-   * The world-space rotation in radians.
-   */
-  get rotation(): number { return this._transform.worldRotation; }
-  set rotation(val: number) { this._transform.rotation = val; }
-
-  /**
-   * The local rotation in radians relative to the parent.
-   */
-  get localRotation(): number { return this._transform.rotation; }
-  set localRotation(val: number) { this._transform.rotation = val; }
-
-  /**
-   * The local scale relative to the parent.
-   */
-  get scale(): Vector2 { return this._transform.scale; }
-  set scale(val: Vector2) { this._transform.scale = val; }
-
-  /**
-   * Adds a child GameObject to this entity.
-   * @param child The child entity to add.
-   */
-  addChild(child: GameObject) {
-    child._transform.parent = this._transform;
-    this._transform.children.add(child._transform);
-  }
-
-  /**
-   * Removes a child GameObject from this entity.
-   * @param child The child entity to remove.
-   */
-  removeChild(child: GameObject) {
-    if (child._transform.parent === this._transform) {
-      child._transform.parent = undefined;
-      this._transform.children.delete(child._transform);
-    }
-  }
-
-  /**
-   * Gets or sets the parent GameObject.
-   */
-  get parent(): GameObject | undefined {
-    return this._transform.parent?.gameObject;
-  }
-  set parent(val: GameObject | undefined) {
-    if (this._transform.parent) {
-      this._transform.parent.children.delete(this._transform);
-    }
-    this._transform.parent = val?._transform;
-    val?._transform.children.add(this._transform);
   }
 
   /**

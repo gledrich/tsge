@@ -20,7 +20,7 @@ export const resolveComponentPath = (obj: InspectableObject, pathStr: string): {
   let propPath = pathStr;
 
   if (pathStr === 'tag' || pathStr === 'zIndex') {
-    target = obj.getComponent(Dino.TagComponent);
+    target = obj.metadata;
     propPath = pathStr;
   } else if (pathStr === 'visible') {
     target = obj.getComponent(Dino.VisibilityComponent);
@@ -35,8 +35,8 @@ export const resolveComponentPath = (obj: InspectableObject, pathStr: string): {
   const paths = propPath.split('.');
   if (paths.length === 2) {
     if (paths[0] === 'position') {
-      // Use localPosition so we can read and write to the actual Vector2 reference
-      return { target: obj.localPosition, prop: paths[1] };
+      // Use transform.position so we can read and write to the actual Vector2 reference
+      return { target: obj.transform.position, prop: paths[1] };
     }
     return { target: target[paths[0]], prop: paths[1] };
   }
@@ -141,7 +141,7 @@ const InspectorRow: React.FC<{
 
   // Trigger a code sync when the user leaves the input
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const tag = selectedObject.getComponent(Dino.TagComponent)?.tag;
+    const tag = selectedObject.metadata.tag;
     if (!tag) return;
 
     const val = parseValue(e);

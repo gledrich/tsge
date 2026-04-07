@@ -72,7 +72,7 @@ export default class SpriteComponent extends RenderComponent {
       endCol,
     } = this;
 
-    const { position, rotation, scale } = this.gameObject;
+    const { position, rotation, scale } = this.gameObject.transform;
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';

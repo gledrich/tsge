@@ -21,8 +21,8 @@ export default class PhysicsSystem extends System {
         physics.velocity.y += physics.acceleration.y * fixedDelta;
 
         // Apply velocity to local position
-        object.localPosition.x += physics.velocity.x * fixedDelta;
-        object.localPosition.y += physics.velocity.y * fixedDelta;
+        object.transform.position.x += physics.velocity.x * fixedDelta;
+        object.transform.position.y += physics.velocity.y * fixedDelta;
       }
     });
   }

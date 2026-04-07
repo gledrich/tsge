@@ -1,4 +1,5 @@
 import Vector2 from './Vector2.js';
+import type GameObject from './GameObject.js';
 
 /**
  * Manages the viewport and transformation of the game world.
@@ -17,9 +18,9 @@ export default class Camera {
    * @param viewportWidth Width of the viewport.
    * @param viewportHeight Height of the viewport.
    */
-  follow(target: { position: Vector2, width: number, height: number }, viewportWidth: number, viewportHeight: number) {
-    this.position.x = (target.position.x + target.width / 2) - (viewportWidth / 2) / this.zoom;
-    this.position.y = (target.position.y + target.height / 2) - (viewportHeight / 2) / this.zoom;
+  follow(target: GameObject, viewportWidth: number, viewportHeight: number) {
+    this.position.x = (target.transform.position.x + target.width / 2) - (viewportWidth / 2) / this.zoom;
+    this.position.y = (target.transform.position.y + target.height / 2) - (viewportHeight / 2) / this.zoom;
   }
 
   /**

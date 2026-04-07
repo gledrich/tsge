@@ -10,11 +10,11 @@ describe('Rectangle', () => {
       height: 50
     });
     
-    expect(rect.position.x).toBe(10);
+    expect(rect.transform.position.x).toBe(10);
     expect(rect.width).toBe(100);
     expect(rect.height).toBe(50);
     expect(rect.colour).toBe('black');
-    expect(rect.zIndex).toBe(0);
+    expect(rect.metadata.zIndex).toBe(0);
   });
 
   it('initialises with provided values', () => {
@@ -27,9 +27,9 @@ describe('Rectangle', () => {
       tag: 'enemy'
     });
     
-    expect(rect.tag).toBe('enemy');
+    expect(rect.metadata.tag).toBe('enemy');
     expect(rect.colour).toBe('red');
-    expect(rect.zIndex).toBe(5);
+    expect(rect.metadata.zIndex).toBe(5);
   });
 
   it('adds ShapeComponent on creation', () => {
@@ -49,8 +49,8 @@ describe('Rectangle', () => {
       height: 10
     });
     
-    rect.position = new Vector2(50, 50);
-    expect(rect.position.x).toBe(50);
-    expect(rect.position.y).toBe(50);
+    rect.transform.position = new Vector2(50, 50);
+    expect(rect.transform.position.x).toBe(50);
+    expect(rect.transform.position.y).toBe(50);
   });
 });

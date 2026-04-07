@@ -37,7 +37,7 @@ describe('Text', () => {
   it('initialises correctly', () => {
     const textObj = new Text(mockProps);
     expect(textObj.text).toBe('Score: 0');
-    expect(textObj.tag).toBe('score-ui');
+    expect(textObj.metadata.tag).toBe('score-ui');
     expect(textObj.hasComponent(TextComponent)).toBe(true);
   });
 

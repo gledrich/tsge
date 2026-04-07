@@ -56,12 +56,12 @@ export default class Rectangle extends GameObject {
       throw new Error('You must provide a width and height for Rectangle');
     }
 
-    this.tag = defaultedProps.tag;
-    this.localPosition = defaultedProps.position;
+    this.metadata.tag = defaultedProps.tag;
+    this.transform.position = defaultedProps.position;
     this._width = defaultedProps.width;
     this._height = defaultedProps.height;
     this.colour = defaultedProps.colour;
-    this.zIndex = defaultedProps.zIndex;
+    this.metadata.zIndex = defaultedProps.zIndex;
 
     this.addComponent(new ShapeComponent('rect', this.colour, this._width, this._height));
 
