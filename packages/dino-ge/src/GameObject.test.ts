@@ -3,6 +3,7 @@ import TagComponent from './TagComponent';
 import TransformComponent from './TransformComponent';
 import EventBusComponent from './EventBusComponent';
 import Component from './Component';
+import Engine from './Engine';
 
 class MockGameObject extends GameObject {}
 class MockComponent extends Component {}
@@ -107,5 +108,41 @@ describe('GameObject', () => {
 
     expect(obj.getComponent(DerivedComponent)).toBeUndefined();
     expect(obj.getComponent(BaseComponent)).toBeUndefined();
+  });
+
+  it('handles removing non-existent component gracefully', () => {
+    const obj = new MockGameObject('test', 0);
+    // Should not throw
+    obj.removeComponent(MockComponent);
+    expect(obj.hasComponent(MockComponent)).toBe(false);
+  });
+
+  it('stops listening for events with off()', () => {
+    const obj = new MockGameObject('test', 0);
+    const callback = jest.fn();
+    
+    // Test off and emit when no EventBus exists yet (branches)
+    obj.off('test-event', callback);
+    obj.emit('test-event');
+    
+    // Now create it and test off
+    obj.on('test-event', callback);
+    // Call on again to cover the "bus already exists" branch in on()
+    obj.on('test-event', callback);
+    
+    obj.off('test-event', callback);
+    obj.emit('test-event');
+    
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('registers and destroys itself via Engine', () => {
+    const obj = new MockGameObject('test', 0);
+    
+    obj.registerSelf();
+    expect(Engine.objects.has(obj)).toBe(true);
+    
+    obj.destroySelf();
+    expect(Engine.objects.has(obj)).toBe(false);
   });
 });
