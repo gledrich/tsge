@@ -18,7 +18,7 @@ function App() {
   const [isInspectorVisible, setIsInspectorVisible] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isBottomPanelVisible, setIsBottomPanelVisible] = useState(false);
-  const [isSnippetsCollapsed, setIsSnippetsCollapsed] = useState(false);
+  const [isSnippetsCollapsed, setIsSnippetsCollapsed] = useState(true);
 
   useEffect(() => {
     (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
