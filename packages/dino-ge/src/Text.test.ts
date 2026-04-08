@@ -148,10 +148,6 @@ describe('Text', () => {
     
     // Call default onClick for function coverage
     textObj2.onClick();
-
-    // Trigger the default from defaultProps specifically
-    const textObj3 = new Text({ text: 'default', position: new Vector2() });
-    textObj3.onClick(); // This calls the defaultOnClick from defaultProps
   });
 
   it('manages manual registration', () => {
@@ -178,12 +174,12 @@ describe('Text', () => {
       // Should not throw
     }
 
-    // Branch: defaultedProps.onClick is falsy (hits line 137 false branch)
-    const textObj2 = new Text({ ...mockProps, onClick: null as unknown as () => void });
-    expect(textObj2.onClick).toBeDefined(); // Still has class-level default
+    // Branch: props.onClick is falsy (hits constructor false branch)
+    const textObj2 = new Text({ ...mockProps, onClick: undefined });
+    expect(textObj2.onClick).toBeDefined();
 
-    // Branch: this.onClick is falsy (hits line 188 false branch)
-    (textObj2 as unknown as { onClick: unknown }).onClick = null;
+    // Branch: this.onClick is falsy (hits mouseClick false branch)
+    (textObj2 as unknown as { onClick: unknown }).onClick = undefined;
     if (capturedListener) {
       capturedListener(new Vector2(150, 125));
       // Should not throw

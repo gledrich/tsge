@@ -1,6 +1,6 @@
 {
   "name": "dino-ge-monorepo",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Monorepo for Dino GE",
   "type": "module",
   "private": true,

@@ -61,7 +61,6 @@ const defaultProps = {
   position: new Vector2(0, 0),
   zIndex: 0,
   register: true,
-  onClick: function defaultOnClick() {},
 };
 
 /**
@@ -111,7 +110,7 @@ export default class Text extends GameObject {
   registered: boolean = false;
 
   /** Callback for click events. */
-  onClick: () => void = () => {};
+  onClick: () => void = function defaultOnClick() {};
 
   constructor(props: TextProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
@@ -134,8 +133,8 @@ export default class Text extends GameObject {
     
     this.#onMouseClick = this.#mouseClick.bind(this);
     
-    if (defaultedProps.onClick) {
-      this.onClick = defaultedProps.onClick;
+    if (props.onClick) {
+      this.onClick = props.onClick;
     }
 
     this._textComponent = new TextComponent(

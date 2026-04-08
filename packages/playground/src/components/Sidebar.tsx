@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SceneExplorer from './SceneExplorer';
 import '../styles/sidebar.css';
 
 interface Snippet {
@@ -35,7 +36,7 @@ const snippets: Snippet[] = [
 });` },
   { icon: 'fa-image', label: 'Sprite', code: `new Sprite({
   tag: 'spriteObj',
-  img: dinoImg,
+  img: 'dino',
   rows: 1,
   cols: 24,
   position: new Vector2(100, 100),
@@ -74,33 +75,50 @@ floor.addComponent(floorPhys);` }
 ];
 
 const Sidebar: React.FC<Record<string, never>> = () => {
-  const [isMinimized, setIsMinimized] = useState(true);
+  const [activeTab, setActiveTab] = useState<'snippets' | 'scene'>('snippets');
 
   const insertSnippet = (code: string) => {
     window.dispatchEvent(new CustomEvent('playground-insert-text', { detail: code }));
   };
 
   return (
-    <div className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
-      <div className="sidebar-header" onClick={() => setIsMinimized(!isMinimized)}>
-        <div className="sidebar-title">Snippets</div>
-        <i className={`fa-solid fa-chevron-down sidebar-toggle-icon`} />
-      </div>
-      {!isMinimized && (
-        <div className="snippets-grid">
-          {snippets.map((s, index) => (
-            <button 
-              key={index} 
-              className="snippet-btn" 
-              title={s.label}
-              onClick={() => insertSnippet(s.code)}
-            >
-              <i className={`fa-solid ${s.icon}`} />
-              <span>{s.label}</span>
-            </button>
-          ))}
+    <div className="sidebar">
+      <div className="sidebar-tabs">
+        <div 
+          className={`sidebar-tab ${activeTab === 'snippets' ? 'active' : ''}`}
+          onClick={() => setActiveTab('snippets')}
+        >
+          <i className="fa-solid fa-code" />
+          <span>Snippets</span>
         </div>
-      )}
+        <div 
+          className={`sidebar-tab ${activeTab === 'scene' ? 'active' : ''}`}
+          onClick={() => setActiveTab('scene')}
+        >
+          <i className="fa-solid fa-layer-group" />
+          <span>Scene</span>
+        </div>
+      </div>
+      
+      <div className="sidebar-content">
+        {activeTab === 'snippets' ? (
+          <div className="snippets-grid">
+            {snippets.map((s, index) => (
+              <button 
+                key={index} 
+                className="snippet-btn" 
+                title={s.label}
+                onClick={() => insertSnippet(s.code)}
+              >
+                <i className={`fa-solid ${s.icon}`} />
+                <span>{s.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <SceneExplorer />
+        )}
+      </div>
     </div>
   );
 };

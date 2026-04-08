@@ -42,13 +42,18 @@ export class ObjectSet extends Set<GameObject> {
    * Find all objects with a specific tag.
    * @param tag The tag to search for.
    */
-  findAll: (tag?: string) => GameObject[] = () => [];
+  findAll: (tag?: string) => GameObject[];
+
+  constructor() {
+    super();
+    this.findAll = () => [];
+  }
 }
 
 /**
  * Interface for the shared global state of the Engine.
  */
-interface EngineState {
+export interface EngineState {
   objects: ObjectSet;
   paused: boolean;
   debug: boolean;
@@ -57,49 +62,59 @@ interface EngineState {
   systems: System[];
   renderingSystem?: RenderingSystem;
   events: EventTarget;
+  currentScene: Scene | null;
 }
 
 /**
  * Shared state for the engine to ensure singletons work across different module loads.
  */
-const _globalState: EngineState = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ || {
+const INITIAL_STATE: EngineState = {
   objects: new ObjectSet(),
   paused: false,
   debug: false,
   selectedObject: null,
   camera: new Camera(),
   systems: [new PhysicsSystem()],
-  events: new EventTarget()
+  events: new EventTarget(),
+  currentScene: null
 };
-(globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ = _globalState;
 
 /**
  * The core singleton class that manages the game loop, rendering, and scene state.
  */
 export default class Engine {
+  /** Internal helper to access the global shared state. */
+  private static get _state(): EngineState {
+    const global = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
+    if (!global.__DINO_ENGINE_STATE__) {
+      global.__DINO_ENGINE_STATE__ = INITIAL_STATE;
+    }
+    return global.__DINO_ENGINE_STATE__;
+  }
+
   /**
    * Global set of game objects if no scene is active.
    */
-  public static get objects(): ObjectSet { return _globalState.objects; }
+  public static get objects(): ObjectSet { return this._state.objects; }
 
   /**
    * Global list of systems that process game objects.
    */
-  private static get _systems(): System[] { return _globalState.systems; }
+  private static get _systems(): System[] { return this._state.systems; }
 
   /**
    * The global rendering system.
    */
-  public static get renderingSystem(): RenderingSystem | undefined { return _globalState.renderingSystem; }
-  public static set renderingSystem(val: RenderingSystem | undefined) { _globalState.renderingSystem = val; }
+  public static get renderingSystem(): RenderingSystem | undefined { return this._state.renderingSystem; }
+  public static set renderingSystem(val: RenderingSystem | undefined) { this._state.renderingSystem = val; }
 
   /**
    * Whether the game loop is currently paused.
    */
-  public static get paused(): boolean { return _globalState.paused; }
+  public static get paused(): boolean { return this._state.paused; }
   public static set paused(val: boolean) {
-    if (_globalState.paused !== val) {
-      _globalState.paused = val;
+    if (this._state.paused !== val) {
+      this._state.paused = val;
       this.emit('paused', val);
     }
   }
@@ -107,10 +122,10 @@ export default class Engine {
   /**
    * Toggle for visual debug mode (hitboxes and stats).
    */
-  public static get debug(): boolean { return _globalState.debug; }
+  public static get debug(): boolean { return this._state.debug; }
   public static set debug(val: boolean) {
-    if (_globalState.debug !== val) {
-      _globalState.debug = val;
+    if (this._state.debug !== val) {
+      this._state.debug = val;
       this.emit('debug', val);
     }
   }
@@ -118,7 +133,7 @@ export default class Engine {
   /**
    * Internal event bus for engine events.
    */
-  private static get events(): EventTarget { return _globalState.events; }
+  private static get events(): EventTarget { return this._state.events; }
 
   /**
    * Listens for an event on the global engine bus.
@@ -150,30 +165,30 @@ export default class Engine {
   /**
    * The currently selected object in debug mode.
    */
-  public static get selectedObject(): GameObject | null { return _globalState.selectedObject; }
-  public static set selectedObject(val: GameObject | null) { _globalState.selectedObject = val; }
+  public static get selectedObject(): GameObject | null { return this._state.selectedObject; }
+  public static set selectedObject(val: GameObject | null) { this._state.selectedObject = val; }
 
   /**
    * The global camera instance.
    */
-  public static get camera(): Camera { return _globalState.camera; }
-
-  private static _currentScene: Scene;
+  public static get camera(): Camera { return this._state.camera; }
 
   /**
    * Gets the currently active scene.
    */
-  public static get currentScene(): Scene {
-    return this._currentScene;
+  public static get currentScene(): Scene | null {
+    return this._state.currentScene;
   }
 
   /**
    * Sets the active scene, resetting the camera and calling the scene's onLoad.
    */
-  public static set currentScene(scene: Scene) {
-    this._currentScene = scene;
-    this.camera.reset();
-    scene.onLoad();
+  public static set currentScene(scene: Scene | null) {
+    this._state.currentScene = scene;
+    if (scene) {
+      this.camera.reset();
+      scene.onLoad();
+    }
   }
 
   private _canvas: Canvas;
@@ -420,6 +435,9 @@ export default class Engine {
   }
 
   private _findAllObjects(tag: string = '') {
+    if (!tag) {
+      return Array.from(Engine.objects);
+    }
     return Array.from(Engine.objects).filter((obj) => obj.metadata.tag === tag);
   }
 
@@ -474,6 +492,10 @@ export default class Engine {
    * @param object The object to destroy.
    */
   static destroyObject(object: GameObject) {
+    if (this.selectedObject === object) {
+      this.selectedObject = null;
+    }
+    
     if (Engine.currentScene) {
       Engine.currentScene.remove(object);
     } else {

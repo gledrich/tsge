@@ -1,0 +1,73 @@
+.scene-explorer {
+  flex: 1;
+  background-color: #011627;
+  color: #d1d1d1;
+  font-size: 0.85rem;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+.empty-scene {
+  padding: 1rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+  text-align: center;
+}
+
+.scene-node-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-node {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  gap: 8px;
+  transition: background-color 0.1s;
+  user-select: none;
+}
+
+.scene-node:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.scene-node.selected {
+  background-color: rgba(67, 170, 139, 0.2);
+  color: #43aa8b;
+  border-left: 2px solid #43aa8b;
+}
+
+.toggle-icon {
+  width: 12px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.toggle-icon:hover {
+  color: white;
+}
+
+.spacer {
+  width: 12px;
+}
+
+.type-icon {
+  width: 14px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.node-tag {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-children {
+  display: flex;
+  flex-direction: column;
+}

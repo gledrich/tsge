@@ -10,6 +10,9 @@ export default class Input {
   private static keys: Set<string> = new Set();
   private static isInitialized = false;
 
+  private static isDragging = false;
+  private static dragOffset: Vector2 = new Vector2(0, 0);
+
   /**
    * Initializes input event listeners.
    */
@@ -20,15 +23,21 @@ export default class Input {
     document.addEventListener('mousemove', (event: MouseEvent) => {
       this.mousePosition.x = event.clientX;
       this.mousePosition.y = event.clientY;
+
+      if (this.isDragging && Engine.selectedObject && Engine.debug) {
+        Engine.selectedObject.transform.position.x = this.mouseX - this.dragOffset.x;
+        Engine.selectedObject.transform.position.y = this.mouseY - this.dragOffset.y;
+      }
     });
 
-    document.addEventListener('click', (event: MouseEvent) => {
+    document.addEventListener('mousedown', (event: MouseEvent) => {
       if ((event.target as HTMLElement).tagName !== 'CANVAS') return;
+      this.keys.add(`mouse${event.button}`);
 
-      const pos = new Vector2(this.mouseX, this.mouseY);
+      const worldPos = new Vector2(this.mouseX, this.mouseY);
 
-      // If debug mode is on, try to select an object
-      if (Engine.debug) {
+      // If debug mode is on, try to select/drag an object
+      if (Engine.debug && event.button === 0) {
         const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
         let found = false;
 
@@ -39,32 +48,35 @@ export default class Input {
           const width = obj.bounds?.width ?? 0;
           const height = obj.bounds?.height ?? 0;
           if (
-            pos.x > obj.transform.position.x &&
-            pos.x < obj.transform.position.x + width &&
-            pos.y > obj.transform.position.y &&
-            pos.y < obj.transform.position.y + height
+            worldPos.x > obj.transform.position.x &&
+            worldPos.x < obj.transform.position.x + width &&
+            worldPos.y > obj.transform.position.y &&
+            worldPos.y < obj.transform.position.y + height
           ) {
             Engine.selectedObject = obj;
+            this.isDragging = true;
+            this.dragOffset.x = worldPos.x - obj.transform.position.x;
+            this.dragOffset.y = worldPos.y - obj.transform.position.y;
             found = true;
             break;
           }
         }
 
-        if (!found) Engine.selectedObject = null;
+        if (!found) {
+          Engine.selectedObject = null;
+        }
       }
 
       if (!Engine.paused) {
-        this.clickListeners.forEach((listener) => listener(pos));
+        this.clickListeners.forEach((listener) => listener(worldPos));
       }
-    });
-
-    document.addEventListener('mousedown', (event: MouseEvent) => {
-      if ((event.target as HTMLElement).tagName !== 'CANVAS') return;
-      this.keys.add(`mouse${event.button}`);
     });
 
     document.addEventListener('mouseup', (event: MouseEvent) => {
       this.keys.delete(`mouse${event.button}`);
+      if (event.button === 0) {
+        this.isDragging = false;
+      }
     });
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {

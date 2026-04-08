@@ -11,6 +11,8 @@ import EventBusComponent from './EventBusComponent.js';
  * Acts as the 'Entity' in our evolving Entity Component System.
  */
 export default abstract class GameObject {
+  /** Unique identifier for the object. */
+  public readonly id: string = Math.random().toString(36).substring(2, 9);
   /** Collection of components attached to this entity. */
   private _components: Map<string, Component> = new Map();
 

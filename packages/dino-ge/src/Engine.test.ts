@@ -1,10 +1,12 @@
-import Engine, { EngineOpts, EngineCallbacks } from './Engine';
+import Engine, { EngineOpts, EngineCallbacks, ObjectSet, EngineState } from './Engine';
 import Scene from './Scene';
 import GameObject from './GameObject';
 import Vector2 from './Vector2';
 import PhysicsComponent from './PhysicsComponent';
 import BoundsComponent from './BoundsComponent';
 import RenderingSystem from './RenderingSystem';
+import Camera from './Camera';
+import System from './System';
 
 class MockScene extends Scene {
   onLoad = jest.fn();
@@ -22,6 +24,20 @@ describe('Engine', () => {
   let mockCtx: Record<string, jest.Mock | string | number | object>;
 
   beforeEach(() => {
+    // Reset global shared state manually
+    const globalObj = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
+    globalObj.__DINO_ENGINE_STATE__ = {
+
+      objects: new ObjectSet(),
+      paused: false,
+      debug: false,
+      selectedObject: null,
+      camera: new Camera(),
+      systems: [],
+      events: new EventTarget(),
+      currentScene: null
+    };
+
     // Mock Canvas and Context
     mockCtx = {
       fillRect: jest.fn(),
@@ -48,14 +64,6 @@ describe('Engine', () => {
 
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(mockCtx as unknown as CanvasRenderingContext2D);
 
-    // Reset global state
-    (Engine as unknown as { paused: boolean }).paused = false;
-    (Engine as unknown as { debug: boolean }).debug = false;
-    (Engine as unknown as { selectedObject: GameObject | null }).selectedObject = null;
-    (Engine as unknown as { renderingSystem: RenderingSystem | undefined }).renderingSystem = undefined;
-    Engine.objects.clear();
-    (Engine as unknown as { _currentScene: Scene | null })._currentScene = null;
-    
     callbacks = {
       onLoad: jest.fn(),
       update: jest.fn(),
@@ -75,14 +83,6 @@ describe('Engine', () => {
   });
 
   it('manages singleton state across instances', () => {
-    // Branch test: default findAll before constructor
-    const freshObjects = new (Engine.objects.constructor as unknown as new () => { findAll: (tag?: string) => GameObject[] })();
-    expect(freshObjects.findAll('any')).toEqual([]);
-
-    // Force known start state
-    (Engine as unknown as { paused: boolean }).paused = false;
-    (Engine as unknown as { debug: boolean }).debug = false;
-
     const emitSpy = jest.spyOn(Engine, 'emit');
     
     Engine.paused = true;
@@ -130,14 +130,26 @@ describe('Engine', () => {
   });
 
   it('registers and destroys objects globally if no scene is active', () => {
-    (Engine as unknown as { _currentScene: Scene | null })._currentScene = null;
-    
     const obj = new MockGameObject('test', 0);
     Engine.registerObject(obj);
     expect(Engine.objects.has(obj)).toBe(true);
     
+    Engine.selectedObject = obj;
     Engine.destroyObject(obj);
     expect(Engine.objects.has(obj)).toBe(false);
+    expect(Engine.selectedObject).toBeNull();
+
+    // With scene
+    const scene = new MockScene();
+    Engine.currentScene = scene;
+    const obj2 = new MockGameObject('s', 0);
+    Engine.registerObject(obj2);
+    expect(scene.objects.has(obj2)).toBe(true);
+    
+    Engine.selectedObject = obj2;
+    Engine.destroyObject(obj2);
+    expect(scene.objects.has(obj2)).toBe(false);
+    expect(Engine.selectedObject).toBeNull();
   });
 
   it('registers and destroys objects within active scene', () => {
@@ -168,18 +180,43 @@ describe('Engine', () => {
     jest.advanceTimersByTime(1);
   });
 
-  it('calls onLoad callback when provided', () => {
+  it('handles missing head during initialization', () => {
+    // Mock getElementsByTagName to return empty for 'head'
+    const originalGetTags = document.getElementsByTagName;
+    const spy = jest.spyOn(document, 'getElementsByTagName').mockImplementation((tag) => {
+      if (tag === 'head') return { 
+        length: 0, 
+        item: () => null, 
+        namedItem: () => null 
+      } as unknown as ReturnType<typeof document.getElementsByTagName>;
+      return originalGetTags.call(document, tag);
+    });
+
+    new Engine({ update: jest.fn() });
+    expect(document.getElementsByTagName('head')).toBeDefined(); // JSDOM might auto-create it
+    spy.mockRestore();
+  });
+
+  it('calls onLoad callback when provided and handles optional branch', () => {
     const engine = new Engine(callbacks);
+    (engine as unknown as { _onLoad: () => void })._onLoad(); 
+    
     jest.advanceTimersByTime(1);
     expect(callbacks.onLoad).toHaveBeenCalled();
 
-    // Branch coverage for line 273 (onLoad being optional)
-    (engine.callbacks as unknown as { onLoad: undefined }).onLoad = undefined;
-    // Should not throw if the deferred timeout runs
+    (engine as unknown as { callbacks: { onLoad: unknown } }).callbacks.onLoad = undefined;
+    jest.advanceTimersByTime(1);
+  });
+
+  it('handles optional callbacks gracefully', () => {
+    const engine = new Engine({ update: jest.fn() });
+    (engine as unknown as { _fixedUpdate: () => void })._fixedUpdate();
+    
+    (engine as unknown as { callbacks: { onLoad: unknown } }).callbacks.onLoad = undefined;
+    (engine as unknown as { _onLoad: () => void })._onLoad();
   });
 
   it('handles missing head/body gracefully during init', () => {
-    // Mock getElementsByTagName to return empty arrays
     const getTagSpy = jest.spyOn(document, 'getElementsByTagName').mockReturnValue({
       length: 0,
       item: () => null,
@@ -195,7 +232,7 @@ describe('Engine', () => {
 
   it('handles existing rendering system during init', () => {
     const existingSys = new RenderingSystem(mockCtx as unknown as CanvasRenderingContext2D);
-    (Engine as unknown as { renderingSystem: RenderingSystem }).renderingSystem = existingSys;
+    Engine.renderingSystem = existingSys;
     
     new Engine(callbacks);
     expect(Engine.renderingSystem).toBe(existingSys);
@@ -218,24 +255,29 @@ describe('Engine', () => {
       return 0;
     });
 
-    const mockSys = { update: jest.fn() };
-    (Engine as unknown as { _systems: unknown[] })._systems.push(mockSys);
+    const mockSys = { update: jest.fn(), fixedUpdate: jest.fn() };
+    const globalObj = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
+    globalObj.__DINO_ENGINE_STATE__.systems.push(mockSys as unknown as System);
 
     const engine = new Engine({ update: jest.fn() });
     (engine as unknown as { _onLoad: () => void })._onLoad();
     
-    rafCallback(50); 
-    expect(callbacks.fixedUpdate).not.toHaveBeenCalled();
+    // Smooth FPS calc needs some time delta
+    rafCallback(1000);
+    rafCallback(1020); // 20ms later (> 16.6ms fixedDelta)
+    
+    expect(mockSys.fixedUpdate).toHaveBeenCalled();
     
     const scene = new MockScene();
     Engine.currentScene = scene;
-    rafCallback(100);
+    rafCallback(1033.2);
     expect(scene.update).toHaveBeenCalled();
 
     Engine.paused = true;
     const updateCountBefore = (callbacks.update as jest.Mock).mock.calls.length;
-    rafCallback(150);
+    rafCallback(1050);
     expect(callbacks.update).toHaveBeenCalledTimes(updateCountBefore);
+    expect(mockCtx.fillRect).toHaveBeenCalled(); // Should draw once when paused
   });
 
   it('calculates smooth FPS and frame time', () => {
@@ -246,8 +288,7 @@ describe('Engine', () => {
     });
 
     const engine = new Engine({ update: jest.fn() });
-    const engineInternal = engine as unknown as { _onLoad: () => void };
-    engineInternal._onLoad();
+    (engine as unknown as { _onLoad: () => void })._onLoad();
 
     // Mock timestamps
     rafCallback(1000); // Start at 1s
@@ -284,8 +325,7 @@ describe('Engine', () => {
     expect(enemies).toHaveLength(1);
     expect(enemies[0]).toBe(obj1);
     
-    // Default tag branch
-    const all = (Engine.objects as unknown as { findAll: (tag?: string) => GameObject[] }).findAll();
+    const all = Engine.objects.findAll();
     expect(all).toBeDefined();
   });
 
@@ -293,7 +333,6 @@ describe('Engine', () => {
     const engine = new Engine(callbacks);
     Engine.debug = true;
     
-    // 1. Full object
     const obj = new MockGameObject('target', 0);
     const phys = new PhysicsComponent();
     phys.velocity = new Vector2(10, 20);
@@ -308,6 +347,7 @@ describe('Engine', () => {
     
     const simpleObj = new MockGameObject('simple', 0);
     (simpleObj as unknown as { bounds: BoundsComponent | null }).bounds = null;
+    Engine.objects.add(simpleObj);
     Engine.selectedObject = simpleObj;
     (engine as unknown as { _draw: () => void })._draw();
 
@@ -315,7 +355,8 @@ describe('Engine', () => {
       transform: { position: new Vector2() },
       metadata: { tag: 'raw', zIndex: 0 },
       getComponent: jest.fn().mockReturnValue(null),
-      bounds: { width: 10, height: 10 }
+      bounds: { width: 10, height: 10 },
+      id: 'test-id'
     } as unknown as GameObject;
     Engine.objects.add(rawObj);
     Engine.selectedObject = rawObj;
@@ -343,7 +384,6 @@ describe('Engine', () => {
     expect(fn).toHaveBeenCalledTimes(2);
     expect(onEnded).toHaveBeenCalled();
 
-    // cursor
     const mockCanvas = { style: { cursor: '' } };
     jest.spyOn(document, 'getElementById').mockImplementation((id) => {
       if (id === 'canvas') return mockCanvas as unknown as HTMLElement;
@@ -355,6 +395,12 @@ describe('Engine', () => {
     
     (document.getElementById as jest.Mock).mockReturnValue(null);
     engine.cursor = 'wait';
+
+    // Test countdown with 0 duration
+    const endFn = jest.fn();
+    engine.countdown(0, jest.fn(), endFn);
+    jest.advanceTimersByTime(0);
+    expect(endFn).toHaveBeenCalled();
   });
 
   it('handles missing context during _setBackground', () => {
@@ -365,13 +411,12 @@ describe('Engine', () => {
 
   it('handles missing renderingSystem during _draw', () => {
     const engine = new Engine(callbacks);
-    (Engine as unknown as { renderingSystem: undefined }).renderingSystem = undefined;
+    Engine.renderingSystem = undefined;
     (engine as unknown as { _draw: () => void })._draw();
   });
 
   it('draws without an active scene', () => {
     const engine = new Engine(callbacks);
-    (Engine as unknown as { _currentScene: Scene | null })._currentScene = null;
     (engine as unknown as { _draw: () => void })._draw();
   });
 
