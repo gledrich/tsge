@@ -377,6 +377,24 @@ describe('Physics', () => {
       expect(manifold!.depth).toBe(10);
     });
 
+    it('handles circleVsRect where rect has no bounds', () => {
+      const circle = new Circle({ position: new Vector2(0, 0), radius: 10 });
+      class NoBoundsObject extends GameObject {}
+      const rect = new NoBoundsObject('rect', 0);
+      rect.transform.position = new Vector2(5, 5);
+      
+      // rectWidth/rectHeight will be 0.
+      // closestX = max(5, min(5, 5+0)) = 5
+      // closestY = max(5, min(5, 5+0)) = 5
+      // dist to (5,5) from center (5,5) is 0.
+      // distSq = 0. Hits dist === 0 branch.
+      const manifold = Physics.getCollisionManifold(circle, rect);
+      expect(manifold).not.toBeNull();
+      // radius 10 - dist(center(10,10) to closest(5,5) which is sqrt(50))
+      // 10 - 7.071 = 2.9289...
+      expect(manifold!.depth).toBeCloseTo(2.9289);
+    });
+
     it('handles objects without bounds components', () => {
       class RawObject extends GameObject { }
       const o1 = new RawObject('o1', 0);

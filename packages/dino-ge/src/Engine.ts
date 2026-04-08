@@ -27,7 +27,7 @@ export interface EngineOpts {
  */
 export interface EngineCallbacks {
   /** Called once after the engine is initialized. */
-  onLoad: () => void;
+  onLoad?: () => void;
   /** Called every frame for game logic and rendering. */
   update: () => void;
   /** Optional callback for physics or fixed-step logic. */
@@ -42,7 +42,7 @@ export class ObjectSet extends Set<GameObject> {
    * Find all objects with a specific tag.
    * @param tag The tag to search for.
    */
-  findAll: (tag: string) => GameObject[] = () => [];
+  findAll: (tag?: string) => GameObject[] = () => [];
 }
 
 /**
@@ -176,10 +176,10 @@ export default class Engine {
     scene.onLoad();
   }
 
-  #canvas: Canvas;
-  #ctx!: CanvasRenderingContext2D;
-  #window: HTMLDivElement;
-  #title: HTMLTitleElement;
+  private _canvas: Canvas;
+  private _ctx: CanvasRenderingContext2D;
+  private _window: HTMLDivElement;
+  private _title: HTMLTitleElement;
 
   /** Current background colour. */
   backgroundColour: string;
@@ -203,10 +203,10 @@ export default class Engine {
 
   /** Current frames per second. */
   fps: number = 0;
-  #oldTimestamp: number = 0;
-  #secondsPassed: number = 0;
-  #accumulator: number = 0;
-  #fixedDelta: number = 1 / 60;
+  private _oldTimestamp: number = 0;
+  private _secondsPassed: number = 0;
+  private _accumulator: number = 0;
+  private _fixedDelta: number = 1 / 60;
 
   constructor(callbacks: EngineCallbacks, opts: Partial<EngineOpts> = {}) {
     const defaultedOpts = {
@@ -218,70 +218,79 @@ export default class Engine {
     };
 
 
-    Engine.objects.findAll = this.#findAllObjects.bind(this);
+    Engine.objects.findAll = this._findAllObjects.bind(this);
 
-    this.#title = document.createElement('title');
-    this.#title.innerHTML = defaultedOpts.title;
-    document.getElementsByTagName('head')[0].appendChild(this.#title);
+    this._title = document.createElement('title');
+    this._title.innerHTML = defaultedOpts.title;
+    const heads = document.getElementsByTagName('head');
+    if (heads.length > 0) {
+      heads[0].appendChild(this._title);
+    } else {
+      document.documentElement.appendChild(document.createElement('head')).appendChild(this._title);
+    }
 
     this.backgroundColour = defaultedOpts.backgroundColour;
 
     this.callbacks = {
       onLoad: () => {
-        callbacks.onLoad();
-        this.#onLoad();
+        callbacks.onLoad?.();
+        this._onLoad();
       },
       update: callbacks.update,
+      fixedUpdate: callbacks.fixedUpdate,
     };
 
-    this.#canvas = new Canvas();
-    this.#ctx = this.#canvas.canvas.getContext('2d')!;
-    this.width = this.#canvas.canvas.width;
-    this.height = this.#canvas.canvas.height;
+    this._canvas = new Canvas();
+    this._ctx = this._canvas.canvas.getContext('2d')!;
+    this.width = this._canvas.canvas.width;
+    this.height = this._canvas.canvas.height;
 
     if (Engine.renderingSystem) {
-      Engine.renderingSystem.setContext(this.#ctx);
+      Engine.renderingSystem.setContext(this._ctx);
     } else {
-      Engine.renderingSystem = new RenderingSystem(this.#ctx);
+      Engine.renderingSystem = new RenderingSystem(this._ctx);
     }
 
-    this.#window = document.createElement('div');
-    this.#window.id = 'canvas-container';
-    this.#window.style.width = defaultedOpts.width;
-    this.#window.style.height = defaultedOpts.height;
+    this._window = document.createElement('div');
+    this._window.id = 'canvas-container';
+    this._window.style.width = defaultedOpts.width;
+    this._window.style.height = defaultedOpts.height;
 
     Input.init();
 
     window.addEventListener('resize', () => {
-      this.#canvas.resize();
-      this.width = this.#canvas.canvas.width;
-      this.height = this.#canvas.canvas.height;
+      this._canvas.resize();
+      this.width = this._canvas.canvas.width;
+      this.height = this._canvas.canvas.height;
     });
 
-    document.getElementsByTagName('body')[0].appendChild(this.#window);
-    this.#window.appendChild(this.#canvas.canvas);
+    const bodies = document.getElementsByTagName('body');
+    if (bodies.length > 0) {
+      bodies[0].appendChild(this._window);
+    }
+    this._window.appendChild(this._canvas.canvas);
 
-    setTimeout(() => this.callbacks.onLoad(), 0);
+    setTimeout(() => this.callbacks.onLoad?.(), 0);
   }
 
-  #onLoad() {
-    this.#draw();
+  private _onLoad() {
+    this._draw();
 
-    window.requestAnimationFrame(this.#update.bind(this));
+    window.requestAnimationFrame(this._update.bind(this));
   }
 
-  #update(timestamp: number) {
+  private _update(timestamp: number) {
     if (!Engine.paused) {
-      this.#secondsPassed = (timestamp - this.#oldTimestamp) / 1000;
-      this.#oldTimestamp = timestamp;
+      this._secondsPassed = (timestamp - this._oldTimestamp) / 1000;
+      this._oldTimestamp = timestamp;
 
-      this.fps = Math.round(1 / this.#secondsPassed);
+      this.fps = Math.round(1 / this._secondsPassed);
 
       // Fixed update loop
-      this.#accumulator += this.#secondsPassed;
-      while (this.#accumulator >= this.#fixedDelta) {
-        this.#fixedUpdate();
-        this.#accumulator -= this.#fixedDelta;
+      this._accumulator += this._secondsPassed;
+      while (this._accumulator >= this._fixedDelta) {
+        this._fixedUpdate();
+        this._accumulator -= this._fixedDelta;
       }
 
       if (Engine.currentScene) {
@@ -289,21 +298,21 @@ export default class Engine {
       }
 
       this.callbacks.update();
-      this.#draw();
+      this._draw();
     } else {
       // Still allow drawing in paused mode if debug is on or for initial frame
-      this.#draw();
+      this._draw();
     }
 
-    window.requestAnimationFrame(this.#update.bind(this));
+    window.requestAnimationFrame(this._update.bind(this));
   }
 
-  #fixedUpdate() {
+  private _fixedUpdate() {
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
     Engine._systems.forEach((system) => {
       if (system.fixedUpdate) {
-        system.fixedUpdate(objects, this.#fixedDelta);
+        system.fixedUpdate(objects, this._fixedDelta);
       }
     });
 
@@ -312,13 +321,15 @@ export default class Engine {
     }
   }
 
-  #setBackground() {
-    this.#ctx.fillStyle = this.backgroundColour;
-    this.#ctx.fillRect(0, 0, this.#canvas.canvas.width, this.#canvas.canvas.height);
+  private _setBackground() {
+    if (this._ctx) {
+      this._ctx.fillStyle = this.backgroundColour;
+      this._ctx.fillRect(0, 0, this._canvas.canvas.width, this._canvas.canvas.height);
+    }
   }
 
-  #draw() {
-    this.#setBackground();
+  private _draw() {
+    this._setBackground();
 
     const objects = Engine.currentScene ? Engine.currentScene.objects : Engine.objects;
 
@@ -327,32 +338,33 @@ export default class Engine {
     }
 
     if (Engine.debug) {
-      this.#drawDebug(objects);
+      this._drawDebug(objects);
     }
   }
-  #drawDebug(objects: Set<GameObject>) {
+
+  private _drawDebug(objects: Set<GameObject>) {
     // Draw Stats Overlay (Top Right)
-    this.#ctx.save();
-    this.#ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
+    this._ctx.save();
+    this._ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
 
     const overlayWidth = 180;
     const statsHeight = 80;
     const padding = 10;
-    const x = this.#canvas.canvas.width - overlayWidth - padding;
+    const x = this._canvas.canvas.width - overlayWidth - padding;
     let y = padding;
 
     // Background for Stats
-    this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    this.#ctx.fillRect(x, y, overlayWidth, statsHeight);
+    this._ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this._ctx.fillRect(x, y, overlayWidth, statsHeight);
 
-    this.#ctx.fillStyle = 'white';
-    this.#ctx.textAlign = 'left';
-    this.#ctx.textBaseline = 'top';
+    this._ctx.fillStyle = 'white';
+    this._ctx.textAlign = 'left';
+    this._ctx.textBaseline = 'top';
 
-    this.#ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 10);
-    this.#ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 25);
-    this.#ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 45);
-    this.#ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 60);
+    this._ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 10);
+    this._ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 25);
+    this._ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 45);
+    this._ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 60);
 
     // Inspector Panel (If object selected)
     if (Engine.selectedObject) {
@@ -376,24 +388,24 @@ export default class Engine {
       }
 
       const inspectorHeight = 20 + (properties.length * 15);
-      this.#ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.#ctx.fillRect(x, y, overlayWidth, inspectorHeight);
-      this.#ctx.strokeStyle = '#00ff00';
-      this.#ctx.strokeRect(x, y, overlayWidth, inspectorHeight);
+      this._ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      this._ctx.fillRect(x, y, overlayWidth, inspectorHeight);
+      this._ctx.strokeStyle = '#00ff00';
+      this._ctx.strokeRect(x, y, overlayWidth, inspectorHeight);
 
-      this.#ctx.fillStyle = '#00ff00';
-      this.#ctx.fillText('INSPECTOR', x + 10, y + 5);
+      this._ctx.fillStyle = '#00ff00';
+      this._ctx.fillText('INSPECTOR', x + 10, y + 5);
 
-      this.#ctx.fillStyle = 'white';
+      this._ctx.fillStyle = 'white';
       properties.forEach(([key, val], i) => {
-        this.#ctx.fillText(`${key}: ${val}`, x + 10, y + 20 + (i * 15));
+        this._ctx.fillText(`${key}: ${val}`, x + 10, y + 20 + (i * 15));
       });
     }
 
-    this.#ctx.restore();
+    this._ctx.restore();
   }
 
-  #findAllObjects(tag: string = '') {
+  private _findAllObjects(tag: string = '') {
     return Array.from(Engine.objects).filter((obj) => obj.metadata.tag === tag);
   }
 

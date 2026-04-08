@@ -133,7 +133,7 @@ describe('Input', () => {
     const canvas = document.createElement('canvas');
     
     // Set mouse position inside both
-    (Input as any).mousePosition = new Vector2(20, 20);
+    (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(20, 20);
 
     // Should select objTop first due to sorting (10 > 0)
     capturedListeners['click']({ target: canvas } as unknown as MouseEvent);
@@ -154,12 +154,12 @@ describe('Input', () => {
       transform: { position: { x: 10, y: 10 } },
       metadata: { zIndex: 100, tag: 'no-bounds' }
     } as unknown as GameObject;
-    (Engine as any).objects.add(objNoBounds);
+    (Engine as unknown as { objects: Set<GameObject> }).objects.add(objNoBounds);
     capturedListeners['click']({ target: canvas } as unknown as MouseEvent);
     expect(Engine.selectedObject).not.toBe(objNoBounds);
 
     // Click outside
-    (Input as any).mousePosition = new Vector2(100, 100);
+    (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(100, 100);
     capturedListeners['click']({ target: canvas } as unknown as MouseEvent);
     expect(Engine.selectedObject).toBeNull();
   });
@@ -177,7 +177,7 @@ describe('Input', () => {
     Input.init();
     const canvas = document.createElement('canvas');
     
-    (Input as any).mousePosition = new Vector2(20, 20);
+    (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(20, 20);
     capturedListeners['click']({ 
       target: canvas, 
       clientX: 20, clientY: 20 
