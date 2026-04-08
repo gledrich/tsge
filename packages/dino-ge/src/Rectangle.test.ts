@@ -53,4 +53,32 @@ describe('Rectangle', () => {
     expect(rect.transform.position.x).toBe(50);
     expect(rect.transform.position.y).toBe(50);
   });
+
+  it('throws error if position is not a Vector2', () => {
+    expect(() => {
+      new Rectangle({
+        position: { x: 0, y: 0 } as unknown as Vector2,
+        width: 10,
+        height: 10
+      });
+    }).toThrow('"position" must be a Vector2!');
+  });
+
+  it('throws error if width or height is missing', () => {
+    expect(() => {
+      new Rectangle({
+        position: new Vector2(),
+        width: 0,
+        height: 10
+      });
+    }).toThrow('You must provide a width and height for Rectangle');
+
+    expect(() => {
+      new Rectangle({
+        position: new Vector2(),
+        width: 10,
+        height: 0
+      });
+    }).toThrow('You must provide a width and height for Rectangle');
+  });
 });
