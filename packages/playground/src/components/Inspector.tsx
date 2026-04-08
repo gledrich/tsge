@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as Dino from 'dino-ge';
-import InspectorRow, { InspectableObject, PropertyRowDef } from './InspectorRow';
+import InspectorRow, { InspectableObject, PropertyRowDef, resolveComponentPath, getUpdatedCodeSnippet } from './InspectorRow';
 import '../styles/inspector.css';
 
 const { Engine } = Dino;
@@ -45,6 +45,7 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
 
 const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
   const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
 
   // Sync the currently selected engine object
   useEffect(() => {
@@ -59,12 +60,67 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
     return () => cancelAnimationFrame(rafId);
   }, [visible]);
 
+  const handleApplyToCode = () => {
+    if (!selectedObject) return;
+    const tag = selectedObject.metadata.tag;
+    if (!tag) return;
+
+    setIsApplying(true);
+
+    const onValueReceived = (event: Event) => {
+      window.removeEventListener('playground-editor-value', onValueReceived);
+      const customEvent = event as CustomEvent<string>;
+      let currentCode = customEvent.detail;
+      let hasChanges = false;
+
+      // Iterate through all sections and rows to apply current values
+      Object.values(SECTIONS).forEach(section => {
+        if (section.component && !selectedObject.hasComponent(section.component)) {
+          return;
+        }
+
+        section.rows.forEach(def => {
+          const resolved = resolveComponentPath(selectedObject, def.propertyPath);
+          if (resolved && resolved.target) {
+            const val = resolved.target[resolved.prop];
+            const newCode = getUpdatedCodeSnippet(currentCode, tag, def.propertyPath, val);
+            if (newCode) {
+              currentCode = newCode;
+              hasChanges = true;
+            }
+          }
+        });
+      });
+
+      if (hasChanges) {
+        window.dispatchEvent(new CustomEvent('playground-update-code', { detail: currentCode }));
+      }
+      
+      setTimeout(() => setIsApplying(false), 500);
+    };
+
+    window.addEventListener('playground-editor-value', onValueReceived);
+    window.dispatchEvent(new CustomEvent('playground-get-value'));
+  };
+
   if (!visible) return null;
 
   return (
     <div className="inspector-container">
       <div className="inspector-header">
-        <h2>Inspector</h2>
+        <div className="header-left">
+          <h2>Inspector</h2>
+          {selectedObject && (
+            <button 
+              className={`apply-btn ${isApplying ? 'applying' : ''}`} 
+              onClick={handleApplyToCode}
+              title="Apply all current values to code"
+            >
+              <i className={`fa-solid ${isApplying ? 'fa-check' : 'fa-save'}`} />
+              <span>Apply to Code</span>
+            </button>
+          )}
+        </div>
         <i className="fa-solid fa-xmark" style={{ cursor: 'pointer' }} onClick={onClose} />
       </div>
       <div className="inspector-body">

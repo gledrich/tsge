@@ -40,6 +40,45 @@
   letter-spacing: 1px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.apply-btn {
+  background: #43aa8b;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.apply-btn:hover {
+  background: #368a71;
+  transform: translateY(-1px);
+}
+
+.apply-btn:active {
+  transform: translateY(0);
+}
+
+.apply-btn.applying {
+  background: #2d6a5a;
+  pointer-events: none;
+}
+
+.apply-btn i {
+  font-size: 0.8rem;
+}
+
 .inspector-body {
   padding: 1rem;
   overflow-y: auto;
