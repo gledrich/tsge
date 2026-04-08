@@ -45,4 +45,40 @@ describe('LineComponent', () => {
     expect(mockCtx.stroke).toHaveBeenCalled();
     expect(mockCtx.restore).toHaveBeenCalled();
   });
+
+  it('early returns from draw if no gameObject is attached', () => {
+    const component = new LineComponent(1, new Vector2(), new Vector2());
+    const mockCtx = {
+      save: jest.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.save).not.toHaveBeenCalled();
+  });
+
+  it('applies rotation during draw', () => {
+    const component = new LineComponent(1, new Vector2(), new Vector2());
+    const obj = new MockGameObject('test', 0);
+    obj.transform.rotation = Math.PI / 4;
+    component.gameObject = obj;
+
+    const mockCtx = {
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      scale: jest.fn(),
+      beginPath: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      stroke: jest.fn(),
+      closePath: jest.fn(),
+      lineWidth: 0
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.rotate).toHaveBeenCalledWith(Math.PI / 4);
+  });
 });
