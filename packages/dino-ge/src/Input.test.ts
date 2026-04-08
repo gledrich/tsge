@@ -198,6 +198,35 @@ describe('Input', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
+  it('handles object dragging in debug mode with a parent', () => {
+    (Engine as unknown as { debug: boolean }).debug = true;
+    const parentTransform = { worldPosition: new Vector2(100, 100) };
+    const obj = {
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 110, y: 110 }, parent: parentTransform },
+      bounds: { width: 50, height: 50 },
+      metadata: { zIndex: 0, tag: 'drag-me-child' }
+    } as unknown as GameObject;
+    (Engine as unknown as { objects: Set<GameObject> }).objects = new Set([obj]);
+    
+    Input.init();
+    const canvas = document.createElement('canvas');
+    
+    // Mousedown to start drag (at center of object: world pos 110 + 25 = 135)
+    (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(135, 135);
+    capturedListeners['mousedown']({ target: canvas, button: 0 } as unknown as MouseEvent);
+    expect(Engine.selectedObject).toBe(obj);
+
+    // Mousemove to drag (to mouse pos 200, 200)
+    // Offset was (135 - 110) = 25
+    // New local pos = (mouseX - dragOffset.x) - parentWorldPos.x
+    // New local pos = (200 - 25) - 100 = 75
+    (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(200, 200);
+    capturedListeners['mousemove']({ clientX: 200, clientY: 200 } as unknown as MouseEvent);
+    
+    expect(obj.transform.position.x).toBe(75);
+    expect(obj.transform.position.y).toBe(75);
+  });
+
   it('handles object dragging in debug mode', () => {
     (Engine as unknown as { debug: boolean }).debug = true;
     const obj = {
