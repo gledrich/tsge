@@ -61,7 +61,7 @@ const defaultProps = {
   position: new Vector2(0, 0),
   zIndex: 0,
   register: true,
-  onClick: () => {},
+  onClick: function defaultOnClick() {},
 };
 
 /**
