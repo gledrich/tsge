@@ -66,4 +66,65 @@ describe('TransformComponent', () => {
     expect(child.worldPosition.x).toBeCloseTo(100);
     expect(child.worldPosition.y).toBeCloseTo(110);
   });
+
+  it('manages children with addChild and removeChild', () => {
+    const parent = new TransformComponent();
+    const child = new TransformComponent();
+    const otherParent = new TransformComponent();
+    
+    // Add child
+    parent.addChild(child);
+    expect(child.parent).toBe(parent);
+    expect(parent.children.has(child)).toBe(true);
+    
+    // Add same child again (branch coverage for "if (child.parent === this) return")
+    parent.addChild(child);
+    expect(parent.children.size).toBe(1);
+    
+    // Move child to another parent (branch coverage for "if (child.parent)")
+    otherParent.addChild(child);
+    expect(child.parent).toBe(otherParent);
+    expect(parent.children.has(child)).toBe(false);
+    expect(otherParent.children.has(child)).toBe(true);
+    
+    // Remove child
+    otherParent.removeChild(child);
+    expect(child.parent).toBeUndefined();
+    expect(otherParent.children.has(child)).toBe(false);
+    
+    // Remove child that isn't ours (branch coverage for "if (child.parent === this)")
+    parent.removeChild(child);
+    expect(child.parent).toBeUndefined();
+  });
+
+  it('calculates world properties with nested hierarchies', () => {
+    const root = new TransformComponent();
+    root.position = new Vector2(100, 100);
+    root.rotation = Math.PI; // 180 degrees
+    root.scale = new Vector2(2, 2);
+    
+    const mid = new TransformComponent();
+    mid.position = new Vector2(50, 0); // 100 units left in world space due to rotation and scale
+    mid.parent = root;
+    
+    const leaf = new TransformComponent();
+    leaf.position = new Vector2(10, 0);
+    leaf.parent = mid;
+    
+    // root (100, 100)
+    // mid local (50, 0) * root scale (2) = (100, 0)
+    // mid local (100, 0) rotated by 180 = (-100, 0)
+    // mid world = root (100, 100) + mid local (-100, 0) = (0, 100)
+    expect(mid.worldPosition.x).toBeCloseTo(0);
+    expect(mid.worldPosition.y).toBeCloseTo(100);
+    
+    // leaf local (10, 0) * mid world scale (2) = (20, 0)
+    // leaf local (20, 0) rotated by 180 = (-20, 0)
+    // leaf world = mid world (0, 100) + leaf local (-20, 0) = (-20, 100)
+    expect(leaf.worldPosition.x).toBeCloseTo(-20);
+    expect(leaf.worldPosition.y).toBeCloseTo(100);
+    
+    expect(leaf.worldRotation).toBeCloseTo(Math.PI);
+    expect(leaf.worldScale.x).toBe(2);
+  });
 });
