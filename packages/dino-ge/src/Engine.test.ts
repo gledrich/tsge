@@ -238,6 +238,35 @@ describe('Engine', () => {
     expect(callbacks.update).toHaveBeenCalledTimes(updateCountBefore);
   });
 
+  it('calculates smooth FPS and frame time', () => {
+    let rafCallback: (time: number) => void = () => {};
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      rafCallback = cb as (time: number) => void;
+      return 0;
+    });
+
+    const engine = new Engine({ update: jest.fn() });
+    const engineInternal = engine as unknown as { _onLoad: () => void };
+    engineInternal._onLoad();
+
+    // Mock timestamps
+    rafCallback(1000); // Start at 1s
+    rafCallback(1016.67); // Approx 60fps frame (~16.67ms)
+    
+    expect(engine.frameTime).toBeCloseTo(16.67);
+    expect(engine.fps).toBe(60);
+
+    // Provide 10 frames of 33.33ms (~30fps)
+    for(let i = 1; i <= 10; i++) {
+      rafCallback(1016.67 + (i * 33.33));
+    }
+    
+    expect(engine.frameTime).toBeCloseTo(33.33);
+    // Smooth FPS should be somewhere between 60 and 30 due to rolling average
+    expect(engine.fps).toBeLessThan(60);
+    expect(engine.fps).toBeGreaterThan(30);
+  });
+
   it('provides mouse position getters', () => {
     const engine = new Engine(callbacks);
     expect(engine.mouseX).toBeDefined();

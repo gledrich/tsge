@@ -201,12 +201,15 @@ export default class Engine {
     return Input.mouseY;
   }
 
-  /** Current frames per second. */
+  /** Current frames per second (rolling average). */
   fps: number = 0;
+  /** Current frame time in milliseconds. */
+  frameTime: number = 0;
   private _oldTimestamp: number = 0;
   private _secondsPassed: number = 0;
   private _accumulator: number = 0;
   private _fixedDelta: number = 1 / 60;
+  private _fpsValues: number[] = [];
 
   constructor(callbacks: EngineCallbacks, opts: Partial<EngineOpts> = {}) {
     const defaultedOpts = {
@@ -280,11 +283,21 @@ export default class Engine {
   }
 
   private _update(timestamp: number) {
+    if (this._oldTimestamp === 0) this._oldTimestamp = timestamp;
+    
     if (!Engine.paused) {
       this._secondsPassed = (timestamp - this._oldTimestamp) / 1000;
       this._oldTimestamp = timestamp;
 
-      this.fps = Math.round(1 / this._secondsPassed);
+      // Avoid division by zero on first frame
+      if (this._secondsPassed > 0) {
+        // Smooth FPS calculation
+        const currentFps = 1 / this._secondsPassed;
+        this._fpsValues.push(currentFps);
+        if (this._fpsValues.length > 30) this._fpsValues.shift();
+        this.fps = Math.round(this._fpsValues.reduce((a, b) => a + b, 0) / this._fpsValues.length);
+        this.frameTime = parseFloat((this._secondsPassed * 1000).toFixed(2));
+      }
 
       // Fixed update loop
       this._accumulator += this._secondsPassed;
@@ -348,7 +361,7 @@ export default class Engine {
     this._ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for UI
 
     const overlayWidth = 180;
-    const statsHeight = 80;
+    const statsHeight = 95;
     const padding = 10;
     const x = this._canvas.canvas.width - overlayWidth - padding;
     let y = padding;
@@ -362,9 +375,10 @@ export default class Engine {
     this._ctx.textBaseline = 'top';
 
     this._ctx.fillText(`FPS: ${this.fps}`, x + 10, y + 10);
-    this._ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 25);
-    this._ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 45);
-    this._ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 60);
+    this._ctx.fillText(`Frame: ${this.frameTime}ms`, x + 10, y + 25);
+    this._ctx.fillText(`Objects: ${objects.size}`, x + 10, y + 40);
+    this._ctx.fillText(`Mouse X: ${Math.round(this.mouseX)}`, x + 10, y + 60);
+    this._ctx.fillText(`Mouse Y: ${Math.round(this.mouseY)}`, x + 10, y + 75);
 
     // Inspector Panel (If object selected)
     if (Engine.selectedObject) {
