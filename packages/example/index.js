@@ -180,7 +180,7 @@ class PlayScene extends Scene {
       width: 100,
       zIndex: 6
     });
-    this.player.transform.addChild(this.nameTag);
+    this.player.transform.addChild(this.nameTag.transform);
 
     // Group UI elements under a container
     this.uiContainer = new Rectangle({
@@ -199,8 +199,7 @@ class PlayScene extends Scene {
       colour: 'white',
       position: new Vector2(window.innerWidth / 2 - 75, 20),
       width: 150,
-      zIndex: 10,
-      register: false // Child will be drawn by parent
+      zIndex: 10
     });
 
     this.livesText = new Text({
@@ -210,12 +209,11 @@ class PlayScene extends Scene {
       colour: '#F94144',
       position: new Vector2(20, 60),
       width: 100,
-      zIndex: 10,
-      register: false
+      zIndex: 10
     });
 
-    this.uiContainer.transform.addChild(this.scoreText);
-    this.uiContainer.transform.addChild(this.livesText);
+    this.uiContainer.transform.addChild(this.scoreText.transform);
+    this.uiContainer.transform.addChild(this.livesText.transform);
   }
 
   update() {
@@ -248,14 +246,19 @@ class PlayScene extends Scene {
 
     // Bounds Checking
     if (playerTransform.position.x < 0) playerTransform.position.x = 0;
-    if (playerTransform.position.x > PlayScene.WORLD_WIDTH - this.player.bounds.width)
-      playerTransform.position.x = PlayScene.WORLD_WIDTH - this.player.bounds.width;
+    if (
+      playerTransform.position.x >
+      PlayScene.WORLD_WIDTH - this.player.bounds.width
+    )
+      playerTransform.position.x =
+        PlayScene.WORLD_WIDTH - this.player.bounds.width;
     if (playerTransform.position.y < 0) playerTransform.position.y = 0;
     if (
       playerTransform.position.y >
       PlayScene.WORLD_HEIGHT - this.player.bounds.height
     )
-      playerTransform.position.y = PlayScene.WORLD_HEIGHT - this.player.bounds.height;
+      playerTransform.position.y =
+        PlayScene.WORLD_HEIGHT - this.player.bounds.height;
 
     if (targetVX < 0) {
       this.player.flip = true;
@@ -359,11 +362,13 @@ class PlayScene extends Scene {
     // Star drift (Parallax)
     this.starsMid.forEach((star) => {
       star.transform.position.y += star.speed;
-      if (star.transform.position.y > PlayScene.WORLD_HEIGHT) star.transform.position.y = 0;
+      if (star.transform.position.y > PlayScene.WORLD_HEIGHT)
+        star.transform.position.y = 0;
     });
     this.starsNear.forEach((star) => {
       star.transform.position.y += star.speed;
-      if (star.transform.position.y > PlayScene.WORLD_HEIGHT) star.transform.position.y = 0;
+      if (star.transform.position.y > PlayScene.WORLD_HEIGHT)
+        star.transform.position.y = 0;
     });
 
     // Spawn Meteors (Spawn within camera view)

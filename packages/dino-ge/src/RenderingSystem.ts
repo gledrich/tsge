@@ -46,15 +46,16 @@ export default class RenderingSystem extends System {
     const sorted = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
 
     sorted.forEach((object) => {
+      const { worldPosition } = object.transform;
       const width = object.bounds?.width ?? 0;
       const height = object.bounds?.height ?? 0;
 
       // Frustum Culling
       if (
-        object.transform.position.x < bounds.x + bounds.width &&
-        object.transform.position.x + width > bounds.x &&
-        object.transform.position.y < bounds.y + bounds.height &&
-        object.transform.position.y + height > bounds.y
+        worldPosition.x < bounds.x + bounds.width &&
+        worldPosition.x + width > bounds.x &&
+        worldPosition.y < bounds.y + bounds.height &&
+        worldPosition.y + height > bounds.y
       ) {
         // Find any RenderComponent on the entity
         const renderable = object.getComponent(RenderComponent);
@@ -70,11 +71,11 @@ export default class RenderingSystem extends System {
           this.ctx.save();
           this.ctx.strokeStyle = object === Engine.selectedObject ? '#00ff00' : 'red';
           this.ctx.lineWidth = (object === Engine.selectedObject ? 2 : 1) / Engine.camera.zoom;
-          this.ctx.strokeRect(object.transform.position.x, object.transform.position.y, width, height);
+          this.ctx.strokeRect(worldPosition.x, worldPosition.y, width, height);
 
           this.ctx.font = `${12 / Engine.camera.zoom}px monospace`;
           this.ctx.fillStyle = this.ctx.strokeStyle;
-          this.ctx.fillText(object.metadata.tag || 'obj', object.transform.position.x, object.transform.position.y - (5 / Engine.camera.zoom));
+          this.ctx.fillText(object.metadata.tag || 'obj', worldPosition.x, worldPosition.y - (5 / Engine.camera.zoom));
           this.ctx.restore();
         }
       }

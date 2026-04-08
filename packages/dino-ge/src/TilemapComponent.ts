@@ -28,12 +28,12 @@ export default class TilemapComponent extends RenderComponent {
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.gameObject) return;
 
-    const { position, rotation, scale } = this.gameObject.transform;
+    const { worldPosition, worldRotation, worldScale } = this.gameObject.transform;
 
     ctx.save();
-    ctx.translate(position.x, position.y);
-    if (rotation !== 0) ctx.rotate(rotation);
-    ctx.scale(scale.x, scale.y);
+    ctx.translate(worldPosition.x, worldPosition.y);
+    if (worldRotation !== 0) ctx.rotate(worldRotation);
+    ctx.scale(worldScale.x, worldScale.y);
 
     for (let y = 0; y < this.data.length; y++) {
       for (let x = 0; x < this.data[y].length; x++) {
