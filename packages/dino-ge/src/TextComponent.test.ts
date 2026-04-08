@@ -63,4 +63,42 @@ describe('TextComponent', () => {
     expect(mockCtx.fillText).toHaveBeenCalledWith('Test', 25, 10);
     expect(mockCtx.restore).toHaveBeenCalled();
   });
+
+  it('early returns from draw if no gameObject is attached', () => {
+    const component = new TextComponent('a', 'b', 'c', 'left', 'top', 0, 0);
+    const mockCtx = {
+      save: jest.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.save).not.toHaveBeenCalled();
+  });
+
+  it('applies rotation and handles missing background during draw', () => {
+    const component = new TextComponent('Test', '10px Arial', 'black', 'left', 'top', 50, 20);
+    const obj = new MockGameObject('test', 0);
+    obj.transform.rotation = Math.PI / 4;
+    component.gameObject = obj;
+
+    const mockCtx = {
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      scale: jest.fn(),
+      fillRect: jest.fn(),
+      fillText: jest.fn(),
+      font: '',
+      fillStyle: '',
+      textAlign: '',
+      textBaseline: ''
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.rotate).toHaveBeenCalledWith(Math.PI / 4);
+    expect(mockCtx.fillRect).not.toHaveBeenCalled();
+    expect(mockCtx.fillText).toHaveBeenCalled();
+  });
 });
