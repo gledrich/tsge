@@ -55,15 +55,17 @@ export const getUpdatedCodeSnippet = (code: string, tag: string, propertyPath: s
   const match = tagRegex.exec(code);
   if (!match) return null;
 
-  const searchWindowStart = Math.max(0, match.index - 500);
-  const searchWindowEnd = Math.min(code.length, match.index + 500);
+  // Larger search window to find the object definition
+  const searchWindowStart = Math.max(0, match.index - 1000);
+  const searchWindowEnd = Math.min(code.length, match.index + 2000);
   const snippet = code.substring(searchWindowStart, searchWindowEnd);
 
   let updatedSnippet = snippet;
   const paths = propertyPath.split('.');
 
   if (paths.length === 2 && paths[0] === 'position') {
-    const posRegex = /position:\s*new\s*(?:Dino\.)?Vector2\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/;
+    // Improved regex to handle multiline Vector2 and extra spaces
+    const posRegex = /position:\s*new\s*(?:Dino\.)?Vector2\s*\(\s*([\s\S]*?)\s*,\s*([\s\S]*?)\s*\)/;
     const posMatch = posRegex.exec(snippet);
     if (posMatch) {
       const newX = paths[1] === 'x' ? val : posMatch[1].trim();
@@ -72,19 +74,14 @@ export const getUpdatedCodeSnippet = (code: string, tag: string, propertyPath: s
       updatedSnippet = snippet.replace(posRegex, `position: new ${vectorPrefix}Vector2(${newX}, ${newY})`);
     }
   } else {
-    const propRegex = new RegExp(`(\\b${propertyPath}\\s*:\\s*)([^,\\n}]+)`);
+    // Handle other properties, including those inside components
+    const propName = propertyPath.includes('.') ? propertyPath.split('.').pop() : propertyPath;
+    const propRegex = new RegExp(`(\\b${propName}\\s*:\\s*)([^,\\n}]+)`);
     const propMatch = propRegex.exec(snippet);
+    
     if (propMatch) {
       const formattedVal = typeof val === 'string' ? `'${val}'` : val;
       updatedSnippet = snippet.replace(propRegex, `$1${formattedVal}`);
-    } else if (propertyPath.startsWith('_physics.')) {
-      const physicsProp = propertyPath.replace('_physics.', '');
-      const altRegex = new RegExp(`(\\b${physicsProp}\\s*:\\s*)([^,\\n}]+)`);
-      const altMatch = altRegex.exec(snippet);
-      if (altMatch) {
-        const formattedVal = typeof val === 'string' ? `'${val}'` : val;
-        updatedSnippet = snippet.replace(altRegex, `$1${formattedVal}`);
-      }
     }
   }
 
@@ -127,15 +124,15 @@ const InspectorRow: React.FC<{
     return () => cancelAnimationFrame(rafId);
   }, [selectedObject, def]);
 
-  const parseValue = (e: React.ChangeEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
-    let val: any = def.type === 'checkbox' ? e.target.checked : e.target.value;
+  const parseValue = (element: HTMLInputElement) => {
+    let val: any = def.type === 'checkbox' ? element.checked : element.value;
     if (def.type === 'number') val = parseFloat(val);
     return val;
   };
 
   // Mutate the runtime object immediately
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseValue(e);
+    const val = parseValue(e.target);
     const resolved = resolveComponentPath(selectedObject, def.propertyPath);
     if (resolved && resolved.target) {
       resolved.target[resolved.prop] = val;
@@ -143,11 +140,13 @@ const InspectorRow: React.FC<{
   };
 
   // Trigger a code sync when the user leaves the input
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = () => {
+    if (!inputRef.current) return;
+    
     const tag = selectedObject.metadata.tag;
     if (!tag) return;
 
-    const val = parseValue(e);
+    const val = parseValue(inputRef.current);
 
     const onValueReceived = (event: Event) => {
       window.removeEventListener('playground-editor-value', onValueReceived);
