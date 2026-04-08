@@ -40,4 +40,35 @@ describe('TilemapComponent', () => {
     expect(mockCtx.drawImage).toHaveBeenCalledTimes(3);
     expect(mockCtx.restore).toHaveBeenCalled();
   });
+
+  it('early returns from draw if no gameObject is attached', () => {
+    const component = new TilemapComponent(mockTileset, mockData, 16, 1);
+    const mockCtx = {
+      save: jest.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.save).not.toHaveBeenCalled();
+  });
+
+  it('applies rotation during draw', () => {
+    const component = new TilemapComponent(mockTileset, mockData, 16, 1);
+    const obj = new MockGameObject('test', 0);
+    obj.transform.rotation = Math.PI;
+    component.gameObject = obj;
+
+    const mockCtx = {
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      scale: jest.fn(),
+      drawImage: jest.fn()
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.rotate).toHaveBeenCalledWith(Math.PI);
+  });
 });
