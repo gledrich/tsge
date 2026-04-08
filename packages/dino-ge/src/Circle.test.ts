@@ -36,4 +36,33 @@ describe('Circle', () => {
     
     expect(circle.hasComponent(ShapeComponent)).toBe(true);
   });
+
+  it('throws error if position is not a Vector2', () => {
+    expect(() => {
+      new Circle({
+        position: { x: 0, y: 0 } as unknown as Vector2,
+        radius: 10
+      });
+    }).toThrow('"position" must be a Vector2!');
+  });
+
+  it('throws error if radius is missing', () => {
+    expect(() => {
+      new Circle({
+        position: new Vector2(),
+        radius: 0
+      });
+    }).toThrow('You must provide a radius for Circle');
+  });
+
+  it('initialises with custom tag and zIndex', () => {
+    const circle = new Circle({
+      position: new Vector2(),
+      radius: 10,
+      tag: 'enemy',
+      zIndex: 10
+    });
+    expect(circle.metadata.tag).toBe('enemy');
+    expect(circle.metadata.zIndex).toBe(10);
+  });
 });
