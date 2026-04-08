@@ -374,7 +374,12 @@ describe('Engine', () => {
     (engine as unknown as { _draw: () => void })._draw();
 
     const rawObj = {
-      transform: { position: new Vector2() },
+      transform: { 
+        position: new Vector2(),
+        worldPosition: new Vector2(),
+        worldRotation: 0,
+        worldScale: new Vector2(1, 1)
+      },
       metadata: { tag: 'raw', zIndex: 0 },
       getComponent: jest.fn().mockReturnValue(null),
       bounds: { width: 10, height: 10 },

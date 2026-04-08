@@ -119,12 +119,12 @@ describe('Input', () => {
     (Engine as unknown as { debug: boolean }).debug = true;
     
     const objBottom = {
-      transform: { position: { x: 10, y: 10 } },
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 10, y: 10 } },
       bounds: { width: 50, height: 50 },
       metadata: { zIndex: 0, tag: 'bottom' }
     } as unknown as GameObject;
     const objTop = {
-      transform: { position: { x: 10, y: 10 } },
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 10, y: 10 } },
       bounds: { width: 50, height: 50 },
       metadata: { zIndex: 10, tag: 'top' }
     } as unknown as GameObject;
@@ -152,7 +152,7 @@ describe('Input', () => {
 
     // Test branch where an object has no bounds
     const objNoBounds = {
-      transform: { position: { x: 10, y: 10 } },
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 10, y: 10 } },
       metadata: { zIndex: 100, tag: 'no-bounds' }
     } as unknown as GameObject;
     (Engine as unknown as { objects: Set<GameObject> }).objects.add(objNoBounds);
@@ -168,7 +168,7 @@ describe('Input', () => {
   it('selects objects from currentScene if present', () => {
     (Engine as unknown as { debug: boolean }).debug = true;
     const mockObj = {
-      transform: { position: { x: 10, y: 10 } },
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 10, y: 10 } },
       bounds: { width: 50, height: 50 },
       metadata: { zIndex: 0, tag: 'scene-target' }
     } as unknown as GameObject;
@@ -201,7 +201,7 @@ describe('Input', () => {
   it('handles object dragging in debug mode', () => {
     (Engine as unknown as { debug: boolean }).debug = true;
     const obj = {
-      transform: { position: { x: 10, y: 10 } },
+      transform: { position: { x: 10, y: 10 }, worldPosition: { x: 10, y: 10 } },
       bounds: { width: 50, height: 50 },
       metadata: { zIndex: 0, tag: 'drag-me' }
     } as unknown as GameObject;

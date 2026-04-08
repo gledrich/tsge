@@ -180,7 +180,7 @@ class PlayScene extends Scene {
       width: 100,
       zIndex: 6
     });
-    this.player.transform.addChild(this.nameTag);
+    this.player.transform.addChild(this.nameTag.transform);
 
     // Group UI elements under a container
     this.uiContainer = new Rectangle({
@@ -214,8 +214,8 @@ class PlayScene extends Scene {
       register: false
     });
 
-    this.uiContainer.transform.addChild(this.scoreText);
-    this.uiContainer.transform.addChild(this.livesText);
+    this.uiContainer.transform.addChild(this.scoreText.transform);
+    this.uiContainer.transform.addChild(this.livesText.transform);
   }
 
   update() {

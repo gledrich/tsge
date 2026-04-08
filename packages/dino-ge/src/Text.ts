@@ -178,11 +178,12 @@ export default class Text extends GameObject {
   #mouseClick(pos: Vector2) {
     const width = this.bounds?.width ?? 0;
     const height = this.bounds?.height ?? 0;
+    const { worldPosition } = this.transform;
     if (
-      pos.x > this.transform.position.x &&
-      pos.x < this.transform.position.x + width &&
-      pos.y > this.transform.position.y &&
-      pos.y < this.transform.position.y + height
+      pos.x > worldPosition.x &&
+      pos.x < worldPosition.x + width &&
+      pos.y > worldPosition.y &&
+      pos.y < worldPosition.y + height
     ) {
       if (this.onClick) {
         this.onClick();

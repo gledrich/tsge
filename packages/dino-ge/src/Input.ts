@@ -25,8 +25,15 @@ export default class Input {
       this.mousePosition.y = event.clientY;
 
       if (this.isDragging && Engine.selectedObject && Engine.debug) {
-        Engine.selectedObject.transform.position.x = this.mouseX - this.dragOffset.x;
-        Engine.selectedObject.transform.position.y = this.mouseY - this.dragOffset.y;
+        const { parent } = Engine.selectedObject.transform;
+        if (parent) {
+          const parentWorldPos = parent.worldPosition;
+          Engine.selectedObject.transform.position.x = (this.mouseX - this.dragOffset.x) - parentWorldPos.x;
+          Engine.selectedObject.transform.position.y = (this.mouseY - this.dragOffset.y) - parentWorldPos.y;
+        } else {
+          Engine.selectedObject.transform.position.x = this.mouseX - this.dragOffset.x;
+          Engine.selectedObject.transform.position.y = this.mouseY - this.dragOffset.y;
+        }
       }
     });
 
@@ -47,16 +54,17 @@ export default class Input {
         for (const obj of sorted) {
           const width = obj.bounds?.width ?? 0;
           const height = obj.bounds?.height ?? 0;
+          const { worldPosition } = obj.transform;
           if (
-            worldPos.x > obj.transform.position.x &&
-            worldPos.x < obj.transform.position.x + width &&
-            worldPos.y > obj.transform.position.y &&
-            worldPos.y < obj.transform.position.y + height
+            worldPos.x > worldPosition.x &&
+            worldPos.x < worldPosition.x + width &&
+            worldPos.y > worldPosition.y &&
+            worldPos.y < worldPosition.y + height
           ) {
             Engine.selectedObject = obj;
             this.isDragging = true;
-            this.dragOffset.x = worldPos.x - obj.transform.position.x;
-            this.dragOffset.y = worldPos.y - obj.transform.position.y;
+            this.dragOffset.x = worldPos.x - worldPosition.x;
+            this.dragOffset.y = worldPos.y - worldPosition.y;
             found = true;
             break;
           }
