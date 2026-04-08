@@ -3,6 +3,7 @@ import GameObject from './GameObject';
 import RenderComponent from './RenderComponent';
 import VisibilityComponent from './VisibilityComponent';
 import Vector2 from './Vector2';
+import Engine from './Engine';
 
 jest.mock('./Engine', () => ({
   __esModule: true,
@@ -11,7 +12,8 @@ jest.mock('./Engine', () => ({
       getViewportBounds: jest.fn(() => ({ x: 0, y: 0, width: 800, height: 600 })),
       zoom: 1,
       position: { x: 0, y: 0 }
-    }
+    },
+    selectedObject: null
   }
 }));
 
@@ -60,8 +62,8 @@ describe('RenderingSystem', () => {
     expect(render1.draw).toHaveBeenCalled();
     
     // Check call order - render2 (zIndex 0) should be called before render1 (zIndex 10)
-    const order1 = render1.draw.mock.invocationCallOrder[0];
-    const order2 = render2.draw.mock.invocationCallOrder[0];
+    const order1 = (render1.draw as jest.Mock).mock.invocationCallOrder[0];
+    const order2 = (render2.draw as jest.Mock).mock.invocationCallOrder[0];
     expect(order2).toBeLessThan(order1);
   });
 
@@ -90,5 +92,64 @@ describe('RenderingSystem', () => {
 
     system.update(new Set([obj]));
     expect(render.draw).not.toHaveBeenCalled();
+  });
+
+  it('sets a new rendering context', () => {
+    const system = new RenderingSystem(mockCtx);
+    const newCtx = { 
+      save: jest.fn(),
+      restore: jest.fn(),
+      scale: jest.fn(),
+      translate: jest.fn(),
+      canvas: { width: 100, height: 100 } 
+    } as unknown as CanvasRenderingContext2D;
+    system.setContext(newCtx);
+    
+    const entities = new Set<GameObject>();
+    system.update(entities);
+    expect(newCtx.save).toHaveBeenCalled();
+  });
+
+  it('draws debug overlays including selected object and missing tags', () => {
+    const system = new RenderingSystem(mockCtx);
+    
+    const obj1 = new MockGameObject('test-tag', 0, 50, 50);
+    const obj2 = new MockGameObject('', 1, 50, 50); // No tag
+    
+    (Engine as unknown as { selectedObject: GameObject }).selectedObject = obj1;
+    
+    const debugCtx = {
+      ...mockCtx,
+      save: jest.fn(),
+      restore: jest.fn(),
+      strokeRect: jest.fn(),
+      fillText: jest.fn(),
+      strokeStyle: '',
+      lineWidth: 0,
+      font: '',
+      fillStyle: ''
+    } as unknown as CanvasRenderingContext2D;
+    system.setContext(debugCtx);
+
+    system.update(new Set([obj1, obj2]), 0.016, true);
+
+    expect(debugCtx.strokeRect).toHaveBeenCalledTimes(2);
+    // Selected object (obj1) check is done via style change
+    expect(debugCtx.fillText).toHaveBeenCalledWith('test-tag', 0, -5);
+    expect(debugCtx.fillText).toHaveBeenCalledWith('obj', 0, -5); // obj2 default tag
+  });
+
+  it('handles objects without bounds during update', () => {
+    const system = new RenderingSystem(mockCtx);
+    class NoBoundsObject extends GameObject {}
+    const obj = new NoBoundsObject('test', 0);
+    // Place it inside viewport bounds so it passes frustum culling even with 0 width/height
+    obj.transform.position = new Vector2(1, 1);
+    
+    const render = new MockRenderComponent();
+    obj.addComponent(render);
+
+    system.update(new Set([obj]));
+    expect(render.draw).toHaveBeenCalled();
   });
 });
