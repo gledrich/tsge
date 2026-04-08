@@ -4,9 +4,12 @@ import Engine from './Engine';
 import SpriteComponent from './SpriteComponent';
 
 jest.mock('./Loader', () => {
-  const mockImg = new Image();
-  mockImg.width = 100;
-  mockImg.height = 100;
+  const mockImg = { 
+    width: 100, 
+    height: 100, 
+    complete: true,
+    addEventListener: jest.fn()
+  } as unknown as HTMLImageElement;
   return {
     __esModule: true,
     default: {
@@ -34,6 +37,10 @@ describe('Sprite', () => {
     endCol: 5
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('initialises correctly', () => {
     const sprite = new Sprite(mockProps);
     expect(sprite.metadata.tag).toBe('player');
@@ -45,9 +52,11 @@ describe('Sprite', () => {
   it('synchronises properties with SpriteComponent', () => {
     const sprite = new Sprite(mockProps);
     sprite.flip = true;
+    expect(sprite.flip).toBe(true);
     expect(sprite.getComponent(SpriteComponent)!.flip).toBe(true);
     
     sprite.currentFrame = 3;
+    expect(sprite.currentFrame).toBe(3);
     expect(sprite.getComponent(SpriteComponent)!.currentFrame).toBe(3);
   });
 
@@ -63,5 +72,71 @@ describe('Sprite', () => {
     sprite.play();
     sprite.stop();
     expect(Engine.destroyObject).toHaveBeenCalledWith(sprite);
+  });
+
+  it('throws error if tag is missing', () => {
+    expect(() => {
+      new Sprite({ ...mockProps, tag: '' });
+    }).toThrow('You must provide a tag for a Sprite');
+  });
+
+  it('initialises with default zIndex if not provided', () => {
+    const sprite = new Sprite(mockProps);
+    expect(sprite.metadata.zIndex).toBe(1);
+  });
+
+  it('initialises with custom zIndex if provided', () => {
+    const sprite = new Sprite({ ...mockProps, zIndex: 10 });
+    expect(sprite.metadata.zIndex).toBe(10);
+  });
+
+  it('accepts HTMLImageElement directly', () => {
+    const img = { 
+      width: 100, 
+      height: 100, 
+      complete: true, 
+      addEventListener: jest.fn() 
+    } as unknown as HTMLImageElement;
+    const sprite = new Sprite({ ...mockProps, img });
+    expect(sprite.img).toBe(img);
+  });
+
+  it('provides access to all SpriteComponent properties via getters and setters', () => {
+    const sprite = new Sprite(mockProps);
+    const newImg = { width: 50, height: 50 } as HTMLImageElement;
+    
+    sprite.img = newImg;
+    expect(sprite.img).toBe(newImg);
+    
+    sprite.rows = 2;
+    expect(sprite.rows).toBe(2);
+    
+    sprite.cols = 5;
+    expect(sprite.cols).toBe(5);
+    
+    sprite.startCol = 1;
+    expect(sprite.startCol).toBe(1);
+    
+    sprite.endCol = 4;
+    expect(sprite.endCol).toBe(4);
+    
+    sprite.frameDuration = 200;
+    expect(sprite.frameDuration).toBe(200);
+    
+    expect(sprite.frameWidth).toBeDefined();
+    expect(sprite.frameHeight).toBeDefined();
+    
+    expect(sprite.flip).toBe(false);
+    sprite.flip = true;
+    expect(sprite.flip).toBe(true);
+  });
+
+  it('does not re-register if already registered on play', () => {
+    const sprite = new Sprite(mockProps);
+    sprite.play();
+    expect(Engine.registerObject).toHaveBeenCalledTimes(1);
+    
+    sprite.play();
+    expect(Engine.registerObject).toHaveBeenCalledTimes(1);
   });
 });
