@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import SceneExplorer from './SceneExplorer';
+import React from 'react';
 import '../styles/sidebar.css';
 
 interface Snippet {
@@ -75,8 +74,6 @@ floor.addComponent(floorPhys);` }
 ];
 
 const Sidebar: React.FC<Record<string, never>> = () => {
-  const [activeTab, setActiveTab] = useState<'snippets' | 'scene'>('snippets');
-
   const insertSnippet = (code: string) => {
     window.dispatchEvent(new CustomEvent('playground-insert-text', { detail: code }));
   };
@@ -84,40 +81,26 @@ const Sidebar: React.FC<Record<string, never>> = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-tabs">
-        <div 
-          className={`sidebar-tab ${activeTab === 'snippets' ? 'active' : ''}`}
-          onClick={() => setActiveTab('snippets')}
-        >
+        <div className="sidebar-tab active">
           <i className="fa-solid fa-code" />
           <span>Snippets</span>
-        </div>
-        <div 
-          className={`sidebar-tab ${activeTab === 'scene' ? 'active' : ''}`}
-          onClick={() => setActiveTab('scene')}
-        >
-          <i className="fa-solid fa-layer-group" />
-          <span>Scene</span>
         </div>
       </div>
       
       <div className="sidebar-content">
-        {activeTab === 'snippets' ? (
-          <div className="snippets-grid">
-            {snippets.map((s, index) => (
-              <button 
-                key={index} 
-                className="snippet-btn" 
-                title={s.label}
-                onClick={() => insertSnippet(s.code)}
-              >
-                <i className={`fa-solid ${s.icon}`} />
-                <span>{s.label}</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <SceneExplorer />
-        )}
+        <div className="snippets-grid">
+          {snippets.map((s, index) => (
+            <button 
+              key={index} 
+              className="snippet-btn" 
+              title={s.label}
+              onClick={() => insertSnippet(s.code)}
+            >
+              <i className={`fa-solid ${s.icon}`} />
+              <span>{s.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

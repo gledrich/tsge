@@ -1,0 +1,104 @@
+.bottom-panel {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 350px;
+  background: #1e1e1e;
+  color: white;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+}
+
+.bottom-panel.collapsed {
+  transform: translateY(350px);
+}
+
+.bottom-panel-toggle {
+  position: absolute;
+  top: -30px;
+  right: 50%;
+  margin-right: -100px;
+  width: 200px;
+  height: 30px;
+  background: #43aa8b;
+  color: white;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  z-index: 1001;
+  -webkit-user-select: none;
+  user-select: none;
+  font-weight: 600;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+}
+
+.bottom-panel-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bottom-panel-tabs {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bottom-panel-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.bottom-panel-tab:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: white;
+}
+
+.bottom-panel-tab.active {
+  color: #43aa8b;
+  background-color: rgba(67, 170, 139, 0.05);
+  border-bottom-color: #43aa8b;
+}
+
+.bottom-panel-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adjust components inside bottom panel */
+.bottom-panel-content .scene-explorer {
+  flex: 1;
+  height: 100%;
+}
+
+.bottom-panel-content .console {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  height: 100%;
+}

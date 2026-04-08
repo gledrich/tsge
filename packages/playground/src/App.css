@@ -101,6 +101,15 @@
   padding: 0.75rem 1.25rem;
   border-radius: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: bottom 0.3s ease;
+}
+
+.bottom-panel-open .action-buttons {
+  bottom: calc(350px + 2rem);
+}
+
+.bottom-panel-open .inspector-container {
+  bottom: calc(350px + 1rem);
 }
 
 .action-buttons i {

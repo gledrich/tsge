@@ -3,9 +3,9 @@ import * as Dino from 'dino-ge';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Inspector from './components/Inspector';
-import Console from './components/Console';
 import Toolbar from './components/Toolbar';
 import Logo from './components/Logo';
+import BottomPanel from './components/BottomPanel';
 import { getCurrentScriptId, getScript, updateScript } from './utils/helpers';
 import './App.css';
 
@@ -17,6 +17,7 @@ function App() {
   const [isDebug, setIsDebug] = useState(false);
   const [isInspectorVisible, setIsInspectorVisible] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isBottomPanelVisible, setIsBottomPanelVisible] = useState(false);
 
   useEffect(() => {
     (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
@@ -101,7 +102,7 @@ function App() {
   };
 
   return (
-    <div className="playground-root">
+    <div className={`playground-root ${isBottomPanelVisible ? 'bottom-panel-open' : ''}`}>
       <Logo visible={!isInspectorVisible} />
       
       <div className={`editor-layout ${isSidebarCollapsed ? 'collapsed' : ''}`}>
@@ -114,9 +115,13 @@ function App() {
             currentScriptId={currentScriptId} 
             onRefresh={handleRefresh}
           />
-          <Console />
         </div>
       </div>
+
+      <BottomPanel 
+        visible={isBottomPanelVisible} 
+        onToggle={() => setIsBottomPanelVisible(!isBottomPanelVisible)} 
+      />
 
       <Inspector 
         visible={isInspectorVisible} 
