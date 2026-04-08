@@ -15,7 +15,8 @@ import {
   Tilemap,
   PhysicsComponent,
   TransformComponent,
-  VisibilityComponent
+  VisibilityComponent,
+  Group
 } from 'dino-ge';
 
 class MenuScene extends Scene {
@@ -109,20 +110,31 @@ class PlayScene extends Scene {
       zIndex: -1 // Behind everything
     });
 
+    // Group Stars for a cleaner Scene Explorer
+    this.starsContainer = new Group('stars-root', 0);
+
+    const farStarsLayer = new Group('stars-far', 0);
+    const midStarsLayer = new Group('stars-mid', 1);
+    const nearStarsLayer = new Group('stars-near', 2);
+
+    this.starsContainer.transform.addChild(farStarsLayer.transform);
+    this.starsContainer.transform.addChild(midStarsLayer.transform);
+    this.starsContainer.transform.addChild(nearStarsLayer.transform);
+
     // Distant Stars (Static-ish, very faint)
     for (let i = 0; i < 200; i++) {
-      this.starsFar.push(
-        new Rectangle({
-          position: new Vector2(
-            Math.random() * PlayScene.WORLD_WIDTH,
-            Math.random() * PlayScene.WORLD_HEIGHT
-          ),
-          width: 1,
-          height: 1,
-          colour: 'rgba(255, 255, 255, 0.1)',
-          zIndex: 0
-        })
-      );
+      const star = new Rectangle({
+        position: new Vector2(
+          Math.random() * PlayScene.WORLD_WIDTH,
+          Math.random() * PlayScene.WORLD_HEIGHT
+        ),
+        width: 1,
+        height: 1,
+        colour: 'rgba(255, 255, 255, 0.1)',
+        zIndex: 0
+      });
+      farStarsLayer.transform.addChild(star.transform);
+      this.starsFar.push(star);
     }
 
     // Mid Stars (Moderate speed)
@@ -138,6 +150,7 @@ class PlayScene extends Scene {
         zIndex: 1
       });
       star.speed = 0.5 + Math.random() * 1;
+      midStarsLayer.transform.addChild(star.transform);
       this.starsMid.push(star);
     }
 
@@ -154,6 +167,7 @@ class PlayScene extends Scene {
         zIndex: 2
       });
       star.speed = 3 + Math.random() * 4;
+      nearStarsLayer.transform.addChild(star.transform);
       this.starsNear.push(star);
     }
 
@@ -188,14 +202,7 @@ class PlayScene extends Scene {
     this.player.transform.addChild(this.nameTag.transform);
 
     // Group UI elements under a container
-    this.uiContainer = new Rectangle({
-      tag: 'ui-root',
-      position: new Vector2(0, 0),
-      width: 1,
-      height: 1,
-      colour: 'transparent',
-      zIndex: 10
-    });
+    this.uiContainer = new Group('ui-root', 10);
 
     this.scoreText = new Text({
       tag: 'score',
