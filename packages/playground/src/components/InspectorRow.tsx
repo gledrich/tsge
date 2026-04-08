@@ -93,6 +93,47 @@ export const getUpdatedCodeSnippet = (code: string, tag: string, propertyPath: s
 };
 
 /**
+ * Helper to extract a value from the code for a specific tag and property.
+ */
+export const getValueFromCode = (code: string, tag: string, propertyPath: string): any => {
+  const tagRegex = new RegExp(`tag:\\s*['"\`]${tag}['"\`]`, 'g');
+  const match = tagRegex.exec(code);
+  if (!match) return undefined;
+
+  const searchWindowStart = Math.max(0, match.index - 1000);
+  const searchWindowEnd = Math.min(code.length, match.index + 2000);
+  const snippet = code.substring(searchWindowStart, searchWindowEnd);
+
+  const paths = propertyPath.split('.');
+
+  if (paths.length === 2 && paths[0] === 'position') {
+    const posRegex = /position:\s*new\s*(?:Dino\.)?Vector2\s*\(\s*([\s\S]*?)\s*,\s*([\s\S]*?)\s*\)/;
+    const posMatch = posRegex.exec(snippet);
+    if (posMatch) {
+      const valStr = paths[1] === 'x' ? posMatch[1].trim() : posMatch[2].trim();
+      const val = parseFloat(valStr);
+      return isNaN(val) ? valStr : val;
+    }
+  } else {
+    const propName = propertyPath.includes('.') ? propertyPath.split('.').pop() : propertyPath;
+    const propRegex = new RegExp(`\\b${propName}\\s*:\\s*([^,\\n}]+)`);
+    const propMatch = propRegex.exec(snippet);
+    
+    if (propMatch) {
+      let val: any = propMatch[1].trim();
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      if (!isNaN(parseFloat(val))) return parseFloat(val);
+      if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+        return val.substring(1, val.length - 1);
+      }
+      return val;
+    }
+  }
+  return undefined;
+};
+
+/**
  * Individual input row for a property, handles its own sync loop and value formatting.
  */
 const InspectorRow: React.FC<{
@@ -100,15 +141,48 @@ const InspectorRow: React.FC<{
   selectedObject: InspectableObject;
 }> = ({ def, selectedObject }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [lastSyncedValue, setLastSyncedValue] = React.useState<any>(undefined);
+  const [isModified, setIsModified] = React.useState(false);
 
-  // Sync runtime value to the input box constantly, unless focused
+  // Fetch the current value from the editor code to establish a baseline
+  const refreshBaseline = React.useCallback(() => {
+    const tag = selectedObject.metadata.tag;
+    if (!tag) return;
+
+    const onValueReceived = (event: Event) => {
+      window.removeEventListener('playground-editor-value', onValueReceived);
+      const customEvent = event as CustomEvent<string>;
+      const code = customEvent.detail;
+      const val = getValueFromCode(code, tag, def.propertyPath);
+      setLastSyncedValue(val);
+    };
+
+    window.addEventListener('playground-editor-value', onValueReceived);
+    window.dispatchEvent(new CustomEvent('playground-get-value'));
+  }, [selectedObject, def.propertyPath]);
+
+  // Refresh baseline when object changes or code is updated externally
+  useEffect(() => {
+    refreshBaseline();
+    const handleUpdate = () => refreshBaseline();
+    window.addEventListener('playground-update-code', handleUpdate);
+    window.addEventListener('playground-script-selected', handleUpdate);
+    return () => {
+      window.removeEventListener('playground-update-code', handleUpdate);
+      window.removeEventListener('playground-script-selected', handleUpdate);
+    };
+  }, [refreshBaseline]);
+
+  // Sync runtime value to the input box and check for modifications
   useEffect(() => {
     let rafId: number;
     const loop = () => {
-      if (inputRef.current && document.activeElement !== inputRef.current) {
-        const resolved = resolveComponentPath(selectedObject, def.propertyPath);
-        if (resolved && resolved.target) {
-          const val = resolved.target[resolved.prop];
+      const resolved = resolveComponentPath(selectedObject, def.propertyPath);
+      if (resolved && resolved.target) {
+        const val = resolved.target[resolved.prop];
+        
+        // Update input if not focused
+        if (inputRef.current && document.activeElement !== inputRef.current) {
           if (def.type === 'checkbox') {
             inputRef.current.checked = !!val;
           } else if (def.type === 'number') {
@@ -117,12 +191,22 @@ const InspectorRow: React.FC<{
             inputRef.current.value = val !== undefined ? String(val) : '';
           }
         }
+
+        // Compare runtime value with baseline to determine modified state
+        let modified = false;
+        if (typeof val === 'number' && typeof lastSyncedValue === 'number') {
+          // Use epsilon for float comparison to handle dragging jitter
+          modified = Math.abs(val - lastSyncedValue) > 0.01;
+        } else {
+          modified = val !== lastSyncedValue;
+        }
+        setIsModified(modified);
       }
       rafId = requestAnimationFrame(loop);
     };
     rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [selectedObject, def]);
+  }, [selectedObject, def, lastSyncedValue]);
 
   const parseValue = (element: HTMLInputElement) => {
     let val: any = def.type === 'checkbox' ? element.checked : element.value;
@@ -130,7 +214,6 @@ const InspectorRow: React.FC<{
     return val;
   };
 
-  // Mutate the runtime object immediately
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseValue(e.target);
     const resolved = resolveComponentPath(selectedObject, def.propertyPath);
@@ -139,10 +222,8 @@ const InspectorRow: React.FC<{
     }
   };
 
-  // Trigger a code sync when the user leaves the input
-  const handleBlur = () => {
+  const handleSync = () => {
     if (!inputRef.current) return;
-    
     const tag = selectedObject.metadata.tag;
     if (!tag) return;
 
@@ -156,6 +237,8 @@ const InspectorRow: React.FC<{
       const newCode = getUpdatedCodeSnippet(code, tag, def.propertyPath, val);
       if (newCode) {
         window.dispatchEvent(new CustomEvent('playground-update-code', { detail: newCode }));
+        setLastSyncedValue(val);
+        setIsModified(false);
       }
     };
 
@@ -164,15 +247,21 @@ const InspectorRow: React.FC<{
   };
 
   return (
-    <div className="prop-row">
+    <div className={`prop-row ${isModified ? 'modified' : ''}`}>
       <label>{def.label}</label>
-      <input
-        type={def.type}
-        step="any"
-        ref={inputRef}
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
+      <div className="input-group">
+        <input
+          type={def.type}
+          step="any"
+          ref={inputRef}
+          onChange={handleChange}
+        />
+        <i 
+          className="fa-solid fa-floppy-disk save-prop-icon" 
+          onClick={handleSync}
+          title="Save this property to code"
+        />
+      </div>
     </div>
   );
 };

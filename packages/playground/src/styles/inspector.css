@@ -115,9 +115,17 @@
   flex: 1;
 }
 
+.input-group {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
 .prop-row input[type="number"],
 .prop-row input[type="text"] {
-  flex: 2;
+  flex: 1;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
@@ -127,6 +135,30 @@
   font-size: 0.85rem;
   outline: none;
   width: 100%;
+}
+
+.save-prop-icon {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prop-row:hover .save-prop-icon,
+.prop-row.modified .save-prop-icon {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.prop-row.modified .save-prop-icon {
+  color: #43aa8b;
+}
+
+.save-prop-icon:hover {
+  color: #43aa8b;
+  transform: scale(1.2);
 }
 
 .prop-row input:focus {
