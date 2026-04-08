@@ -10,7 +10,6 @@
   margin: 0 1rem 1rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .console-header {
   display: flex;
   justify-content: space-between;
@@ -20,8 +19,59 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.filter-chip:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-chip.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filter-chip.error.active { color: #F94144; border-color: #F94144; }
+.filter-chip.warn.active { color: #f9c74f; border-color: #f9c74f; }
+.filter-chip.info.active { color: #4895ef; border-color: #4895ef; }
+.filter-chip.log.active { color: #43aa8b; border-color: #43aa8b; }
+
 .title {
   font-size: 0.8rem;
+  color: #43aa8b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.console-line.error pre { color: #F94144; }
+.console-line.warn pre { color: #f9c74f; }
+.console-line.info pre { color: #4895ef; }
+.console-line.error { background: rgba(249, 65, 68, 0.05); }
+.console-line.warn { background: rgba(249, 199, 79, 0.05); }
+
+.console-line pre {
+
   color: #43aa8b;
   text-transform: uppercase;
   letter-spacing: 1px;
