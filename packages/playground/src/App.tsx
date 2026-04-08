@@ -18,6 +18,7 @@ function App() {
   const [isInspectorVisible, setIsInspectorVisible] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isBottomPanelVisible, setIsBottomPanelVisible] = useState(false);
+  const [isSnippetsCollapsed, setIsSnippetsCollapsed] = useState(false);
 
   useEffect(() => {
     (globalThis as unknown as { Engine: typeof Engine }).Engine = Engine;
@@ -110,10 +111,13 @@ function App() {
           <i className={`fa-solid ${isSidebarCollapsed ? 'fa-chevron-left' : 'fa-chevron-right'}`} />
         </div>
         <div className="main-content">
-          <Sidebar />
           <Editor 
             currentScriptId={currentScriptId} 
             onRefresh={handleRefresh}
+          />
+          <Sidebar 
+            isCollapsed={isSnippetsCollapsed}
+            onToggle={() => setIsSnippetsCollapsed(!isSnippetsCollapsed)}
           />
         </div>
       </div>

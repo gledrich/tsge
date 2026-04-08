@@ -73,35 +73,43 @@ floorPhys.isStatic = true;
 floor.addComponent(floorPhys);` }
 ];
 
-const Sidebar: React.FC<Record<string, never>> = () => {
+interface SidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const insertSnippet = (code: string) => {
     window.dispatchEvent(new CustomEvent('playground-insert-text', { detail: code }));
   };
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-tabs">
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-tabs" onClick={onToggle}>
         <div className="sidebar-tab active">
           <i className="fa-solid fa-code" />
           <span>Snippets</span>
+          <i className={`fa-solid ${isCollapsed ? 'fa-chevron-up' : 'fa-chevron-down'} collapse-icon`} />
         </div>
       </div>
       
-      <div className="sidebar-content">
-        <div className="snippets-grid">
-          {snippets.map((s, index) => (
-            <button 
-              key={index} 
-              className="snippet-btn" 
-              title={s.label}
-              onClick={() => insertSnippet(s.code)}
-            >
-              <i className={`fa-solid ${s.icon}`} />
-              <span>{s.label}</span>
-            </button>
-          ))}
+      {!isCollapsed && (
+        <div className="sidebar-content">
+          <div className="snippets-grid">
+            {snippets.map((s, index) => (
+              <button 
+                key={index} 
+                className="snippet-btn" 
+                title={s.label}
+                onClick={() => insertSnippet(s.code)}
+              >
+                <i className={`fa-solid ${s.icon}`} />
+                <span>{s.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
