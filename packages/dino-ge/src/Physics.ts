@@ -170,6 +170,7 @@ export default class Physics {
 
     return true;
   }
+
   private static resolveCollision(manifold: CollisionManifold, phys1?: PhysicsComponent, phys2?: PhysicsComponent) {
     const { obj1, obj2, normal, depth } = manifold;
     const isStatic1 = phys1?.isStatic ?? true; // Assume static if no physics component
@@ -178,7 +179,7 @@ export default class Physics {
     // 1. Positional Correction (to prevent sinking/jitter)
     const percent = 0.8; // How much of the penetration to resolve
     const slop = 0.01; // Allowable penetration
-    const correctionMagnitude = Math.max(depth - slop, 0) / ((isStatic1 ? 0 : 1) + (isStatic2 ? 0 : 1)) * percent;
+    const correctionMagnitude = (Math.max(depth - slop, 0) / ((isStatic1 ? 0 : 1) + (isStatic2 ? 0 : 1))) * percent;
     const correction = normal.clone().multiply(correctionMagnitude);
 
     if (!isStatic1) obj1.transform.position.subtract(correction);
@@ -197,7 +198,6 @@ export default class Physics {
       const e = Math.min(phys1.restitution, phys2.restitution);
 
       // Calculate impulse scalar
-      // Impulse j = -(1 + e) * (Vrel . n) / (1/m1 + 1/m2)
       const invMass1 = isStatic1 ? 0 : (1 / phys1.mass);
       const invMass2 = isStatic2 ? 0 : (1 / phys2.mass);
 
@@ -210,20 +210,23 @@ export default class Physics {
       if (!isStatic2) phys2.velocity.add(impulse.clone().multiply(invMass2));
     } else if (phys1 || phys2) {
       // Only one object has physics, treat the other as static infinity mass
-      const activePhys = phys1 || phys2;
-      const n = phys1 ? normal.clone().multiply(-1) : normal;
-
-      const rv = activePhys!.velocity.clone().multiply(-1); // Relative to static (0,0)
+      const activePhys = (phys1 || phys2)!;
+      // Direction FROM active TO static
+      const n = phys1 ? normal : normal.clone().multiply(-1);
+      
+      // Relative velocity (static - active)
+      const rv = activePhys.velocity.clone().multiply(-1);
       const velAlongNormal = Vector2.dot(rv, n);
 
+      // Do not resolve if velocities are separating
       if (velAlongNormal > 0) return;
 
-      const e = activePhys!.restitution;
+      const e = activePhys.restitution;
       let j = -(1 + e) * velAlongNormal;
-      j /= (1 / activePhys!.mass);
+      j /= (1 / activePhys.mass);
 
       const impulse = n.clone().multiply(j);
-      activePhys!.velocity.add(impulse.clone().multiply(1 / activePhys!.mass));
+      activePhys.velocity.subtract(impulse.clone().multiply(1 / activePhys.mass));
     }
   }
 }
