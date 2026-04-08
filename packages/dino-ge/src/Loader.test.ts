@@ -48,6 +48,67 @@ describe('ResourceLoader', () => {
     global.Image = originalImage;
   });
 
+  it('handles image loading errors', async () => {
+    // Mock Image and its onerror behavior
+    const mockImageInstance = {
+      set src(_val: string) {
+        setTimeout(() => {
+          if (this.onerror) this.onerror();
+        }, 0);
+      },
+      onerror: null as (() => void) | null
+    };
+    
+    const originalImage = global.Image;
+    global.Image = jest.fn(() => mockImageInstance) as unknown as typeof Image;
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    ResourceLoader.queueImage('fail', 'fail.png');
+    
+    await expect(ResourceLoader.loadAll()).rejects.toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load asset: fail.png');
+
+    global.Image = originalImage;
+    consoleSpy.mockRestore();
+  });
+
+  it('loads queued assets without progress callback', async () => {
+    // Mock Image and its onload behavior
+    const mockImageInstance = {
+      set src(_val: string) {
+        setTimeout(() => {
+          if (this.onload) this.onload();
+        }, 0);
+      },
+      onload: null as (() => void) | null
+    };
+    
+    const originalImage = global.Image;
+    global.Image = jest.fn(() => mockImageInstance) as unknown as typeof Image;
+
+    ResourceLoader.queueImage('dino2', 'dino2.png');
+    
+    await ResourceLoader.loadAll(); // No onProgress passed
+
+    expect(ResourceLoader.getImage('dino2')).toBeDefined();
+
+    global.Image = originalImage;
+  });
+
+  it('returns immediately from loadAll if queue is empty', async () => {
+    const onProgress = jest.fn();
+    await ResourceLoader.loadAll(onProgress);
+    expect(onProgress).not.toHaveBeenCalled();
+  });
+
+  it('prevents queuing if asset already exists in assets map', () => {
+    const mockImg = {} as HTMLImageElement;
+    (ResourceLoader as unknown as { assets: Map<string, HTMLImageElement> }).assets.set('existing', mockImg);
+    
+    ResourceLoader.queueImage('existing', 'test.png');
+    expect((ResourceLoader as unknown as { totalToLoad: number }).totalToLoad).toBe(0);
+  });
+
   it('throws error if asset not found', () => {
     expect(() => ResourceLoader.getImage('missing')).toThrow();
   });
