@@ -32,6 +32,20 @@ describe('Camera', () => {
     expect(camera.position.y).toBe(-175);
   });
 
+  it('follows a target without bounds correctly', () => {
+    const camera = new Camera();
+    class NoBoundsObject extends GameObject {}
+    const target = new NoBoundsObject('test', 0);
+    target.transform.position = new Vector2(100, 100);
+    
+    // Viewport 800x600. Target center is (100, 100) since bounds are 0.
+    // Camera pos should be 100 - 400 = -300, 100 - 300 = -200
+    camera.follow(target, 800, 600);
+    
+    expect(camera.position.x).toBe(-300);
+    expect(camera.position.y).toBe(-200);
+  });
+
   it('calculates viewport bounds with zoom', () => {
     const camera = new Camera();
     camera.position = new Vector2(100, 100);
