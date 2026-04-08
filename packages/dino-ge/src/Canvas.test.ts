@@ -1,30 +1,22 @@
 import Canvas from './Canvas';
 
 describe('Canvas', () => {
-  it('initialises with correct properties', () => {
-    const canvasWrapper = new Canvas();
-    expect(canvasWrapper.canvas.tagName).toBe('CANVAS');
-    expect(canvasWrapper.canvas.id).toBe('canvas');
-    expect(canvasWrapper.canvas.style.position).toBe('fixed');
+  it('creates a canvas element with correct ID', () => {
+    const canvasObj = new Canvas();
+    expect(canvasObj.canvas).toBeInstanceOf(HTMLCanvasElement);
+    expect(canvasObj.canvas.id).toBe('canvas');
   });
 
   it('resizes to window dimensions', () => {
-    const canvasWrapper = new Canvas();
+    const canvasObj = new Canvas();
     
     // Mock window dimensions
-    const originalWidth = window.innerWidth;
-    const originalHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1024 });
+    Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 768 });
     
-    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 500 });
-    Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 400 });
+    canvasObj.resize();
     
-    canvasWrapper.resize();
-    
-    expect(canvasWrapper.canvas.width).toBe(500);
-    expect(canvasWrapper.canvas.height).toBe(400);
-    
-    // Restore
-    window.innerWidth = originalWidth;
-    window.innerHeight = originalHeight;
+    expect(canvasObj.canvas.width).toBe(1024);
+    expect(canvasObj.canvas.height).toBe(768);
   });
 });

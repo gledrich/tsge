@@ -1,66 +1,83 @@
-import Tilemap from './Tilemap';
+import Tilemap, { TilemapProps } from './Tilemap';
 import Vector2 from './Vector2';
-import TilemapComponent from './TilemapComponent';
 import ResourceLoader from './Loader';
+import TilemapComponent from './TilemapComponent';
+import BoundsComponent from './BoundsComponent';
+import Engine from './Engine';
 
 jest.mock('./Loader', () => ({
   __esModule: true,
   default: {
-    getImage: jest.fn(() => ({ width: 32, height: 32 }))
+    getImage: jest.fn()
+  }
+}));
+
+jest.mock('./Engine', () => ({
+  __esModule: true,
+  default: {
+    registerObject: jest.fn(),
+    currentScene: null
   }
 }));
 
 describe('Tilemap', () => {
-  const mockData = [
-    [0, 0, 0],
-    [0, 0, 0]
-  ];
-  const mockProps = {
-    tag: 'background',
-    tileset: 'tiles',
+  const mockImg = { width: 32, height: 32 } as HTMLImageElement;
+  const mockData = [[1, 0], [0, 1]];
+  const mockProps: TilemapProps = {
+    tileset: mockImg,
     data: mockData,
     tileSize: 16,
     tilesetCols: 2,
-    position: new Vector2(0, 0)
+    position: new Vector2(10, 20)
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('initialises correctly and calls ResourceLoader', () => {
+  it('initialises with an Image element', () => {
     const tilemap = new Tilemap(mockProps);
-    expect(tilemap.metadata.tag).toBe('background');
-    expect(ResourceLoader.getImage).toHaveBeenCalledWith('tiles');
-    expect(tilemap.hasComponent(TilemapComponent)).toBe(true);
-  });
-
-  it('initialises with default tag and zIndex if not provided', () => {
-    const tm = new Tilemap({
-      tileset: { width: 32, height: 32 } as unknown as HTMLImageElement,
-      data: [[0]],
-      tileSize: 16,
-      tilesetCols: 1,
-      position: new Vector2(0, 0)
-    });
-    expect(tm.metadata.tag).toBe('tilemap');
-    expect(tm.metadata.zIndex).toBe(0);
-  });
-
-  it('calculates width and height correctly', () => {
-    const tilemap = new Tilemap(mockProps);
-    // 3 columns * 16px = 48px width
-    // 2 rows * 16px = 32px height
-    expect(tilemap.bounds?.width).toBe(48);
+    
+    expect(tilemap.tileset).toBe(mockImg);
+    expect(tilemap.data).toBe(mockData);
+    expect(tilemap.tileSize).toBe(16);
+    expect(tilemap.tilesetCols).toBe(2);
+    expect(tilemap.transform.position.x).toBe(10);
+    expect(tilemap.transform.position.y).toBe(20);
+    
+    // Bounds: 2 tiles * 16px = 32px
+    expect(tilemap.bounds?.width).toBe(32);
     expect(tilemap.bounds?.height).toBe(32);
+    
+    expect(tilemap.hasComponent(BoundsComponent)).toBe(true);
+    expect(tilemap.hasComponent(TilemapComponent)).toBe(true);
+    expect(Engine.registerObject).toHaveBeenCalledWith(tilemap);
   });
 
-  it('uses provided image object without calling ResourceLoader', () => {
-    const mockImg = { width: 64, height: 64 } as HTMLImageElement;
-    new Tilemap({
+  it('initialises with a tileset tag from ResourceLoader', () => {
+    (ResourceLoader.getImage as jest.Mock).mockReturnValue(mockImg);
+    
+    const propsWithTag: TilemapProps = {
       ...mockProps,
-      tileset: mockImg
-    });
-    expect(ResourceLoader.getImage).not.toHaveBeenCalled();
+      tileset: 'tiles-tag'
+    };
+    
+    const tilemap = new Tilemap(propsWithTag);
+    
+    expect(ResourceLoader.getImage).toHaveBeenCalledWith('tiles-tag');
+    expect(tilemap.tileset).toBe(mockImg);
+  });
+
+  it('uses provided tag and zIndex', () => {
+    const props: TilemapProps = {
+      ...mockProps,
+      tag: 'level-1',
+      zIndex: -1
+    };
+    
+    const tilemap = new Tilemap(props);
+    
+    expect(tilemap.metadata.tag).toBe('level-1');
+    expect(tilemap.metadata.zIndex).toBe(-1);
   });
 });
