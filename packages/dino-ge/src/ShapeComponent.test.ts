@@ -70,4 +70,61 @@ describe('ShapeComponent', () => {
     expect(mockCtx.fill).toHaveBeenCalled();
     expect(mockCtx.restore).toHaveBeenCalled();
   });
+
+  it('early returns from draw if no gameObject is attached', () => {
+    const component = new ShapeComponent('rect', 'red', 10, 10);
+    const mockCtx = {
+      save: jest.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.save).not.toHaveBeenCalled();
+  });
+
+  it('applies rotation during draw', () => {
+    const component = new ShapeComponent('rect', 'green', 10, 20);
+    const obj = new MockGameObject('test', 0);
+    obj.transform.rotation = Math.PI / 2;
+    component.gameObject = obj;
+
+    const mockCtx = {
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      scale: jest.fn(),
+      fillRect: jest.fn(),
+      fillStyle: ''
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.rotate).toHaveBeenCalledWith(Math.PI / 2);
+  });
+
+  it('does not draw if type is unknown', () => {
+    // Force invalid type for testing
+    const component = new ShapeComponent('rect', 'green', 10, 20);
+    (component as unknown as { type: string }).type = 'invalid';
+    
+    const obj = new MockGameObject('test', 0);
+    component.gameObject = obj;
+
+    const mockCtx = {
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      scale: jest.fn(),
+      fillRect: jest.fn(),
+      beginPath: jest.fn(),
+      fillStyle: ''
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.fillRect).not.toHaveBeenCalled();
+    expect(mockCtx.beginPath).not.toHaveBeenCalled();
+  });
 });
