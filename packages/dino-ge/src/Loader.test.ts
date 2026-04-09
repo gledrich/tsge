@@ -1,26 +1,23 @@
 import ResourceLoader from './Loader';
 
 describe('ResourceLoader', () => {
+  const getPrivateState = () => (ResourceLoader as unknown as { _state: { totalToLoad: number, loadingQueue: Set<string>, assets: Map<string, HTMLImageElement>, loadedCount: number } })._state;
+
   beforeEach(() => {
-    // Clear private static state between tests
-    // Accessing private members via cast for test cleanup
-    (ResourceLoader as unknown as { assets: Map<string, unknown> }).assets.clear();
-    (ResourceLoader as unknown as { loadingQueue: Set<string> }).loadingQueue.clear();
-    (ResourceLoader as unknown as { totalToLoad: number }).totalToLoad = 0;
-    (ResourceLoader as unknown as { loadedCount: number }).loadedCount = 0;
+    ResourceLoader.clear();
     jest.clearAllMocks();
   });
 
   it('queues images correctly', () => {
     ResourceLoader.queueImage('test', 'test.png');
-    expect((ResourceLoader as unknown as { totalToLoad: number }).totalToLoad).toBe(1);
-    expect((ResourceLoader as unknown as { loadingQueue: Set<string> }).loadingQueue.size).toBe(1);
+    expect(getPrivateState().totalToLoad).toBe(1);
+    expect(getPrivateState().loadingQueue.size).toBe(1);
   });
 
   it('prevents duplicate queuing of the same tag', () => {
     ResourceLoader.queueImage('test', 'test.png');
     ResourceLoader.queueImage('test', 'other.png');
-    expect((ResourceLoader as unknown as { totalToLoad: number }).totalToLoad).toBe(1);
+    expect(getPrivateState().totalToLoad).toBe(1);
   });
 
   it('loads queued assets and triggers callback', async () => {
@@ -103,13 +100,34 @@ describe('ResourceLoader', () => {
 
   it('prevents queuing if asset already exists in assets map', () => {
     const mockImg = {} as HTMLImageElement;
-    (ResourceLoader as unknown as { assets: Map<string, HTMLImageElement> }).assets.set('existing', mockImg);
+    getPrivateState().assets.set('existing', mockImg);
     
     ResourceLoader.queueImage('existing', 'test.png');
-    expect((ResourceLoader as unknown as { totalToLoad: number }).totalToLoad).toBe(0);
+    expect(getPrivateState().totalToLoad).toBe(0);
   });
 
   it('throws error if asset not found', () => {
     expect(() => ResourceLoader.getImage('missing')).toThrow();
+  });
+
+  it('returns all loaded assets', () => {
+    const mockImg = { src: 'dino.png' } as HTMLImageElement;
+    getPrivateState().assets.set('dino', mockImg);
+    
+    const loaded = ResourceLoader.getLoadedAssets();
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0]).toEqual({ tag: 'dino', image: mockImg });
+  });
+
+  it('clears all assets and queue', () => {
+    ResourceLoader.queueImage('test', 'test.png');
+    getPrivateState().assets.set('loaded', {} as HTMLImageElement);
+    
+    ResourceLoader.clear();
+    
+    expect(getPrivateState().assets.size).toBe(0);
+    expect(getPrivateState().loadingQueue.size).toBe(0);
+    expect(getPrivateState().totalToLoad).toBe(0);
+    expect(getPrivateState().loadedCount).toBe(0);
   });
 });

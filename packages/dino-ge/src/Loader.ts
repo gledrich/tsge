@@ -1,11 +1,42 @@
 /**
+ * Interface for the shared global state of the Loader.
+ */
+interface LoaderState {
+  assets: Map<string, HTMLImageElement>;
+  loadingQueue: Set<string>;
+  totalToLoad: number;
+  loadedCount: number;
+}
+
+/**
+ * Initial state for the loader.
+ */
+const INITIAL_STATE: LoaderState = {
+  assets: new Map(),
+  loadingQueue: new Set(),
+  totalToLoad: 0,
+  loadedCount: 0
+};
+
+/**
  * Handles asynchronous loading of assets like images.
  */
 export default class ResourceLoader {
-  private static assets: Map<string, HTMLImageElement> = new Map();
-  private static loadingQueue: Set<string> = new Set();
-  private static totalToLoad: number = 0;
-  private static loadedCount: number = 0;
+  /** Internal helper to access the global shared state. */
+  private static get _state(): LoaderState {
+    const global = globalThis as unknown as { __DINO_LOADER_STATE__: LoaderState };
+    if (!global.__DINO_LOADER_STATE__) {
+      global.__DINO_LOADER_STATE__ = INITIAL_STATE;
+    }
+    return global.__DINO_LOADER_STATE__;
+  }
+
+  private static get assets() { return this._state.assets; }
+  private static get loadingQueue() { return this._state.loadingQueue; }
+  private static get totalToLoad() { return this._state.totalToLoad; }
+  private static set totalToLoad(val: number) { this._state.totalToLoad = val; }
+  private static get loadedCount() { return this._state.loadedCount; }
+  private static set loadedCount(val: number) { this._state.loadedCount = val; }
 
   /**
    * Queue an image for loading.
@@ -67,5 +98,26 @@ export default class ResourceLoader {
       throw new Error(`Asset not found: ${tag}. Make sure it is queued and loaded.`);
     }
     return asset;
+  }
+
+  /**
+   * Returns all loaded assets.
+   * @returns An array of { tag, image } objects.
+   */
+  static getLoadedAssets(): { tag: string, image: HTMLImageElement }[] {
+    return Array.from(this.assets.entries()).map(([tag, image]) => ({
+      tag,
+      image
+    }));
+  }
+
+  /**
+   * Clears all loaded assets and the loading queue.
+   */
+  static clear() {
+    this.assets.clear();
+    this.loadingQueue.clear();
+    this.totalToLoad = 0;
+    this.loadedCount = 0;
   }
 }
