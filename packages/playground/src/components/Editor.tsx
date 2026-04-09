@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import * as prettier from 'prettier/standalone';
+import * as babel from 'prettier/plugins/babel';
+import * as estree from 'prettier/plugins/estree';
 import { getScript, getFilesList, setCurrentScriptId } from '../utils/helpers';
 import '../styles/editor.css';
 
@@ -12,12 +15,43 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   const [editorInstance, setEditorInstance] = useState<any>(null);
   const [scripts, setScripts] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFormatting, setIsFormatting] = useState(false);
+
+  const formatCode = useCallback(async (code: string) => {
+    try {
+      return await prettier.format(code, {
+        parser: 'babel',
+        plugins: [babel, estree],
+        singleQuote: true,
+        trailingComma: 'none',
+        printWidth: 80,
+        tabWidth: 2
+      });
+    } catch (err) {
+      console.error('Prettier formatting failed:', err);
+      return code;
+    }
+  }, []);
 
   const handleSave = useCallback(async (value: string) => {
     setIsSaving(true);
     onRefresh(value);
     setTimeout(() => setIsSaving(false), 500);
   }, [onRefresh]);
+
+  const handleFormat = useCallback(async () => {
+    if (!editorInstance) return;
+    setIsFormatting(true);
+    const currentCode = editorInstance.getValue();
+    const formatted = await formatCode(currentCode);
+    
+    if (formatted !== currentCode) {
+      const pos = editorInstance.getCursorPosition();
+      editorInstance.setValue(formatted, -1);
+      editorInstance.moveCursorToPosition(pos);
+    }
+    setIsFormatting(false);
+  }, [editorInstance, formatCode]);
 
   useEffect(() => {
     const refreshScripts = async () => {
@@ -48,32 +82,33 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
         }
       });
 
+      aceEditor.commands.addCommand({
+        name: 'format',
+        bindKey: { win: 'Shift-Alt-F', mac: 'Shift-Option-F' },
+        exec: () => {
+          handleFormat();
+        }
+      });
+
       setEditorInstance(aceEditor);
     }
-  }, [editorInstance, handleSave]);
+  }, [editorInstance, handleSave, handleFormat]);
 
   useEffect(() => {
     if (editorInstance) {
       const loadScript = async () => {
         setIsSaving(true);
-        let script = await getScript(currentScriptId);
-        
-        if (window.js_beautify) {
-          script = window.js_beautify(script, {
-            indent_size: 2,
-            space_in_empty_paren: false,
-            preserve_newlines: true
-          }) + '\n\n';
-        }
+        const script = await getScript(currentScriptId);
+        const formatted = await formatCode(script);
 
         const pos = editorInstance.getCursorPosition();
-        editorInstance.setValue(script, -1);
+        editorInstance.setValue(formatted, -1);
         editorInstance.moveCursorToPosition(pos);
         setIsSaving(false);
       };
       loadScript();
     }
-  }, [currentScriptId, editorInstance]);
+  }, [currentScriptId, editorInstance, formatCode]);
 
   useEffect(() => {
     const handleInsertText = (e: Event) => {
@@ -151,7 +186,13 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
             ))}
           </select>
           <i 
+            className={`fa-solid fa-wand-magic-sparkles format-btn ${isFormatting ? 'active' : ''}`}
+            title="Format Code (Shift+Alt+F)"
+            onClick={handleFormat}
+          />
+          <i 
             className={`fa-solid fa-cloud ${isSaving ? 'saving' : 'save'}`} 
+            title="Save (Ctrl+S)"
             onClick={() => handleSave(editorInstance.getValue())}
           />
         </div>

@@ -84,11 +84,44 @@
 .icons-container {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 1rem;
 }
 
 .icons-container i {
   cursor: pointer;
+  transition: all 0.2s;
 }
 
+.icons-container i:hover {
+  color: #43aa8b;
+}
 
+.format-btn.active {
+  color: #f9c74f;
+  animation: magic 1s infinite alternate;
+}
+
+@keyframes magic {
+  from { transform: scale(1); filter: drop-shadow(0 0 2px #f9c74f); }
+  to { transform: scale(1.2); filter: drop-shadow(0 0 8px #f9c74f); }
+}
+
+.script-selector {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 0.8rem;
+}
+
+.saving {
+  color: #43aa8b;
+  animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
