@@ -40,7 +40,10 @@ describe('Engine', () => {
       camera: new Camera(),
       systems: [],
       events: new EventTarget(),
-      currentScene: null
+      currentScene: null,
+      debugCollisions: [],
+      showPhysicsVectors: false,
+      showCollisionLines: false
     };
 
     // Mock Canvas and Context
@@ -52,6 +55,9 @@ describe('Engine', () => {
       setTransform: jest.fn(),
       strokeRect: jest.fn(),
       beginPath: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      stroke: jest.fn(),
       arc: jest.fn(),
       fill: jest.fn(),
       closePath: jest.fn(),
@@ -457,5 +463,17 @@ describe('Engine', () => {
     scene.add(new MockGameObject('b', 0));
     Engine.destroyAll();
     expect(scene.objects.size).toBe(0);
+  });
+
+  it('manages debug visualization toggles', () => {
+    Engine.showPhysicsVectors = false;
+    expect(Engine.showPhysicsVectors).toBe(false);
+    Engine.showPhysicsVectors = true;
+    expect(Engine.showPhysicsVectors).toBe(true);
+
+    Engine.showCollisionLines = false;
+    expect(Engine.showCollisionLines).toBe(false);
+    Engine.showCollisionLines = true;
+    expect(Engine.showCollisionLines).toBe(true);
   });
 });

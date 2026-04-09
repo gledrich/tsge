@@ -27,6 +27,7 @@ export { default as Input } from './Input.js';
 export { default as Line } from './Line.js';
 export { default as Loader } from './Loader.js';
 export { default as Physics } from './Physics.js';
+export { type CollisionManifold } from './Physics.js';
 export { default as Rectangle } from './Rectangle.js';
 export { default as Text } from './Text.js';
 export { default as Tilemap } from './Tilemap.js';

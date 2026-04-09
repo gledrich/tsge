@@ -45,15 +45,18 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
 
 const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
   const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(null);
+  const [isDebug, setIsDebug] = useState(Engine.debug);
   const [isApplying, setIsApplying] = useState(false);
+  const [, setTick] = useState(0);
 
-  // Sync the currently selected engine object
+  // Sync the currently selected engine object and debug state
   useEffect(() => {
     if (!visible) return;
     
     let rafId: number;
     const loop = () => {
       setSelectedObject(Engine.selectedObject as InspectableObject | null);
+      setIsDebug(Engine.debug);
       rafId = requestAnimationFrame(loop);
     };
     rafId = requestAnimationFrame(loop);
@@ -124,28 +127,59 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
         <i className="fa-solid fa-xmark" style={{ cursor: 'pointer' }} onClick={onClose} />
       </div>
       <div className="inspector-body">
-        {(!Engine.debug || !selectedObject) ? (
-          <div className="no-selection">Toggle Debug Mode and click an object to inspect.</div>
+        {!isDebug ? (
+          <div className="no-selection">Toggle Debug Mode to inspect objects.</div>
         ) : (
           <div className="inspector-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {Object.entries(SECTIONS).map(([sectionName, config]) => {
-              if (config.component && !selectedObject.hasComponent(config.component)) {
-                return null;
-              }
-              
-              return (
-                <div key={sectionName} className="inspector-section">
-                  <h3>{sectionName}</h3>
-                  {config.rows.map((def) => (
-                    <InspectorRow 
-                      key={def.propertyPath} 
-                      def={def} 
-                      selectedObject={selectedObject} 
-                    />
-                  ))}
-                </div>
-              );
-            })}
+            {/* Global Debug Settings - Always visible when debug is on */}
+            <div className="inspector-section">
+              <h3>Debug Settings</h3>
+              <div className="inspector-row">
+                <label>Physics Vectors</label>
+                <input 
+                  type="checkbox" 
+                  checked={Engine.showPhysicsVectors} 
+                  onChange={(e) => {
+                    Engine.showPhysicsVectors = e.target.checked;
+                    setTick(t => t + 1);
+                  }} 
+                />
+              </div>
+              <div className="inspector-row">
+                <label>Collision Normals</label>
+                <input 
+                  type="checkbox" 
+                  checked={Engine.showCollisionLines} 
+                  onChange={(e) => {
+                    Engine.showCollisionLines = e.target.checked;
+                    setTick(t => t + 1);
+                  }} 
+                />
+              </div>
+            </div>
+
+            {!selectedObject ? (
+              <div className="no-selection">Click an object to inspect.</div>
+            ) : (
+              Object.entries(SECTIONS).map(([sectionName, config]) => {
+                if (config.component && !selectedObject.hasComponent(config.component)) {
+                  return null;
+                }
+                
+                return (
+                  <div key={sectionName} className="inspector-section">
+                    <h3>{sectionName}</h3>
+                    {config.rows.map((def) => (
+                      <InspectorRow 
+                        key={def.propertyPath} 
+                        def={def} 
+                        selectedObject={selectedObject} 
+                      />
+                    ))}
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
       </div>
