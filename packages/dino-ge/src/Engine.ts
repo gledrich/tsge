@@ -7,6 +7,7 @@ import System from './System.js';
 import PhysicsSystem from './PhysicsSystem.js';
 import RenderingSystem from './RenderingSystem.js';
 import PhysicsComponent from './PhysicsComponent.js';
+import type { CollisionManifold } from './Physics.js';
 
 /**
  * Options for initializing the Engine.
@@ -63,6 +64,9 @@ export interface EngineState {
   renderingSystem?: RenderingSystem;
   events: EventTarget;
   currentScene: Scene | null;
+  debugCollisions: { manifold: CollisionManifold, timestamp: number }[];
+  showPhysicsVectors: boolean;
+  showCollisionLines: boolean;
 }
 
 /**
@@ -76,7 +80,10 @@ const INITIAL_STATE: EngineState = {
   camera: new Camera(),
   systems: [new PhysicsSystem()],
   events: new EventTarget(),
-  currentScene: null
+  currentScene: null,
+  debugCollisions: [],
+  showPhysicsVectors: false,
+  showCollisionLines: false
 };
 
 /**
@@ -107,6 +114,25 @@ export default class Engine {
    */
   public static get renderingSystem(): RenderingSystem | undefined { return this._state.renderingSystem; }
   public static set renderingSystem(val: RenderingSystem | undefined) { this._state.renderingSystem = val; }
+
+  /**
+   * Recent collisions for debug visualization.
+   */
+  public static get debugCollisions(): { manifold: CollisionManifold, timestamp: number }[] {
+    return this._state.debugCollisions;
+  }
+
+  /**
+   * Whether to show velocity/acceleration vectors in debug mode.
+   */
+  public static get showPhysicsVectors(): boolean { return this._state.showPhysicsVectors; }
+  public static set showPhysicsVectors(val: boolean) { this._state.showPhysicsVectors = val; }
+
+  /**
+   * Whether to show collision normals/contact points in debug mode.
+   */
+  public static get showCollisionLines(): boolean { return this._state.showCollisionLines; }
+  public static set showCollisionLines(val: boolean) { this._state.showCollisionLines = val; }
 
   /**
    * Whether the game loop is currently paused.

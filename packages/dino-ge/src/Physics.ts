@@ -2,6 +2,7 @@ import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import Circle from './Circle.js';
 import PhysicsComponent from './PhysicsComponent.js';
+import Engine from './Engine.js';
 
 /**
  * Holds data about a collision between two objects.
@@ -158,6 +159,13 @@ export default class Physics {
   static checkCollision(obj1: GameObject, obj2: GameObject): boolean {
     const manifold = this.getCollisionManifold(obj1, obj2);
     if (!manifold) return false;
+
+    if (Engine.debug) {
+      Engine.debugCollisions.push({ manifold, timestamp: Date.now() });
+      if (Engine.debugCollisions.length > 50) {
+        Engine.debugCollisions.shift();
+      }
+    }
 
     const phys1 = obj1.getComponent(PhysicsComponent);
     const phys2 = obj2.getComponent(PhysicsComponent);

@@ -4,6 +4,7 @@ import Circle from './Circle';
 import Vector2 from './Vector2';
 import PhysicsComponent from './PhysicsComponent';
 import GameObject from './GameObject';
+import Engine from './Engine';
 
 describe('Physics', () => {
   describe('checkCollision - Rectangle vs Rectangle', () => {
@@ -146,6 +147,26 @@ describe('Physics', () => {
       // Relative velocity was 200. After impulse it should be reversed and scaled by e.
       expect(phys1.velocity.x).toBeLessThan(100);
       expect(phys2.velocity.x).toBeGreaterThan(-100);
+    });
+
+    it('records collisions in debug mode and caps history', () => {
+      Engine.debug = true;
+      (Engine as unknown as { debugCollisions: unknown[] }).debugCollisions.length = 0;
+      
+      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
+      const r2 = new Rectangle({ position: new Vector2(10, 0), width: 50, height: 50 });
+
+      Physics.checkCollision(r1, r2);
+      expect(Engine.debugCollisions.length).toBe(1);
+
+      // Fill up to cap (50)
+      for (let i = 0; i < 60; i++) {
+        Physics.checkCollision(r1, r2);
+      }
+      expect(Engine.debugCollisions.length).toBe(50);
+
+      Engine.debug = false;
+      Engine.debugCollisions.length = 0;
     });
 
     it('respects restitution (bounciness) values', () => {
