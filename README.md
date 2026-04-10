@@ -2,6 +2,8 @@
 
 A lightweight, developer-friendly 2D game engine built with TypeScript, designed for building expressive web-based games.
 
+⚠️ **This project is in alpha** ⚠️
+
 ## Core Features
 
 - **Entity Component System (ECS):** Flexible, composition-based architecture using Entities (GameObjects), Components (Data), and Systems (Logic).
@@ -15,11 +17,11 @@ A lightweight, developer-friendly 2D game engine built with TypeScript, designed
 
 The Dino GE playground provides a robust environment to prototype and test game logic live:
 
-*   **Live Code Editor:** Modify your game logic in the browser with an integrated code editor.
-*   **Property Inspector:** Toggle the UI to inspect and adjust game object properties in real-time.
-*   **Debug Mode:** Visualize collision boxes and engine state by clicking the bug icon.
-*   **Hot Refresh:** Quickly apply changes to your code (`Ctrl + Enter` or click the refresh icon).
-*   **Play/Pause Controls:** Easily manage the engine state during development.
+- **Live Code Editor:** Modify your game logic in the browser with an integrated code editor.
+- **Property Inspector:** Toggle the UI to inspect and adjust game object properties in real-time.
+- **Debug Mode:** Visualize collision boxes and engine state by clicking the bug icon.
+- **Hot Refresh:** Quickly apply changes to your code (`Ctrl + Enter` or click the refresh icon).
+- **Play/Pause Controls:** Easily manage the engine state during development.
 
 ## Get Started
 

@@ -1,16 +1,18 @@
 # dino-ge
 
-A lightweight, performant 2D game engine built from the ground up in TypeScript. `dino-ge` provides a robust, developer-friendly framework for building commercial-quality 2D web games.
+A lightweight, performant 2D game engine built from the ground up in TypeScript. `dino-ge` provides a robust, developer-friendly framework for building 2D web games.
+
+⚠️ **This project is in alpha** ⚠️
 
 ## Features
 
--   **Composition-based Architecture:** Flexible `GameObject` system for managing game entities.
--   **Built-in Physics:** Integrated 2D physics with support for AABB collision detection.
--   **Rendering System:** High-performance canvas-based rendering for sprites, tilemaps, and primitives.
--   **Input Management:** Easy-to-use handling for keyboard and mouse events.
--   **Asset Loading:** Efficient resource management and preloading for textures and images.
--   **Camera System:** Dynamic camera with support for zooming and following.
--   **TypeScript Native:** Full type safety and modern ES module support.
+- **Composition-based Architecture:** Flexible `GameObject` system for managing game entities.
+- **Built-in Physics:** Integrated 2D physics with support for AABB collision detection.
+- **Rendering System:** High-performance canvas-based rendering for sprites, tilemaps, and primitives.
+- **Input Management:** Easy-to-use handling for keyboard and mouse events.
+- **Asset Loading:** Efficient resource management and preloading for textures and images.
+- **Camera System:** Dynamic camera with support for zooming and following.
+- **TypeScript Native:** Full type safety and modern ES module support.
 
 ## Installation
 
@@ -23,23 +25,26 @@ npm install dino-ge
 ```typescript
 import { Engine, Scene, Sprite, Vector2, Loader } from 'dino-ge';
 
-const engine = new Engine({
-  onLoad: async () => {
-    // Load assets
-    Loader.queueImage('player', 'assets/player.png');
-    await Loader.loadAll();
-    
-    // Create and set scene
-    const scene = new MyGameScene();
-    Engine.currentScene = scene;
+const engine = new Engine(
+  {
+    onLoad: async () => {
+      // Load assets
+      Loader.queueImage('player', 'assets/player.png');
+      await Loader.loadAll();
+
+      // Create and set scene
+      const scene = new MyGameScene();
+      Engine.currentScene = scene;
+    },
+    update: () => {
+      // Global update logic
+    }
   },
-  update: () => {
-    // Global update logic
+  {
+    title: 'My Dino Game',
+    backgroundColour: '#264653'
   }
-}, {
-  title: 'My Dino Game',
-  backgroundColour: '#264653'
-});
+);
 
 class MyGameScene extends Scene {
   onLoad() {

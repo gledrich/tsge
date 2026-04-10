@@ -2,6 +2,8 @@
 
 Interactive, live-editing playground and inspector for the **Dino GE** game engine.
 
+⚠️ **This project is in alpha** ⚠️
+
 ## Installation
 
 ```bash
