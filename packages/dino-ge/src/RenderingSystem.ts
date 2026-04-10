@@ -118,6 +118,26 @@ export default class RenderingSystem extends System {
           this.ctx.lineWidth = (object === Engine.selectedObject ? 2 : 1) / Engine.camera.zoom;
           this.ctx.strokeRect(worldPosition.x, worldPosition.y, width, height);
 
+          // Draw resize handle if selected
+          if (object === Engine.selectedObject) {
+            const handleSize = 8 / Engine.camera.zoom;
+            this.ctx.fillStyle = '#FFD166';
+            this.ctx.fillRect(
+              worldPosition.x + width - handleSize / 2,
+              worldPosition.y + height - handleSize / 2,
+              handleSize,
+              handleSize
+            );
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 1 / Engine.camera.zoom;
+            this.ctx.strokeRect(
+              worldPosition.x + width - handleSize / 2,
+              worldPosition.y + height - handleSize / 2,
+              handleSize,
+              handleSize
+            );
+          }
+
           this.ctx.font = `${12 / Engine.camera.zoom}px monospace`;
           this.ctx.fillStyle = this.ctx.strokeStyle;
           this.ctx.fillText(object.metadata.tag || 'obj', worldPosition.x, worldPosition.y - (5 / Engine.camera.zoom));

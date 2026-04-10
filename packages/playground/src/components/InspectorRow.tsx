@@ -26,7 +26,10 @@ export const resolveComponentPath = (obj: InspectableObject, pathStr: string): {
     target = obj.getComponent(Dino.VisibilityComponent);
     propPath = pathStr;
   } else if (pathStr === 'width' || pathStr === 'height') {
-    target = obj.bounds;
+    // Try components first as they might be the source of truth syncing to bounds
+    const shape = obj.getComponent(Dino.ShapeComponent);
+    const text = obj.getComponent(Dino.TextComponent);
+    target = shape || text || obj.bounds;
     propPath = pathStr;
   } else if (pathStr.startsWith('_physics.')) {
     target = obj.getComponent(Dino.PhysicsComponent);
