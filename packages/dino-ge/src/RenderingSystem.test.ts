@@ -44,6 +44,7 @@ describe('RenderingSystem', () => {
       restore: jest.fn(),
       scale: jest.fn(),
       translate: jest.fn(),
+      fillRect: jest.fn(),
       canvas: { width: 800, height: 600 }
     } as unknown as CanvasRenderingContext2D;
     jest.clearAllMocks();
@@ -128,6 +129,7 @@ describe('RenderingSystem', () => {
       save: jest.fn(),
       restore: jest.fn(),
       strokeRect: jest.fn(),
+      fillRect: jest.fn(),
       fillText: jest.fn(),
       strokeStyle: '',
       lineWidth: 0,
@@ -138,7 +140,7 @@ describe('RenderingSystem', () => {
 
     system.update(new Set([obj1, obj2]), 0.016, true);
 
-    expect(debugCtx.strokeRect).toHaveBeenCalledTimes(2);
+    expect(debugCtx.strokeRect).toHaveBeenCalledTimes(3);
     // Selected object (obj1) check is done via style change
     expect(debugCtx.fillText).toHaveBeenCalledWith('test-tag', 0, -5);
     expect(debugCtx.fillText).toHaveBeenCalledWith('obj', 0, -5); // obj2 default tag
@@ -175,6 +177,7 @@ describe('RenderingSystem', () => {
       save: jest.fn(),
       restore: jest.fn(),
       strokeRect: jest.fn(),
+      fillRect: jest.fn(),
       fillText: jest.fn(),
       strokeStyle: '',
       lineWidth: 0,
@@ -259,6 +262,7 @@ describe('RenderingSystem', () => {
       save: jest.fn(),
       restore: jest.fn(),
       strokeRect: jest.fn(),
+      fillRect: jest.fn(),
       fillText: jest.fn(),
     } as unknown as CanvasRenderingContext2D;
     system.setContext(debugCtx);
