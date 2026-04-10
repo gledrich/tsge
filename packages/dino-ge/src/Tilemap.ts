@@ -2,7 +2,6 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
 import TilemapComponent from './TilemapComponent.js';
-import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Properties for creating a new Tilemap.
@@ -55,13 +54,9 @@ export default class Tilemap extends GameObject {
     this.tileSize = props.tileSize;
     this.tilesetCols = props.tilesetCols;
 
-    const width = this.data[0].length * this.tileSize;
-    const height = this.data.length * this.tileSize;
-    this.bounds = new BoundsComponent(width, height);
-    this.addComponent(this.bounds);
-
     this.transform.position = props.position;
 
+    // TilemapComponent will automatically create/update BoundsComponent via onAttach
     this.addComponent(new TilemapComponent(
       this.tileset,
       this.data,

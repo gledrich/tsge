@@ -1,4 +1,5 @@
 import RenderComponent from './RenderComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Component that holds data for rendering a tilemap.
@@ -19,6 +20,31 @@ export default class TilemapComponent extends RenderComponent {
     this.data = data;
     this.tileSize = tileSize;
     this.tilesetCols = tilesetCols;
+  }
+
+  /**
+   * Ensures the parent GameObject has a BoundsComponent synced with this tilemap.
+   */
+  private _updateGameObjectBounds() {
+    if (!this.gameObject) return;
+
+    const width = this.data[0].length * this.tileSize;
+    const height = this.data.length * this.tileSize;
+
+    if (!this.gameObject.bounds) {
+      this.gameObject.bounds = new BoundsComponent(width, height);
+      this.gameObject.addComponent(this.gameObject.bounds);
+    } else {
+      this.gameObject.bounds.width = width;
+      this.gameObject.bounds.height = height;
+    }
+  }
+
+  /**
+   * Lifecycle hook called by GameObject when component is added.
+   */
+  onAttach() {
+    this._updateGameObjectBounds();
   }
 
   /**

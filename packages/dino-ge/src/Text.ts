@@ -3,7 +3,6 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import Input from './Input.js';
 import TextComponent from './TextComponent.js';
-import BoundsComponent from './BoundsComponent.js';
 
 /** Horizontal alignment options for text. */
 export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
@@ -147,10 +146,8 @@ export default class Text extends GameObject {
       height,
       backgroundColour
     );
+    // TextComponent will automatically create/update BoundsComponent via onAttach
     this.addComponent(this._textComponent);
-
-    this.bounds = new BoundsComponent(width, height);
-    this.addComponent(this.bounds);
 
     if (defaultedProps.register) {
       this.registerSelf();

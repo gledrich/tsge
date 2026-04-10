@@ -68,6 +68,8 @@ export default abstract class GameObject {
    * @param component The component to add.
    */
   addComponent(component: Component) {
+    component.gameObject = this;
+
     // Index the component by its class name and all base class names up to Component.
     let proto = Object.getPrototypeOf(component);
     while (proto && proto.constructor.name !== 'Object') {
@@ -79,7 +81,9 @@ export default abstract class GameObject {
       proto = Object.getPrototypeOf(proto);
     }
 
-    component.gameObject = this;
+    if ((component as any).onAttach) {
+      (component as any).onAttach();
+    }
   }
 
   /**

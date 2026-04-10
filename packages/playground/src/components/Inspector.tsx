@@ -24,6 +24,14 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
     rows: [
       { label: 'X', type: 'number', propertyPath: 'position.x' },
       { label: 'Y', type: 'number', propertyPath: 'position.y' },
+      { label: 'Scale X', type: 'number', propertyPath: 'scale.x' },
+      { label: 'Scale Y', type: 'number', propertyPath: 'scale.y' },
+      { label: 'Rotation', type: 'number', propertyPath: 'rotation' }
+    ]
+  },
+  Bounds: {
+    component: Dino.BoundsComponent,
+    rows: [
       { label: 'Width', type: 'number', propertyPath: 'width' },
       { label: 'Height', type: 'number', propertyPath: 'height' }
     ]
