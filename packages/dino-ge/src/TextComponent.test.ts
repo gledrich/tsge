@@ -1,5 +1,6 @@
 import TextComponent from './TextComponent';
 import GameObject from './GameObject';
+import BoundsComponent from './BoundsComponent';
 
 class MockGameObject extends GameObject {}
 
@@ -119,5 +120,30 @@ describe('TextComponent', () => {
     // Updating component width should update bounds
     component.width = 100;
     expect(obj.bounds!.width).toBe(100);
+
+    // Updating component height should update bounds
+    component.height = 150;
+    expect(obj.bounds!.height).toBe(150);
+  });
+
+  it('updates existing BoundsComponent on GameObject', () => {
+    const obj = new MockGameObject('test', 0);
+    const bounds = new BoundsComponent(10, 10);
+    obj.bounds = bounds;
+    obj.addComponent(bounds);
+
+    const component = new TextComponent('a', 'b', 'c', 'left', 'top', 50, 20);
+    obj.addComponent(component);
+
+    expect(obj.bounds).toBe(bounds); // Should reuse existing
+    expect(bounds.width).toBe(50);
+    expect(bounds.height).toBe(20);
+  });
+
+  it('does nothing in _updateGameObjectBounds if unattached', () => {
+    const component = new TextComponent('a', 'b', 'c', 'left', 'top', 50, 20);
+    expect(() => {
+      (component as unknown as { _updateGameObjectBounds: () => void })._updateGameObjectBounds();
+    }).not.toThrow();
   });
 });

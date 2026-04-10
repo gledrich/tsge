@@ -28,7 +28,7 @@ export default class Input {
       this.mousePosition.x = event.clientX;
       this.mousePosition.y = event.clientY;
 
-      if (Engine.debug && this.isResizing && Engine.selectedObject) {
+      if (this.isResizing && Engine.selectedObject && Engine.debug) {
         const obj = Engine.selectedObject;
         const { worldPosition } = obj.transform;
         const newWidth = Math.max(5, this.mouseX - worldPosition.x);
@@ -39,7 +39,7 @@ export default class Input {
           // Update scale to match the new desired bounds
           obj.transform.scale.x = newWidth / sprite.frameWidth;
           obj.transform.scale.y = newHeight / sprite.frameHeight;
-
+          
           // Sync bounds immediately
           if (obj.bounds) {
             obj.bounds.width = newWidth;
@@ -62,7 +62,8 @@ export default class Input {
             obj.bounds.height = newHeight;
           }
         }
-        return;      }
+        return;
+      }
 
       if (Engine.debug && this.isDragging && Engine.selectedObject) {
         const { parent } = Engine.selectedObject.transform;
@@ -135,11 +136,14 @@ export default class Input {
         let found = false;
 
         // Check objects from top to bottom (zIndex)
-        const sorted = Array.from(objects).sort((a, b) => (b.metadata.zIndex > a.metadata.zIndex ? 1 : -1));
+        const sorted = Array.from(objects).sort((a, b) => b.metadata.zIndex - a.metadata.zIndex);
 
-        for (const obj of sorted) {
-          const width = obj.bounds?.width ?? 0;
-          const height = obj.bounds?.height ?? 0;
+        for (let i = 0; i < sorted.length; i++) {
+          const obj = sorted[i];
+          if (!obj.bounds) continue;
+          
+          const width = obj.bounds.width;
+          const height = obj.bounds.height;
           const { worldPosition } = obj.transform;
           if (
             worldPos.x > worldPosition.x &&
@@ -175,20 +179,22 @@ export default class Input {
     });
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {
-      this.keys.add(event.key.toLowerCase());
+      const key = String(event.key).toLowerCase();
+      this.keys.add(key);
 
       // Toggle Pause with P
-      if (event.key === 'p' || event.key === 'P') {
+      if (key === 'p') {
         Engine.paused = !Engine.paused;
 
         if (Engine.paused) {
-          document.getElementById('canvas')!.style.cursor = 'default';
+          const canvas = document.getElementById('canvas');
+          if (canvas) canvas.style.cursor = 'default';
         }
       }
     });
 
     document.addEventListener('keyup', (event: KeyboardEvent) => {
-      this.keys.delete(event.key.toLowerCase());
+      this.keys.delete(String(event.key).toLowerCase());
     });
 
     window.addEventListener('blur', () => {

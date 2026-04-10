@@ -71,4 +71,30 @@ describe('TilemapComponent', () => {
 
     expect(mockCtx.rotate).toHaveBeenCalledWith(Math.PI);
   });
+
+  it('automatically creates/updates BoundsComponent on GameObject', () => {
+    const component = new TilemapComponent(mockTileset, mockData, 16, 1);
+    const obj = new MockGameObject('test', 0);
+    
+    // Initially no bounds
+    expect(obj.bounds).toBeUndefined();
+    
+    obj.addComponent(component);
+    
+    // Bounds should be created (2x2 tiles, size 16 = 32x32)
+    expect(obj.bounds).toBeDefined();
+    expect(obj.bounds!.width).toBe(32);
+    expect(obj.bounds!.height).toBe(32);
+    
+    // Manually trigger update logic to test branch where bounds already exist
+    (component as unknown as { _updateGameObjectBounds: () => void })._updateGameObjectBounds();
+    expect(obj.bounds!.width).toBe(32);
+  });
+
+  it('does nothing in _updateGameObjectBounds if unattached', () => {
+    const component = new TilemapComponent(mockTileset, mockData, 16, 1);
+    expect(() => {
+      (component as unknown as { _updateGameObjectBounds: () => void })._updateGameObjectBounds();
+    }).not.toThrow();
+  });
 });

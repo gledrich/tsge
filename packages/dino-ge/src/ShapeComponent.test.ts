@@ -1,6 +1,7 @@
 import ShapeComponent from './ShapeComponent';
 import GameObject from './GameObject';
 import Vector2 from './Vector2';
+import BoundsComponent from './BoundsComponent';
 
 class MockGameObject extends GameObject {}
 
@@ -11,6 +12,12 @@ describe('ShapeComponent', () => {
     expect(component.colour).toBe('red');
     expect(component.width).toBe(100);
     expect(component.height).toBe(50);
+  });
+
+  it('initialises with default width and height', () => {
+    const component = new ShapeComponent('rect', 'red');
+    expect(component.width).toBe(0);
+    expect(component.height).toBe(0);
   });
 
   it('initialises as a circle correctly', () => {
@@ -145,5 +152,42 @@ describe('ShapeComponent', () => {
     // Updating component width should update bounds
     component.width = 200;
     expect(obj.bounds!.width).toBe(200);
+
+    // Updating component height should update bounds
+    component.height = 300;
+    expect(obj.bounds!.height).toBe(300);
+  });
+
+  it('updates existing BoundsComponent on GameObject', () => {
+    const obj = new MockGameObject('test', 0);
+    const bounds = new BoundsComponent(10, 10);
+    obj.bounds = bounds;
+    obj.addComponent(bounds);
+
+    const component = new ShapeComponent('rect', 'red', 100, 50);
+    obj.addComponent(component);
+
+    expect(obj.bounds).toBe(bounds); // Should reuse existing
+    expect(bounds.width).toBe(100);
+    expect(bounds.height).toBe(50);
+  });
+
+  it('handles circle radius doubling in bounds', () => {
+    const obj = new MockGameObject('test', 0);
+    const component = new ShapeComponent('circle', 'blue', 25);
+    obj.addComponent(component);
+
+    expect(obj.bounds!.width).toBe(50);
+    expect(obj.bounds!.height).toBe(50);
+
+    component.width = 30;
+    expect(obj.bounds!.width).toBe(60);
+  });
+
+  it('does nothing in _updateGameObjectBounds if unattached', () => {
+    const component = new ShapeComponent('rect', 'red', 100, 50);
+    expect(() => {
+      (component as unknown as { _updateGameObjectBounds: () => void })._updateGameObjectBounds();
+    }).not.toThrow();
   });
 });
