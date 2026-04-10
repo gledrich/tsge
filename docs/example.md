@@ -182,7 +182,8 @@ class PlayScene extends Scene {
       startCol: 4,
       endCol: 10,
       tag: 'player',
-      zIndex: 5
+      zIndex: 5,
+      scale: 3
     });
     this.player.addComponent(new VisibilityComponent());
     this.player.addComponent(new PhysicsComponent());
@@ -195,10 +196,11 @@ class PlayScene extends Scene {
       text: 'Dino',
       fontSize: 12,
       colour: 'white',
-      position: new Vector2(-15, 60), // Centered below player
+      position: new Vector2(-5, 20), // Compensated for parent scale: 3
       width: 100,
       zIndex: 6
     });
+    this.nameTag.transform.scale = new Vector2(0.333, 0.333); // Keep size absolute
     this.player.transform.addChild(this.nameTag.transform);
 
     // Group UI elements under a container

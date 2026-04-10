@@ -49,7 +49,8 @@ class MyGameScene extends Scene {
       rows: 1,
       cols: 4,
       position: new Vector2(400, 300),
-      zIndex: 10
+      zIndex: 10,
+      scale: 3
     });
     player.play();
   }
