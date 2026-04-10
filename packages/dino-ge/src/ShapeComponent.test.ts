@@ -127,4 +127,23 @@ describe('ShapeComponent', () => {
     expect(mockCtx.fillRect).not.toHaveBeenCalled();
     expect(mockCtx.beginPath).not.toHaveBeenCalled();
   });
+
+  it('automatically creates/updates BoundsComponent on GameObject', () => {
+    const component = new ShapeComponent('rect', 'red', 100, 50);
+    const obj = new MockGameObject('test', 0);
+    
+    // Initially no bounds
+    expect(obj.bounds).toBeUndefined();
+    
+    obj.addComponent(component);
+    
+    // Bounds should be created via onAttach hook called by addComponent
+    expect(obj.bounds).toBeDefined();
+    expect(obj.bounds!.width).toBe(100);
+    expect(obj.bounds!.height).toBe(50);
+    
+    // Updating component width should update bounds
+    component.width = 200;
+    expect(obj.bounds!.width).toBe(200);
+  });
 });

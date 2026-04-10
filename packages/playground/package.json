@@ -1,6 +1,6 @@
 {
   "name": "dino-ge-playground",
-  "version": "1.8.8",
+  "version": "1.8.9",
   "description": "Interactive, live-editing playground and inspector for Dino GE",
   "bin": {
     "dino-ge-playground": "server.js"

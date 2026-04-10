@@ -7,4 +7,7 @@ import type GameObject from './GameObject.js';
 export default abstract class Component {
   /** Reference to the GameObject this component is attached to. */
   public gameObject?: GameObject;
+
+  /** Optional lifecycle hook called when the component is added to a GameObject. */
+  public onAttach?(): void;
 }

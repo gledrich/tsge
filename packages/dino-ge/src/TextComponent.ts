@@ -1,4 +1,5 @@
 import RenderComponent from './RenderComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 import type { HorizontalAlign, VerticalAlign } from './Text.js';
 
 /**
@@ -17,10 +18,23 @@ export default class TextComponent extends RenderComponent {
   horizontalAlign: HorizontalAlign;
   /** Vertical alignment. */
   verticalAlign: VerticalAlign;
+
+  private _width: number;
+  private _height: number;
+
   /** Width of the background box or interaction area. */
-  width: number;
+  get width(): number { return this._width; }
+  set width(val: number) {
+    this._width = val;
+    this._updateGameObjectBounds();
+  }
+
   /** Height of the background box or interaction area. */
-  height: number;
+  get height(): number { return this._height; }
+  set height(val: number) {
+    this._height = val;
+    this._updateGameObjectBounds();
+  }
 
   constructor(
     text: string,
@@ -38,9 +52,31 @@ export default class TextComponent extends RenderComponent {
     this.colour = colour;
     this.horizontalAlign = horizontalAlign;
     this.verticalAlign = verticalAlign;
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
     this.backgroundColour = backgroundColour;
+  }
+
+  /**
+   * Ensures the parent GameObject has a BoundsComponent synced with this component.
+   */
+  private _updateGameObjectBounds() {
+    if (!this.gameObject) return;
+
+    if (!this.gameObject.bounds) {
+      this.gameObject.bounds = new BoundsComponent(this._width, this._height);
+      this.gameObject.addComponent(this.gameObject.bounds);
+    } else {
+      this.gameObject.bounds.width = this._width;
+      this.gameObject.bounds.height = this._height;
+    }
+  }
+
+  /**
+   * Lifecycle hook called by GameObject when component is added.
+   */
+  onAttach() {
+    this._updateGameObjectBounds();
   }
 
   /**
@@ -62,8 +98,8 @@ export default class TextComponent extends RenderComponent {
       ctx.fillRect(
         0,
         0,
-        this.width,
-        this.height
+        this._width,
+        this._height
       );
     }
 
@@ -73,8 +109,8 @@ export default class TextComponent extends RenderComponent {
     ctx.textBaseline = this.verticalAlign;
     ctx.fillText(
       this.text,
-      this.width / 2,
-      this.height / 2
+      this._width / 2,
+      this._height / 2
     );
     
     ctx.restore();

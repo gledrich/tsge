@@ -101,4 +101,23 @@ describe('TextComponent', () => {
     expect(mockCtx.fillRect).not.toHaveBeenCalled();
     expect(mockCtx.fillText).toHaveBeenCalled();
   });
+
+  it('automatically creates/updates BoundsComponent on GameObject', () => {
+    const component = new TextComponent('a', 'b', 'c', 'left', 'top', 50, 20);
+    const obj = new MockGameObject('test', 0);
+    
+    // Initially no bounds
+    expect(obj.bounds).toBeUndefined();
+    
+    obj.addComponent(component);
+    
+    // Bounds should be created via onAttach hook called by addComponent
+    expect(obj.bounds).toBeDefined();
+    expect(obj.bounds!.width).toBe(50);
+    expect(obj.bounds!.height).toBe(20);
+    
+    // Updating component width should update bounds
+    component.width = 100;
+    expect(obj.bounds!.width).toBe(100);
+  });
 });

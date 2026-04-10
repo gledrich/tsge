@@ -1,4 +1,5 @@
 import RenderComponent from './RenderComponent.js';
+import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Types of shapes supported by the ShapeComponent.
@@ -13,17 +14,60 @@ export default class ShapeComponent extends RenderComponent {
   type: ShapeType;
   /** Fill colour. */
   colour: string;
-  /** Width (for rect) or radius (for circle). */
-  width: number;
-  /** Height (for rect) or unused (for circle). */
-  height: number;
 
-  constructor(type: ShapeType, colour: string, width: number, height: number = 0) {
+  private _width: number;
+  private _height: number;
+
+  /** Width (for rect) or radius (for circle). */
+  get width(): number { return this._width; }
+  set width(val: number) {
+    this._width = val;
+    this._updateGameObjectBounds();
+  }
+
+  /** Height (for rect) or unused (for circle). */
+  get height(): number { return this._height; }
+  set height(val: number) {
+    this._height = val;
+    this._updateGameObjectBounds();
+  }
+
+  constructor(type: ShapeType, colour: string, width: number = 0, height: number = 0) {
     super();
     this.type = type;
     this.colour = colour;
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
+  }
+
+  /**
+   * Ensures the parent GameObject has a BoundsComponent synced with this shape.
+   */
+  private _updateGameObjectBounds() {
+    if (!this.gameObject) return;
+
+    let targetWidth = this._width;
+    let targetHeight = this._height;
+
+    if (this.type === 'circle') {
+      targetWidth = this._width * 2;
+      targetHeight = this._width * 2;
+    }
+
+    if (!this.gameObject.bounds) {
+      this.gameObject.bounds = new BoundsComponent(targetWidth, targetHeight);
+      this.gameObject.addComponent(this.gameObject.bounds);
+    } else {
+      this.gameObject.bounds.width = targetWidth;
+      this.gameObject.bounds.height = targetHeight;
+    }
+  }
+
+  /**
+   * Lifecycle hook called by GameObject when component is added.
+   */
+  onAttach() {
+    this._updateGameObjectBounds();
   }
 
   /**
@@ -43,11 +87,11 @@ export default class ShapeComponent extends RenderComponent {
     ctx.fillStyle = this.colour;
 
     if (this.type === 'rect') {
-      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillRect(0, 0, this._width, this._height);
     } else if (this.type === 'circle') {
       ctx.beginPath();
       // width is radius. In local space center is at (radius, radius)
-      ctx.arc(this.width, this.width, this.width, 0, Math.PI * 2);
+      ctx.arc(this._width, this._width, this._width, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();
     }

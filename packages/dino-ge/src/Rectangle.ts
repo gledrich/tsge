@@ -1,7 +1,6 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import ShapeComponent from './ShapeComponent.js';
-import BoundsComponent from './BoundsComponent.js';
 
 /**
  * Configuration for creating a Rectangle object.
@@ -50,12 +49,11 @@ export default class Rectangle extends GameObject {
 
     this.metadata.tag = defaultedProps.tag;
     this.transform.position = defaultedProps.position;
-    this.bounds = new BoundsComponent(defaultedProps.width, defaultedProps.height);
-    this.addComponent(this.bounds);
     this.colour = defaultedProps.colour;
     this.metadata.zIndex = defaultedProps.zIndex;
 
-    this.addComponent(new ShapeComponent('rect', this.colour, this.bounds.width, this.bounds.height));
+    // ShapeComponent will automatically create/update BoundsComponent via onAttach
+    this.addComponent(new ShapeComponent('rect', this.colour, defaultedProps.width, defaultedProps.height));
 
     this.registerSelf();
   }
