@@ -177,7 +177,8 @@ class PlayScene extends Scene {
       startCol: 4,
       endCol: 10,
       tag: 'player',
-      zIndex: 5
+      zIndex: 5,
+      scale: 3
     });
     this.player.addComponent(new VisibilityComponent());
     this.player.addComponent(new PhysicsComponent());

@@ -139,4 +139,88 @@ describe('Sprite', () => {
     sprite.play();
     expect(Engine.registerObject).toHaveBeenCalledTimes(1);
   });
+
+  it('handles scale and bounds correctly', () => {
+    const sprite = new Sprite({ ...mockProps, scale: 2 });
+    expect(sprite.transform.scale.x).toBe(2);
+    expect(sprite.transform.scale.y).toBe(2);
+    // mockImg width is 100, cols is 10, so frameWidth is 10.
+    // with scale 2, bounds width should be 20.
+    expect(sprite.bounds!.width).toBe(20);
+    expect(sprite.bounds!.height).toBe(200); // 100 height / 1 row * 2 scale = 200
+  });
+
+  it('defaults scale to 1 and calculates bounds', () => {
+    const sprite = new Sprite(mockProps);
+    expect(sprite.transform.scale.x).toBe(1);
+    expect(sprite.bounds!.width).toBe(10);
+    expect(sprite.bounds!.height).toBe(100);
+  });
+
+  it('updates bounds when scale is changed via setter', () => {
+    const sprite = new Sprite(mockProps);
+    sprite.scale = 5;
+    expect(sprite.transform.scale.x).toBe(5);
+    expect(sprite.bounds!.width).toBe(50);
+    expect(sprite.bounds!.height).toBe(500);
+  });
+
+  it('handles Vector2 scale in setter', () => {
+    const sprite = new Sprite(mockProps);
+    sprite.scale = new Vector2(2, 3);
+    expect(sprite.scale.x).toBe(2);
+    expect(sprite.scale.y).toBe(3);
+    expect(sprite.transform.scale.x).toBe(2);
+    expect(sprite.transform.scale.y).toBe(3);
+    expect(sprite.bounds!.width).toBe(20);
+    expect(sprite.bounds!.height).toBe(300);
+  });
+
+  it('handles scale as Vector2 in constructor', () => {
+    const sprite = new Sprite({ ...mockProps, scale: new Vector2(4, 5) });
+    expect(sprite.transform.scale.x).toBe(4);
+    expect(sprite.transform.scale.y).toBe(5);
+    expect(sprite.bounds!.width).toBe(40);
+    expect(sprite.bounds!.height).toBe(500);
+  });
+
+  it('updates bounds when image finishes loading', () => {
+    const imgMock = { 
+      width: 0, 
+      height: 0, 
+      complete: false, 
+      addEventListener: jest.fn() 
+    };
+    const img = imgMock as unknown as HTMLImageElement;
+    
+    const sprite = new Sprite({ ...mockProps, img });
+    
+    // Simulate image load
+    // The first listener is from SpriteComponent constructor
+    // The second listener is from Sprite constructor
+    expect(img.addEventListener).toHaveBeenCalledTimes(2);
+    
+    imgMock.width = 200;
+    imgMock.height = 100;
+    
+    const componentLoadHandler = (img.addEventListener as jest.Mock).mock.calls[0][1];
+    const spriteLoadHandler = (img.addEventListener as jest.Mock).mock.calls[1][1];
+    
+    componentLoadHandler();
+    spriteLoadHandler();
+    
+    // frameWidth = 200 / 10 = 20
+    // frameHeight = 100 / 1 = 100
+    expect(sprite.bounds!.width).toBe(20);
+    expect(sprite.bounds!.height).toBe(100);
+  });
+
+  it('does nothing in _updateBounds if bounds is missing', () => {
+    const sprite = new Sprite(mockProps);
+    delete sprite.bounds;
+    // Calling setter which calls _updateBounds
+    expect(() => {
+      sprite.scale = 2;
+    }).not.toThrow();
+  });
 });

@@ -25,6 +25,8 @@ export interface SpriteProps {
   endCol: number;
   /** Rendering order. */
   zIndex?: number;
+  /** Scale of the sprite (defaults to 1). */
+  scale?: number | Vector2;
 }
 
 /**
@@ -74,6 +76,20 @@ export default class Sprite extends GameObject {
   get frameDuration(): number { return this._spriteComponent.frameDuration; }
   set frameDuration(val: number) { this._spriteComponent.frameDuration = val; }
 
+  /**
+   * Gets or sets the scale of the sprite.
+   * Updating this will also update the object's bounds.
+   */
+  get scale(): Vector2 { return this.transform.scale; }
+  set scale(val: number | Vector2) {
+    if (typeof val === 'number') {
+      this.transform.scale = new Vector2(val, val);
+    } else {
+      this.transform.scale = val;
+    }
+    this._updateBounds();
+  }
+
   constructor(props: SpriteProps) {
     if (!props.tag) {
       throw new Error('You must provide a tag for a Sprite');
@@ -97,11 +113,35 @@ export default class Sprite extends GameObject {
     );
     this.addComponent(this._spriteComponent);
 
-    this.bounds = new BoundsComponent(this.frameWidth * 3, this.frameHeight * 3);
+    const scale = props.scale !== undefined ? props.scale : 1;
+    if (typeof scale === 'number') {
+      this.transform.scale = new Vector2(scale, scale);
+    } else {
+      this.transform.scale = scale;
+    }
+
+    this.bounds = new BoundsComponent(0, 0);
     this.addComponent(this.bounds);
+
+    if (img.complete) {
+      this._updateBounds();
+    } else {
+      img.addEventListener('load', () => this._updateBounds(), { once: true });
+    }
 
     this.transform.position = props.position;
     this.registered = false;
+  }
+
+  /**
+   * Updates the bounds of the sprite based on its current frame size and scale.
+   * @private
+   */
+  private _updateBounds() {
+    if (this.bounds) {
+      this.bounds.width = this.frameWidth * this.transform.scale.x;
+      this.bounds.height = this.frameHeight * this.transform.scale.y;
+    }
   }
 
   /**

@@ -99,7 +99,7 @@ export default class SpriteComponent extends RenderComponent {
     ctx.scale(worldScale.x, worldScale.y);
 
     if (this.flip) {
-      ctx.translate(frameWidth * 3, 0);
+      ctx.translate(frameWidth, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(
         img,
@@ -109,8 +109,8 @@ export default class SpriteComponent extends RenderComponent {
         frameHeight,
         0,
         0,
-        frameWidth * 3,
-        frameHeight * 3
+        frameWidth,
+        frameHeight
       );
     } else {
       ctx.drawImage(
@@ -121,8 +121,8 @@ export default class SpriteComponent extends RenderComponent {
         frameHeight,
         0, // Drawing at 0,0 relative to transform
         0,
-        frameWidth * 3,
-        frameHeight * 3
+        frameWidth,
+        frameHeight
       );
     }
     ctx.restore();
