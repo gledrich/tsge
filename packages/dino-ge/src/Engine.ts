@@ -13,6 +13,8 @@ import type { CollisionManifold } from './Physics.js';
  * Options for initializing the Engine.
  */
 export interface EngineOpts {
+  /** The ID of the HTML element to inject the canvas into. */
+  containerId?: string;
   /** Width of the game window (e.g., '800px' or '100%'). */
   width: string;
   /** Height of the game window (e.g., '600px' or '100%'). */
@@ -284,7 +286,8 @@ export default class Engine {
       fixedUpdate: callbacks.fixedUpdate,
     };
 
-    this._canvas = new Canvas();
+    const container = defaultedOpts.containerId ? document.getElementById(defaultedOpts.containerId) : null;
+    this._canvas = new Canvas(container || undefined);
     this._ctx = this._canvas.canvas.getContext('2d')!;
     this.width = this._canvas.canvas.width;
     this.height = this._canvas.canvas.height;
@@ -295,24 +298,28 @@ export default class Engine {
       Engine.renderingSystem = new RenderingSystem(this._ctx);
     }
 
-    this._window = document.createElement('div');
-    this._window.id = 'canvas-container';
-    this._window.style.width = defaultedOpts.width;
-    this._window.style.height = defaultedOpts.height;
+    if (!container) {
+      this._window = document.createElement('div');
+      this._window.id = 'canvas-container';
+      this._window.style.width = defaultedOpts.width;
+      this._window.style.height = defaultedOpts.height;
+      
+      const bodies = document.getElementsByTagName('body');
+      if (bodies.length > 0) {
+        bodies[0].appendChild(this._window);
+      }
+      this._window.appendChild(this._canvas.canvas);
+    } else {
+      this._window = container as HTMLDivElement;
+    }
 
     Input.init();
 
     window.addEventListener('resize', () => {
-      this._canvas.resize();
+      this._canvas.resize(container || undefined);
       this.width = this._canvas.canvas.width;
       this.height = this._canvas.canvas.height;
     });
-
-    const bodies = document.getElementsByTagName('body');
-    if (bodies.length > 0) {
-      bodies[0].appendChild(this._window);
-    }
-    this._window.appendChild(this._canvas.canvas);
 
     setTimeout(() => this.callbacks.onLoad?.(), 0);
   }

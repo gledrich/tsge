@@ -1,6 +1,6 @@
 {
   "name": "dino-ge-example",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Minimal example for Dino GE",
   "private": true,
   "type": "module",
