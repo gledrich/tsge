@@ -7,7 +7,6 @@ const { Engine } = Dino;
 
 interface InspectorProps {
   visible: boolean;
-  onClose: () => void;
 }
 
 const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
@@ -51,24 +50,38 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
   }
 };
 
-const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
-  const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(null);
+const Inspector: React.FC<InspectorProps> = ({ visible }) => {
+  const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(Engine.selectedObject as InspectableObject | null);
   const [isDebug, setIsDebug] = useState(Engine.debug);
   const [isApplying, setIsApplying] = useState(false);
   const [, setTick] = useState(0);
 
-  // Sync the currently selected engine object and debug state
+  // Sync state using events and throttled polling for properties
   useEffect(() => {
     if (!visible) return;
-    
-    let rafId: number;
-    const loop = () => {
-      setSelectedObject(Engine.selectedObject as InspectableObject | null);
-      setIsDebug(Engine.debug);
-      rafId = requestAnimationFrame(loop);
+
+    const onSelectedObjectChanged = (e: any) => {
+      setSelectedObject(e.detail as InspectableObject | null);
     };
-    rafId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafId);
+
+    const onDebugChanged = (e: any) => {
+      setIsDebug(e.detail);
+    };
+
+    Engine.on('selectedObjectChanged', onSelectedObjectChanged);
+    Engine.on('debug', onDebugChanged);
+
+    // Sync properties when engine updates
+    const onEngineUpdate = () => {
+      setTick(t => t + 1);
+    };
+    window.addEventListener('playground-update-inspector', onEngineUpdate);
+
+    return () => {
+      Engine.off('selectedObjectChanged', onSelectedObjectChanged);
+      Engine.off('debug', onDebugChanged);
+      window.removeEventListener('playground-update-inspector', onEngineUpdate);
+    };
   }, [visible]);
 
   const handleApplyToCode = () => {
@@ -132,7 +145,6 @@ const Inspector: React.FC<InspectorProps> = ({ visible, onClose }) => {
             </button>
           )}
         </div>
-        <i className="fa-solid fa-xmark" style={{ cursor: 'pointer' }} onClick={onClose} />
       </div>
       <div className="inspector-body">
         {!isDebug ? (

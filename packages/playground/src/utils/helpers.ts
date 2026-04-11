@@ -9,7 +9,20 @@ export const getCurrentScriptId = () => currentScriptId;
 const createInitialFile = async (id: string) => {
   const defaultContent = `import { Engine, Scene, Sprite, Vector2, Text } from 'dino-ge';
 
-// Your playground script starts here!
+new Engine({
+  onLoad: () => {
+    console.log('Game Ready!');
+    new Text({
+      text: 'Dino GE Playground',
+      position: new Vector2(100, 100),
+      colour: 'white'
+    });
+  },
+  update: () => {}
+}, { 
+  containerId: 'playground-canvas-container',
+  backgroundColour: '#264653' 
+});
 `;
   
   await fetch(`/api/scripts/${id}`, {

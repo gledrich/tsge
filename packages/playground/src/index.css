@@ -1,93 +1,52 @@
+:root {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2d2d2d;
+  --accent-primary: #43aa8b;
+  --accent-secondary: #F94144;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #333;
+  --handle-color: #444;
+  --handle-active-color: var(--accent-primary);
+}
+
 html,
 body {
   margin: 0;
+  padding: 0;
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: row;
-  background-color: black;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
 }
 
-#canvas-container {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  background-color: #1a1a1a;
-  z-index: 0;
+#root {
+  height: 100%;
+  width: 100%;
 }
 
-.logo-container {
-  position: fixed;
-  z-index: 1000;
-  left: 1rem;
-  top: 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 0.5rem 1rem;
-  background: rgba(67, 170, 139, 0.2);
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(67, 170, 139, 0.4);
-  border-radius: 0.5rem;
-  color: #43aa8b;
-  -webkit-user-select: none;
-  user-select: none;
+* {
+  box-sizing: border-box;
 }
 
-.logo-container h1 {
-  margin: 0;
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.action-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
-  position: fixed;
-  bottom: 2rem;
-  left: 2rem;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(5px);
-  padding: 0.75rem 1.25rem;
-  border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
 }
 
-.action-buttons i {
-  font-size: 1.5rem;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.1s ease, color 0.2s ease;
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
-.action-buttons i:hover {
-  transform: scale(1.2);
-  color: #43aa8b;
-}
-
-.script-selector {
-  background: #2d2d2d;
-  color: white;
-  border: 1px solid #444;
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 0.9rem;
-  margin: 0 10px;
-  outline: none;
-  cursor: pointer;
-  max-width: 150px;
-}
-
-.script-selector:hover {
-  border-color: #43aa8b;
-}
-
-.new-script {
-  cursor: pointer;
-  color: white;
-  margin-right: 5px;
-}
-
-.new-script:hover {
-  color: #43aa8b;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--handle-color);
 }

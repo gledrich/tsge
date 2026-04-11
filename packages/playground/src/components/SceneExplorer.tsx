@@ -70,11 +70,10 @@ const getIconForObject = (obj: Dino.GameObject): string => {
 
 const SceneExplorer: React.FC = () => {
   const [rootObjects, setRootObjects] = useState<Dino.GameObject[]>([]);
-  const [selectedObject, setSelectedObject] = useState<Dino.GameObject | null>(null);
+  const [selectedObject, setSelectedObject] = useState<Dino.GameObject | null>(Engine.selectedObject);
 
   useEffect(() => {
-    let rafId: number;
-    const loop = () => {
+    const updateHierarchy = () => {
       let allObjects: Dino.GameObject[] = [];
       
       const scene = (Engine as any).currentScene;
@@ -87,27 +86,32 @@ const SceneExplorer: React.FC = () => {
         allObjects = Array.from(globalObjects);
       }
 
-      if (allObjects.length > 0) {
-        // Only log if count changes to avoid spamming
-        if (allObjects.length !== (window as any)._lastObjCount) {
-          console.log(`SceneExplorer found ${allObjects.length} objects (Scene: ${!!scene})`);
-          (window as any)._lastObjCount = allObjects.length;
-        }
-      }
-
-      // Filter for objects that have no parent transform
       const roots = allObjects.filter(obj => !obj.transform.parent);
-      
-      if (allObjects.length > 0 && roots.length === 0) {
-        console.warn('SceneExplorer: Objects exist but no roots found. Hierarchy might be circular or broken.', allObjects);
-      }
-
       setRootObjects(roots);
-      setSelectedObject(Engine.selectedObject);
-      rafId = requestAnimationFrame(loop);
     };
-    rafId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafId);
+
+    const onSelectedObjectChanged = (e: any) => {
+      setSelectedObject(e.detail as Dino.GameObject | null);
+    };
+
+    const onDebugChanged = () => {
+      // Re-trigger update on debug change if needed
+    };
+
+    Engine.on('selectedObjectChanged', onSelectedObjectChanged);
+    Engine.on('debug', onDebugChanged);
+
+    // Initial update
+    updateHierarchy();
+
+    // Scene hierarchy is relatively static, poll at 1Hz instead of 60Hz
+    const intervalId = setInterval(updateHierarchy, 1000);
+
+    return () => {
+      Engine.off('selectedObjectChanged', onSelectedObjectChanged);
+      Engine.off('debug', onDebugChanged);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleSelect = (obj: Dino.GameObject) => {

@@ -74,75 +74,53 @@ floorPhys.isStatic = true;
 floor.addComponent(floorPhys);` }
 ];
 
-interface SidebarProps {
-  isCollapsed: boolean;
-  onToggle: () => void;
-}
-
 type TabType = 'snippets' | 'assets';
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
+const Sidebar: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('snippets');
 
   const insertSnippet = (code: string) => {
     window.dispatchEvent(new CustomEvent('playground-insert-text', { detail: code }));
   };
 
-  const handleTabClick = (tab: TabType, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isCollapsed) {
-      onToggle();
-      setActiveTab(tab);
-    } else if (activeTab === tab) {
-      onToggle();
-    } else {
-      setActiveTab(tab);
-    }
-  };
-
   return (
-    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className="sidebar">
       <div className="sidebar-tabs">
         <div 
           className={`sidebar-tab ${activeTab === 'snippets' ? 'active' : ''}`} 
-          onClick={(e) => handleTabClick('snippets', e)}
+          onClick={() => setActiveTab('snippets')}
         >
           <i className="fa-solid fa-code" />
           <span>Snippets</span>
         </div>
         <div 
           className={`sidebar-tab ${activeTab === 'assets' ? 'active' : ''}`} 
-          onClick={(e) => handleTabClick('assets', e)}
+          onClick={() => setActiveTab('assets')}
         >
           <i className="fa-solid fa-images" />
           <span>Assets</span>
         </div>
-        <div className="sidebar-collapse-btn" onClick={onToggle}>
-          <i className={`fa-solid ${isCollapsed ? 'fa-chevron-up' : 'fa-chevron-down'}`} />
-        </div>
       </div>
       
-      {!isCollapsed && (
-        <div className="sidebar-content">
-          {activeTab === 'snippets' ? (
-            <div className="snippets-grid">
-              {snippets.map((s, index) => (
-                <button 
-                  key={index} 
-                  className="snippet-btn" 
-                  title={s.label}
-                  onClick={() => insertSnippet(s.code)}
-                >
-                  <i className={`fa-solid ${s.icon}`} />
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </div>
-          ) : (activeTab === 'assets' && (
-            <AssetPanel />
-          ))}
-        </div>
-      )}
+      <div className="sidebar-content">
+        {activeTab === 'snippets' ? (
+          <div className="snippets-grid">
+            {snippets.map((s, index) => (
+              <button 
+                key={index} 
+                className="snippet-btn" 
+                title={s.label}
+                onClick={() => insertSnippet(s.code)}
+              >
+                <i className={`fa-solid ${s.icon}`} />
+                <span>{s.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (activeTab === 'assets' && (
+          <AssetPanel />
+        ))}
+      </div>
     </div>
   );
 };

@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import Editor from '@monaco-editor/react';
 import * as prettier from 'prettier/standalone';
 import * as babel from 'prettier/plugins/babel';
 import * as estree from 'prettier/plugins/estree';
-import { getScript, getFilesList, setCurrentScriptId } from '../utils/helpers';
+import { getScript, getFilesList, setCurrentScriptId, updateScript } from '../utils/helpers';
 import '../styles/editor.css';
 
 interface EditorProps {
@@ -10,12 +11,11 @@ interface EditorProps {
   onRefresh: (value: string) => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [editorInstance, setEditorInstance] = useState<any>(null);
+const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   const [scripts, setScripts] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isFormatting, setIsFormatting] = useState(false);
+  const [editorValue, setEditorValue] = useState<string>('');
 
   const formatCode = useCallback(async (code: string) => {
     try {
@@ -40,18 +40,13 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   }, [onRefresh]);
 
   const handleFormat = useCallback(async () => {
-    if (!editorInstance) return;
     setIsFormatting(true);
-    const currentCode = editorInstance.getValue();
-    const formatted = await formatCode(currentCode);
-    
-    if (formatted !== currentCode) {
-      const pos = editorInstance.getCursorPosition();
-      editorInstance.setValue(formatted, -1);
-      editorInstance.moveCursorToPosition(pos);
+    const formatted = await formatCode(editorValue);
+    if (formatted !== editorValue) {
+      setEditorValue(formatted);
     }
     setIsFormatting(false);
-  }, [editorInstance, formatCode]);
+  }, [editorValue, formatCode]);
 
   useEffect(() => {
     const refreshScripts = async () => {
@@ -62,82 +57,33 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   }, [currentScriptId]);
 
   useEffect(() => {
-    if (window.ace && editorRef.current && !editorInstance) {
-      const aceEditor = window.ace.edit(editorRef.current);
-      aceEditor.setTheme('ace/theme/tomorrow_night_eighties');
-      aceEditor.session.setMode('ace/mode/javascript');
-      aceEditor.setOptions({
-        fontSize: '10pt',
-        tabSize: 2,
-        useSoftTabs: true,
-        showPrintMargin: false,
-        wrap: true
-      });
-
-      aceEditor.commands.addCommand({
-        name: 'save',
-        bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-        exec: () => {
-          handleSave(aceEditor.getValue());
-        }
-      });
-
-      aceEditor.commands.addCommand({
-        name: 'format',
-        bindKey: { win: 'Shift-Alt-F', mac: 'Shift-Option-F' },
-        exec: () => {
-          handleFormat();
-        }
-      });
-
-      setEditorInstance(aceEditor);
-    }
-  }, [editorInstance, handleSave, handleFormat]);
-
-  useEffect(() => {
-    if (editorInstance) {
-      const loadScript = async () => {
-        setIsSaving(true);
-        const script = await getScript(currentScriptId);
-        const formatted = await formatCode(script);
-
-        const pos = editorInstance.getCursorPosition();
-        editorInstance.setValue(formatted, -1);
-        editorInstance.moveCursorToPosition(pos);
-        setIsSaving(false);
-      };
-      loadScript();
-    }
-  }, [currentScriptId, editorInstance, formatCode]);
+    const loadScript = async () => {
+      setIsSaving(true);
+      const script = await getScript(currentScriptId);
+      const formatted = await formatCode(script);
+      setEditorValue(formatted);
+      setIsSaving(false);
+    };
+    loadScript();
+  }, [currentScriptId, formatCode]);
 
   useEffect(() => {
     const handleInsertText = (e: Event) => {
       const customEvent = e as CustomEvent<string>;
-      if (editorInstance) {
-        editorInstance.insert(customEvent.detail);
-        editorInstance.focus();
-      }
+      setEditorValue(prev => prev + '\n' + customEvent.detail);
     };
 
     const handleRefreshEvent = () => {
-      if (editorInstance) {
-        onRefresh(editorInstance.getValue());
-      }
+      onRefresh(editorValue);
     };
 
     const handleUpdateCodeEvent = (e: Event) => {
       const customEvent = e as CustomEvent<string>;
-      if (editorInstance) {
-        const pos = editorInstance.getCursorPosition();
-        editorInstance.setValue(customEvent.detail, -1);
-        editorInstance.moveCursorToPosition(pos);
-      }
+      setEditorValue(customEvent.detail);
     };
 
     const handleGetValueEvent = () => {
-      if (editorInstance) {
-        window.dispatchEvent(new CustomEvent('playground-editor-value', { detail: editorInstance.getValue() }));
-      }
+      window.dispatchEvent(new CustomEvent('playground-editor-value', { detail: editorValue }));
     };
 
     window.addEventListener('playground-insert-text', handleInsertText);
@@ -151,7 +97,7 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
       window.removeEventListener('playground-update-code', handleUpdateCodeEvent);
       window.removeEventListener('playground-get-value', handleGetValueEvent);
     };
-  }, [editorInstance, onRefresh]);
+  }, [editorValue, onRefresh]);
 
   const handleScriptChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCurrentScriptId(e.target.value);
@@ -161,15 +107,27 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   const handleNewScript = async () => {
     const name = window.prompt('Enter script name:');
     if (name) {
+      await updateScript('', false, name); // Initialize empty file
       setCurrentScriptId(name);
       window.dispatchEvent(new CustomEvent('playground-script-selected', { detail: name }));
     }
   };
 
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      handleSave(editor.getValue());
+    });
+
+    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
+      // Prettier is already handled by handleFormat, but monaco might have its own formatter.
+      // We'll trigger our handleFormat
+      handleFormat();
+    });
+  };
+
   return (
     <div className="editor">
       <div className="banner">
-        <h2>Editor</h2>
         <div className="icons-container">
           <i 
             className="fa-solid fa-plus new-script" 
@@ -193,13 +151,30 @@ const Editor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
           <i 
             className={`fa-solid fa-cloud ${isSaving ? 'saving' : 'save'}`} 
             title="Save (Ctrl+S)"
-            onClick={() => handleSave(editorInstance.getValue())}
+            onClick={() => handleSave(editorValue)}
           />
         </div>
       </div>
-      <div id="editor-textbox" className="editor-textbox" ref={editorRef} style={{ width: '100%', height: 'calc(100% - 40px)' }}></div>
+      <div className="editor-textbox">
+        <Editor
+          height="100%"
+          defaultLanguage="javascript"
+          theme="vs-dark"
+          value={editorValue}
+          onChange={(value) => setEditorValue(value || '')}
+          onMount={handleEditorDidMount}
+          options={{
+            fontSize: 13,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            wordWrap: 'on'
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-export default Editor;
+export default CodeEditor;
