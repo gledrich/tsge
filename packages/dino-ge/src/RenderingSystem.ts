@@ -59,10 +59,7 @@ export default class RenderingSystem extends System {
       const now = Date.now();
       const TTL = 500; // 500ms
 
-      // Clean up old collisions
-      while (Engine.debugCollisions.length > 0 && now - Engine.debugCollisions[0].timestamp > TTL) {
-        Engine.debugCollisions.shift();
-      }
+      Engine.cleanDebugCollisions(now);
 
       Engine.debugCollisions.forEach(({ manifold, timestamp }) => {
         const { obj1, obj2, normal } = manifold;

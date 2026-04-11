@@ -15,6 +15,14 @@ export default abstract class Scene {
   public onLoad(): void {}
 
   /**
+   * Called when the game window or container is resized.
+   * Useful for updating UI positions or camera bounds.
+   * @param width The new width of the game window.
+   * @param height The new height of the game window.
+   */
+  public onResize?(width: number, height: number): void;
+
+  /**
    * Called every frame to update game logic within the scene.
    */
   public update(): void {}

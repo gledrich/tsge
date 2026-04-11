@@ -3,16 +3,20 @@ import React from 'react';
 interface ToolbarProps {
   isPaused: boolean;
   isDebug: boolean;
+  arePanelsMinimized: boolean;
   onTogglePause: () => void;
   onToggleDebug: () => void;
+  onTogglePanels: () => void;
   onRefresh: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
   isPaused,
   isDebug,
+  arePanelsMinimized,
   onTogglePause,
   onToggleDebug,
+  onTogglePanels,
   onRefresh
 }) => {
   return (
@@ -31,6 +35,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
         className={`fa-solid fa-bug ${isDebug ? 'active-debug' : ''}`} 
         onClick={onToggleDebug}
         title="Toggle Debug Mode"
+      />
+      <i 
+        className={`fa-solid ${arePanelsMinimized ? 'fa-expand' : 'fa-compress'}`} 
+        onClick={onTogglePanels}
+        title={arePanelsMinimized ? 'Restore Panels' : 'Minimize All Panels'}
       />
     </div>
   );

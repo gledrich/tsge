@@ -20,6 +20,7 @@ function App() {
   const [isInspectorVisible, setIsInspectorVisible] = useState(true);
   const [activeTab, setActiveTab] = useState<'editor' | 'console'>('editor');
   const [isViewportReady, setIsViewportReady] = useState(false);
+  const [arePanelsMinimized, setArePanelsMinimized] = useState(false);
 
   const explorerPanelRef = usePanelRef();
   const editorPanelRef = usePanelRef();
@@ -74,7 +75,6 @@ function App() {
     
     if (isInspectorVisible && panel.isCollapsed()) {
       panel.expand();
-      if (panel.getSize().asPercentage < 5) panel.resize(20);
     } else if (!isInspectorVisible && !panel.isCollapsed()) {
       panel.collapse();
     }
@@ -135,15 +135,33 @@ function App() {
     if (isPaused) setIsPaused(false);
   };
 
-  const togglePanel = (ref: any, defaultSize: number) => {
+  const togglePanel = (ref: any) => {
     const panel = ref.current;
     if (!panel) return;
     
     if (panel.isCollapsed()) {
       panel.expand();
-      panel.resize(defaultSize);
     } else {
       panel.collapse();
+    }
+  };
+
+  const handleToggleAllPanels = () => {
+    const newState = !arePanelsMinimized;
+    setArePanelsMinimized(newState);
+
+    if (newState) {
+      // Minimize all
+      explorerPanelRef.current?.collapse();
+      editorPanelRef.current?.collapse();
+      inspectorPanelRef.current?.collapse();
+      setIsInspectorVisible(false);
+    } else {
+      // Restore all
+      explorerPanelRef.current?.expand();
+      editorPanelRef.current?.expand();
+      inspectorPanelRef.current?.expand();
+      setIsInspectorVisible(true);
     }
   };
 
@@ -151,7 +169,13 @@ function App() {
     <div className="playground-root">
       <Group orientation="horizontal" className="main-layout">
         {/* Left Panel: Sidebar & Scene Explorer */}
-        <Panel defaultSize={20} minSize={10} collapsible={true} collapsedSize={0} panelRef={explorerPanelRef}>
+        <Panel 
+          defaultSize={20} 
+          minSize={20} 
+          collapsible={true} 
+          collapsedSize={0} 
+          panelRef={explorerPanelRef}
+        >
           <div className="panel-container">
             <div className="panel-header">Explorer</div>
             <div className="panel-content" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -167,14 +191,14 @@ function App() {
         
         <Separator 
           className="resize-handle-horizontal" 
-          onDoubleClick={() => togglePanel(explorerPanelRef, 20)}
+          onDoubleClick={() => togglePanel(explorerPanelRef)}
         />
 
         {/* Center Panel: Viewport & Editor/Console */}
         <Panel defaultSize={60}>
           <Group orientation="vertical">
             {/* Top: Viewport */}
-            <Panel defaultSize={60} minSize={20}>
+            <Panel defaultSize={60} minSize={50}>
               <div className="viewport-panel">
                 {!isViewportReady && (
                   <div style={{
@@ -203,12 +227,14 @@ function App() {
                 <Toolbar 
                   isPaused={isPaused}
                   isDebug={isDebug}
+                  arePanelsMinimized={arePanelsMinimized}
                   onTogglePause={() => setIsPaused(!isPaused)}
                   onToggleDebug={() => {
                     const newDebug = !isDebug;
                     setIsDebug(newDebug);
                     if (newDebug && !isInspectorVisible) setIsInspectorVisible(true);
                   }}
+                  onTogglePanels={handleToggleAllPanels}
                   onRefresh={() => window.dispatchEvent(new CustomEvent('playground-refresh'))}
                 />
               </div>
@@ -216,11 +242,17 @@ function App() {
             
             <Separator 
               className="resize-handle-vertical" 
-              onDoubleClick={() => togglePanel(editorPanelRef, 40)}
+              onDoubleClick={() => togglePanel(editorPanelRef)}
             />
 
             {/* Bottom: Editor & Console Tabs */}
-            <Panel defaultSize={40} minSize={10} collapsible={true} collapsedSize={0} panelRef={editorPanelRef}>
+            <Panel 
+              defaultSize={40} 
+              minSize={40} 
+              collapsible={true} 
+              collapsedSize={0} 
+              panelRef={editorPanelRef}
+            >
               <div className="panel-container">
                 <div className="panel-header" style={{ display: 'flex', gap: '10px' }}>
                   <span 
@@ -258,11 +290,11 @@ function App() {
         />
         <Panel 
           defaultSize={20} 
-          minSize={10} 
+          minSize={20} 
           collapsible={true} 
           collapsedSize={0} 
           panelRef={inspectorPanelRef}
-          onResize={(size) => {
+          onResize={(size: any) => {
             // Defer state update to avoid update-during-render crashes
             requestAnimationFrame(() => {
               const isCurrentlyCollapsed = size.asPercentage === 0;

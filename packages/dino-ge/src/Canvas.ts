@@ -24,7 +24,7 @@ export default class Canvas {
       this.canvas.style.height = '100%';
       
       // Use ResizeObserver to handle panel resizing in playground
-      this._resizeObserver = new ResizeObserver(() => this.resize(parentElement));
+      this._resizeObserver = new ResizeObserver(this._onResizeObserved.bind(this, parentElement));
       this._resizeObserver.observe(parentElement);
       this.resize(parentElement);
     } else {
@@ -42,9 +42,10 @@ export default class Canvas {
    * @param parent Optional parent element to match size with.
    */
   public resize(parent?: HTMLElement) {
-    if (parent) {
-      this.canvas.width = parent.clientWidth;
-      this.canvas.height = parent.clientHeight;
+    const target = parent || this.canvas.parentElement;
+    if (target && target.clientWidth > 0) {
+      this.canvas.width = target.clientWidth;
+      this.canvas.height = target.clientHeight;
     } else {
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
@@ -53,6 +54,10 @@ export default class Canvas {
     if (this.onResize) {
       this.onResize();
     }
+  }
+
+  private _onResizeObserved(parentElement: HTMLElement) {
+    this.resize(this.canvas.parentElement || parentElement);
   }
 
   /**

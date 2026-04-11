@@ -26,7 +26,7 @@ class MenuScene extends Scene {
   onLoad() {
     this.game.cursor = 'pointer';
 
-    new Text({
+    this.title = new Text({
       tag: 'title',
       text: 'DINO SURVIVAL',
       fontSize: 64,
@@ -36,7 +36,7 @@ class MenuScene extends Scene {
       zIndex: 10
     });
 
-    new Text({
+    this.startBtn = new Text({
       tag: 'start-btn',
       text: 'CLICK TO START',
       fontSize: 32,
@@ -47,7 +47,7 @@ class MenuScene extends Scene {
       onClick: () => this.onStart()
     });
 
-    new Text({
+    this.controls = new Text({
       tag: 'controls',
       text: 'WASD to Move - SPACE to Shoot',
       fontSize: 20,
@@ -56,6 +56,14 @@ class MenuScene extends Scene {
       width: 300,
       zIndex: 10
     });
+  }
+
+  onResize(width, height) {
+    if (this.title && this.startBtn && this.controls) {
+      this.title.transform.position.x = width / 2 - 250;
+      this.startBtn.transform.position.x = width / 2 - 150;
+      this.controls.transform.position.x = width / 2 - 150;
+    }
   }
 }
 
@@ -421,7 +429,7 @@ class GameOverScene extends Scene {
   onLoad() {
     this.game.cursor = 'pointer';
 
-    new Text({
+    this.gameOverText = new Text({
       tag: 'gameOver',
       text: 'GAME OVER',
       fontSize: '60',
@@ -431,7 +439,7 @@ class GameOverScene extends Scene {
       zIndex: 10
     });
 
-    new Text({
+    this.finalScoreText = new Text({
       tag: 'finalScore',
       text: `Score: ${this.score}`,
       fontSize: '30',
@@ -443,7 +451,7 @@ class GameOverScene extends Scene {
 
     if (this.score > this.highScore) {
       localStorage.setItem('dinoHighScore', this.score.toString());
-      new Text({
+      this.highScoreText = new Text({
         tag: 'newHigh',
         text: 'NEW HIGH SCORE!',
         fontSize: '24',
@@ -453,7 +461,7 @@ class GameOverScene extends Scene {
         zIndex: 10
       });
     } else {
-      new Text({
+      this.highScoreText = new Text({
         tag: 'highScore',
         text: `High Score: ${this.highScore}`,
         fontSize: '24',
@@ -464,7 +472,7 @@ class GameOverScene extends Scene {
       });
     }
 
-    new Text({
+    this.restartBtn = new Text({
       tag: 'restart-btn',
       text: 'PLAY AGAIN',
       fontSize: '32',
@@ -474,6 +482,15 @@ class GameOverScene extends Scene {
       zIndex: 10,
       onClick: () => this.onRestart()
     });
+  }
+
+  onResize(width, height) {
+    if (this.gameOverText && this.finalScoreText && this.highScoreText && this.restartBtn) {
+      this.gameOverText.transform.position.x = width / 2 - 200;
+      this.finalScoreText.transform.position.x = width / 2 - 100;
+      this.highScoreText.transform.position.x = width / 2 - 100;
+      this.restartBtn.transform.position.x = width / 2 - 100;
+    }
   }
 }
 

@@ -31,7 +31,7 @@ describe('Engine', () => {
     global.ResizeObserver = class ResizeObserver {
       constructor(callback: (entries: unknown[], observer: ResizeObserver) => void) {
         // Mock implementation
-        this._callback = callback;
+        this._callback = callback as unknown as ((entries: unknown[], observer: ResizeObserver) => void);
       }
       private _callback: (entries: unknown[], observer: ResizeObserver) => void;
       observe = jest.fn();
@@ -289,6 +289,65 @@ describe('Engine', () => {
     window.dispatchEvent(new Event('resize'));
     
     expect(resizeSpy).toHaveBeenCalled();
+
+    // Trigger onResize manually to cover branch in constructor
+    (canvasObj as unknown as { onResize: () => void }).onResize();
+    expect(engine.width).toBe(window.innerWidth);
+
+    // Cover branch with currentScene.onResize
+    const scene = new MockScene();
+    scene.onResize = jest.fn();
+    Engine.currentScene = scene;
+    (canvasObj as unknown as { onResize: () => void }).onResize();
+    expect(scene.onResize).toHaveBeenCalledWith(engine.width, engine.height);
+  });
+
+  it('terminates and cleans up resources', () => {
+    const engine = new Engine(callbacks);
+    const terminateSpy = jest.spyOn(engine, 'terminate');
+    
+    // Test termination with internal window
+    engine.terminate();
+    expect(terminateSpy).toHaveBeenCalled();
+
+    // Re-instantiate to test termination of EXISTING instance
+    const engine2 = new Engine(callbacks);
+    const terminateSpy2 = jest.spyOn(engine2, 'terminate');
+    
+    // Starting a THIRD engine should terminate engine2
+    new Engine(callbacks);
+    expect(terminateSpy2).toHaveBeenCalled();
+
+    // Test with external container
+    const container = document.createElement('div');
+    container.id = 'external';
+    document.body.appendChild(container);
+    const engine3 = new Engine(callbacks, { containerId: 'external' });
+    
+    // Cover branch: this._title is missing during terminate
+    (engine3 as unknown as { _title: HTMLTitleElement | null })._title = null;
+    engine3.terminate();
+
+    // Cover branch: global instance mismatch during terminate
+    const engine4 = new Engine(callbacks);
+    const globalObj = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine | null };
+    globalObj.__DINO_ENGINE_INSTANCE__ = null;
+    engine4.terminate();
+  });
+
+  it('bails out of _update when destroyed', () => {
+    const engine = new Engine(callbacks);
+    engine.terminate();
+    (engine as unknown as { _update: (ts: number) => void })._update(1000); // Should return immediately
+  });
+
+  it('handles currentScene setter branches', () => {
+    const scene = new MockScene();
+    Engine.currentScene = scene;
+    expect(Engine.currentScene).toBe(scene);
+
+    Engine.currentScene = null;
+    expect(Engine.currentScene).toBeNull();
   });
 
   it('runs the game loop (update and draw) and handles multiple fixed updates', () => {
@@ -379,10 +438,10 @@ describe('Engine', () => {
     Engine.debug = true;
 
     const obj = new MockGameObject('target', 0);
-    const phys = new PhysicsComponent();
-    phys.velocity = new Vector2(10, 20);
-    phys.acceleration = new Vector2(1, 2);
-    obj.addComponent(phys);
+    const physComp = new PhysicsComponent();
+    physComp.velocity = new Vector2(10, 20);
+    physComp.acceleration = new Vector2(1, 2);
+    obj.addComponent(physComp);
     obj.bounds = new BoundsComponent(10, 10);
     Engine.objects.add(obj);
     Engine.selectedObject = obj;
@@ -391,37 +450,70 @@ describe('Engine', () => {
     expect(mockCtx.fillText).toHaveBeenCalled();
 
     const simpleObj = new MockGameObject('simple', 0);
-    Engine.selectedObject = simpleObj;
-    (engine as unknown as { _draw: () => void })._draw();
-
-    // Test when no object is selected
-    Engine.selectedObject = null;
-    (engine as unknown as { _draw: () => void })._draw();
-
-    // Test when object lacks metadata (TagComponent)
-    const noTagObj = new MockGameObject('notag', 0);
-    Engine.selectedObject = noTagObj;
-    (engine as unknown as { _draw: () => void })._draw();
-
     Engine.objects.add(simpleObj);
     Engine.selectedObject = simpleObj;
     (engine as unknown as { _draw: () => void })._draw();
 
-    // Raw object mock for branch coverage
-    const rawObj = {
-      transform: { 
-        position: new Vector2(),
-        worldPosition: new Vector2(),
-        worldRotation: 0,
-        worldScale: new Vector2(1, 1)
+    // Test Collision TTL cleanup via static method with default parameter
+    Engine.debugCollisions = [{
+      manifold: {
+        obj1: obj,
+        obj2: simpleObj,
+        normal: new Vector2(1, 0),
+        depth: 5
       },
-      metadata: { tag: 'raw', zIndex: 0 },
-      getComponent: jest.fn().mockReturnValue(null),
+      timestamp: Date.now() - 1000 // Expired
+    }];
+    Engine.cleanDebugCollisions(); // Covers the default argument
+    expect(Engine.debugCollisions.length).toBe(0);
+
+    // Test _drawDebug private method for 100% branch coverage
+    Engine.selectedObject = obj;
+    (engine as unknown as { _drawDebug: (objs: Set<GameObject>) => void })._drawDebug(new Set([obj]));
+    
+    // Branch: no metadata
+    const noMeta = {
+      transform: { position: new Vector2() },
       bounds: { width: 10, height: 10 },
-      id: 'test-id'
+      metadata: null,
+      getComponent: jest.fn().mockReturnValue(null)
     } as unknown as GameObject;
-    Engine.objects.add(rawObj);
-    Engine.selectedObject = rawObj;
+    Engine.selectedObject = noMeta;
+    (engine as unknown as { _drawDebug: (objs: Set<GameObject>) => void })._drawDebug(new Set([noMeta]));
+
+    // Branch: has Physics but no Metadata
+    const physNoMeta = {
+      transform: { position: new Vector2() },
+      bounds: { width: 10, height: 10 },
+      metadata: null,
+      getComponent: jest.fn().mockReturnValue(new PhysicsComponent())
+    } as unknown as GameObject;
+    Engine.selectedObject = physNoMeta;
+    (engine as unknown as { _drawDebug: (objs: Set<GameObject>) => void })._drawDebug(new Set([physNoMeta]));
+
+    // Branch: missing metadata AND missing physics component
+    const minimalObj = {
+      transform: { position: new Vector2() },
+      bounds: null,
+      metadata: null,
+      getComponent: jest.fn().mockReturnValue(null)
+    } as unknown as GameObject;
+    Engine.selectedObject = minimalObj;
+    (engine as unknown as { _drawDebug: (objs: Set<GameObject>) => void })._drawDebug(new Set([minimalObj]));
+
+    // Branch: no selected object
+    Engine.selectedObject = null;
+    (engine as unknown as { _drawDebug: (objs: Set<GameObject>) => void })._drawDebug(new Set());
+
+    // Branch: _draw toggle
+    Engine.debug = false;
+    (engine as unknown as { _draw: () => void })._draw();
+    Engine.debug = true;
+    (engine as unknown as { _draw: () => void })._draw();
+  });
+
+  it('handles draw with no scene or objects', () => {
+    const engine = new Engine(callbacks);
     (engine as unknown as { _draw: () => void })._draw();
   });
 

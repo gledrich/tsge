@@ -65,7 +65,7 @@ const createInitialState = (): EngineState => ({
 export default class Engine {
   /** Internal helper to access the global shared state. */
   private static get _state(): EngineState {
-    const global = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
+    const global = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; };
     if (!global.__DINO_ENGINE_STATE__) {
       global.__DINO_ENGINE_STATE__ = createInitialState();
     }
@@ -77,7 +77,7 @@ export default class Engine {
    * Useful for testing to prevent state bleed between test cases.
    */
   public static resetState() {
-    (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__ = createInitialState();
+    (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState; }).__DINO_ENGINE_STATE__ = createInitialState();
   }
 
   /**
@@ -99,10 +99,10 @@ export default class Engine {
   /**
    * Recent collisions for debug visualization.
    */
-  public static get debugCollisions(): { manifold: CollisionManifold, timestamp: number }[] {
+  public static get debugCollisions(): { manifold: CollisionManifold, timestamp: number; }[] {
     return this._state.debugCollisions;
   }
-  public static set debugCollisions(val: { manifold: CollisionManifold, timestamp: number }[]) {
+  public static set debugCollisions(val: { manifold: CollisionManifold, timestamp: number; }[]) {
     this._state.debugCollisions = val;
   }
 
@@ -268,7 +268,7 @@ export default class Engine {
    */
   constructor(callbacks: EngineCallbacks, opts: Partial<EngineOpts> = {}) {
     // Terminate existing engine if any
-    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine };
+    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine; };
     if (global.__DINO_ENGINE_INSTANCE__) {
       global.__DINO_ENGINE_INSTANCE__.terminate();
     }
@@ -320,7 +320,7 @@ export default class Engine {
       this._window.id = 'canvas-container';
       this._window.style.width = defaultedOpts.width;
       this._window.style.height = defaultedOpts.height;
-      
+
       const bodies = document.getElementsByTagName('body');
       if (bodies.length > 0) {
         bodies[0].appendChild(this._window);
@@ -332,10 +332,16 @@ export default class Engine {
 
     Input.init();
 
-    this._resizeHandler = () => {
-      this._canvas.resize(container || undefined);
+    this._canvas.onResize = () => {
       this.width = this._canvas.canvas.width;
       this.height = this._canvas.canvas.height;
+      if (Engine.currentScene?.onResize) {
+        Engine.currentScene.onResize(this.width, this.height);
+      }
+    };
+
+    this._resizeHandler = () => {
+      this._canvas.resize(container || undefined);
     };
     window.addEventListener('resize', this._resizeHandler);
 
@@ -355,7 +361,7 @@ export default class Engine {
     if (this._title) {
       this._title.remove();
     }
-    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine | null };
+    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine | null; };
     if (global.__DINO_ENGINE_INSTANCE__ === this) {
       global.__DINO_ENGINE_INSTANCE__ = null;
     }
@@ -369,9 +375,9 @@ export default class Engine {
 
   private _update(timestamp: number) {
     if (this._destroyed) return;
-    
+
     if (this._oldTimestamp === 0) this._oldTimestamp = timestamp;
-    
+
     if (!Engine.paused) {
       this._secondsPassed = (timestamp - this._oldTimestamp) / 1000;
       this._oldTimestamp = timestamp;
@@ -442,6 +448,17 @@ export default class Engine {
     }
   }
 
+  /**
+   * Cleans up expired debug collisions.
+   * @param now Current timestamp.
+   */
+  public static cleanDebugCollisions(now: number = Date.now()) {
+    const TTL = 500; // 500ms
+    while (this.debugCollisions.length > 0 && now - this.debugCollisions[0].timestamp > TTL) {
+      this.debugCollisions.shift();
+    }
+  }
+
   private _drawDebug(objects: Set<GameObject>) {
     // Draw Stats Overlay (Top Right)
     this._ctx.save();
@@ -477,8 +494,10 @@ export default class Engine {
       ];
 
       const tagComp = obj.metadata;
-      properties.unshift(['Tag', tagComp.tag]);
-      properties.push(['Z-Index', tagComp.zIndex]);
+      if (tagComp) {
+        properties.unshift(['Tag', tagComp.tag]);
+        properties.push(['Z-Index', tagComp.zIndex]);
+      }
 
       const physComp = obj.getComponent(PhysicsComponent);
       if (physComp) {
