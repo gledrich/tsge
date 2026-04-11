@@ -75,4 +75,20 @@ describe('Vector2', () => {
     expect(v2.y).toBe(v1.y);
     expect(v2).not.toBe(v1);
   });
+
+  it('triggers onChange when x or y is modified', () => {
+    const vec = new Vector2(0, 0);
+    const onChange = jest.fn();
+    vec.onChange = onChange;
+    
+    vec.x = 10;
+    expect(onChange).toHaveBeenCalledTimes(1);
+    
+    vec.y = 20;
+    expect(onChange).toHaveBeenCalledTimes(2);
+    
+    // Should not trigger if value is same
+    vec.x = 10;
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
 });

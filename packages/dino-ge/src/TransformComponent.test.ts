@@ -133,27 +133,26 @@ describe('TransformComponent', () => {
     const child = new TransformComponent();
     parent.addChild(child);
     
-    // Initial access to cache values
-    const pos1 = child.worldPosition;
-    const pos2 = child.worldPosition;
+    // Initial access to populate cache
+    expect(child.worldPosition).toBeDefined();
     
     // Since worldPosition returns a clone, we can't check identity, 
     // but we can check if the underlying update method was called.
-    const updateSpy = jest.spyOn(child as any, 'updateWorldTransform');
+    const updateSpy = jest.spyOn(child as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
     
     // Access again - should NOT call update
-    child.worldPosition;
+    expect(child.worldPosition).toBeDefined();
     expect(updateSpy).not.toHaveBeenCalled();
     
     // Modify parent - should set child as dirty
     parent.position = new Vector2(100, 100);
     
     // Access again - SHOULD call update now
-    child.worldPosition;
+    expect(child.worldPosition).toBeDefined();
     expect(updateSpy).toHaveBeenCalledTimes(1);
     
     // Access again - should NOT call update (cached again)
-    child.worldPosition;
+    expect(child.worldPosition).toBeDefined();
     expect(updateSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -166,19 +165,19 @@ describe('TransformComponent', () => {
     mid.addChild(leaf);
     
     // Populate caches
-    root.worldPosition;
-    mid.worldPosition;
-    leaf.worldPosition;
+    expect(root.worldPosition).toBeDefined();
+    expect(mid.worldPosition).toBeDefined();
+    expect(leaf.worldPosition).toBeDefined();
     
-    const rootSpy = jest.spyOn(root as any, 'updateWorldTransform');
-    const midSpy = jest.spyOn(mid as any, 'updateWorldTransform');
-    const leafSpy = jest.spyOn(leaf as any, 'updateWorldTransform');
+    const rootSpy = jest.spyOn(root as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    const midSpy = jest.spyOn(mid as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    const leafSpy = jest.spyOn(leaf as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
     
     // Change root
     root.rotation = 1;
     
     // Access leaf - should trigger updates up the chain
-    leaf.worldPosition;
+    expect(leaf.worldPosition).toBeDefined();
     expect(leafSpy).toHaveBeenCalled();
     expect(midSpy).toHaveBeenCalled();
     expect(rootSpy).toHaveBeenCalled();
@@ -189,17 +188,86 @@ describe('TransformComponent', () => {
     const child = new TransformComponent();
     
     // Initial access
-    child.worldPosition;
-    const spy = jest.spyOn(child as any, 'updateWorldTransform');
+    expect(child.worldPosition).toBeDefined();
+    const spy = jest.spyOn(child as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
     
     // Add to parent - should become dirty
     parent.addChild(child);
-    child.worldPosition;
+    expect(child.worldPosition).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(1);
     
     // Remove from parent - should become dirty
     parent.removeChild(child);
-    child.worldPosition;
+    expect(child.worldPosition).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it('invalidates cache on direct property mutation (x/y)', () => {
+    const transform = new TransformComponent();
+    
+    // Populate cache
+    expect(transform.worldPosition).toBeDefined();
+    const updateSpy = jest.spyOn(transform as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    
+    // Mutate x directly
+    transform.position.x = 50;
+    
+    // Access worldPosition - should trigger update
+    expect(transform.worldPosition.x).toBe(50);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    
+    // Mutate y directly
+    transform.position.y = 100;
+    expect(transform.worldPosition.y).toBe(100);
+    expect(updateSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('triggers setDirty when rotation or scale is changed', () => {
+    const transform = new TransformComponent();
+    const updateSpy = jest.spyOn(transform as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    
+    // Rotation
+    transform.rotation = Math.PI;
+    expect(transform.worldRotation).toBe(Math.PI);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    
+    // Scale
+    transform.scale = new Vector2(2, 2);
+    expect(transform.worldScale.x).toBe(2);
+    expect(updateSpy).toHaveBeenCalledTimes(2);
+    
+    // Direct scale mutation
+    transform.scale.x = 3;
+    expect(transform.worldScale.x).toBe(3);
+    expect(updateSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('handles replacing position vector instance', () => {
+    const transform = new TransformComponent();
+    const newPos = new Vector2(10, 10);
+    transform.position = newPos;
+    
+    const updateSpy = jest.spyOn(transform as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    
+    newPos.x = 20;
+    expect(transform.worldPosition.x).toBe(20);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('manually triggers onChange anonymous function for coverage', () => {
+    const transform = new TransformComponent();
+    const updateSpy = jest.spyOn(transform as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
+    
+    // Populate cache
+    expect(transform.worldPosition).toBeDefined();
+    
+    // Directly call the anonymous function assigned to onChange
+    const pos = transform.position;
+    if (pos.onChange) {
+      pos.onChange();
+    }
+    
+    expect(transform.worldPosition).toBeDefined();
+    expect(updateSpy).toHaveBeenCalled();
   });
 });

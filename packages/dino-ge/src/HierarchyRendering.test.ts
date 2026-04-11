@@ -3,18 +3,7 @@ import GameObject from './GameObject';
 import ShapeComponent from './ShapeComponent';
 import Vector2 from './Vector2';
 import BoundsComponent from './BoundsComponent';
-
-jest.mock('./Engine', () => ({
-  __esModule: true,
-  default: {
-    camera: {
-      getViewportBounds: jest.fn(() => ({ x: 0, y: 0, width: 800, height: 600 })),
-      zoom: 1,
-      position: { x: 0, y: 0 }
-    },
-    selectedObject: null
-  }
-}));
+import Engine from './Engine';
 
 class MockGameObject extends GameObject {}
 
@@ -22,6 +11,10 @@ describe('Hierarchy Rendering', () => {
   let mockCtx: Record<string, jest.Mock | string | number | { width: number, height: number }>;
 
   beforeEach(() => {
+    Engine.resetState();
+    Engine.camera.zoom = 1;
+    Engine.camera.position = new Vector2(0, 0);
+    
     mockCtx = {
       save: jest.fn(),
       restore: jest.fn(),
@@ -30,6 +23,7 @@ describe('Hierarchy Rendering', () => {
       rotate: jest.fn(),
       fillRect: jest.fn(),
       beginPath: jest.fn(),
+      stroke: jest.fn(),
       arc: jest.fn(),
       fill: jest.fn(),
       closePath: jest.fn(),

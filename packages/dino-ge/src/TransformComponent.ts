@@ -14,6 +14,7 @@ export default class TransformComponent extends Component {
   get position(): Vector2 { return this._position; }
   set position(val: Vector2) {
     this._position = val;
+    this._position.onChange = this.onLocalTransformChange.bind(this);
     this.setDirty();
   }
 
@@ -28,6 +29,7 @@ export default class TransformComponent extends Component {
   get scale(): Vector2 { return this._scale; }
   set scale(val: Vector2) {
     this._scale = val;
+    this._scale.onChange = this.onLocalTransformChange.bind(this);
     this.setDirty();
   }
 
@@ -41,6 +43,21 @@ export default class TransformComponent extends Component {
   private _worldPosition: Vector2 = new Vector2(0, 0);
   private _worldRotation: number = 0;
   private _worldScale: Vector2 = new Vector2(1, 1);
+
+  constructor() {
+    super();
+    this._position.onChange = this.onLocalTransformChange.bind(this);
+    this._scale.onChange = this.onLocalTransformChange.bind(this);
+    this.setDirty();
+  }
+
+  /**
+   * Internal callback for when local vectors are modified.
+   * @private
+   */
+  private onLocalTransformChange() {
+    this.setDirty();
+  }
 
   /**
    * Sets this transform and all its children as dirty, forcing a recalculation 

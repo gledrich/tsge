@@ -44,6 +44,12 @@ export default class RenderingSystem extends System {
     this.ctx.scale(Engine.camera.zoom, Engine.camera.zoom);
     this.ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
 
+    // Update sorted cache if dirty
+    if (Engine.zOrderDirty || !Engine.sortedObjects) {
+      Engine.sortedObjects = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
+      Engine.zOrderDirty = false;
+    }
+
     // Draw Debug Collisions (Briefly)
     if (debug && Engine.showCollisionLines) {
       const now = Date.now();
@@ -87,10 +93,7 @@ export default class RenderingSystem extends System {
       });
     }
 
-    // Sort entities by zIndex for correct draw order
-    const sorted = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
-
-    sorted.forEach((object) => {
+    Engine.sortedObjects.forEach((object) => {
       const { worldPosition, worldScale } = object.transform;
       const width = (object.bounds?.width ?? 0) * worldScale.x;
       const height = (object.bounds?.height ?? 0) * worldScale.y;

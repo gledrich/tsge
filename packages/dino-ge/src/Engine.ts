@@ -69,12 +69,14 @@ export interface EngineState {
   debugCollisions: { manifold: CollisionManifold, timestamp: number }[];
   showPhysicsVectors: boolean;
   showCollisionLines: boolean;
+  zOrderDirty: boolean;
+  sortedObjects: GameObject[];
 }
 
 /**
  * Shared state for the engine to ensure singletons work across different module loads.
  */
-const INITIAL_STATE: EngineState = {
+const createInitialState = (): EngineState => ({
   objects: new ObjectSet(),
   paused: false,
   debug: false,
@@ -85,8 +87,10 @@ const INITIAL_STATE: EngineState = {
   currentScene: null,
   debugCollisions: [],
   showPhysicsVectors: false,
-  showCollisionLines: false
-};
+  showCollisionLines: false,
+  zOrderDirty: true,
+  sortedObjects: []
+});
 
 /**
  * The core singleton class that manages the game loop, rendering, and scene state.
@@ -96,9 +100,17 @@ export default class Engine {
   private static get _state(): EngineState {
     const global = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
     if (!global.__DINO_ENGINE_STATE__) {
-      global.__DINO_ENGINE_STATE__ = INITIAL_STATE;
+      global.__DINO_ENGINE_STATE__ = createInitialState();
     }
     return global.__DINO_ENGINE_STATE__;
+  }
+
+  /**
+   * Resets the engine state to its initial values.
+   * Useful for testing to prevent state bleed between test cases.
+   */
+  public static resetState() {
+    (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__ = createInitialState();
   }
 
   /**
@@ -122,6 +134,9 @@ export default class Engine {
    */
   public static get debugCollisions(): { manifold: CollisionManifold, timestamp: number }[] {
     return this._state.debugCollisions;
+  }
+  public static set debugCollisions(val: { manifold: CollisionManifold, timestamp: number }[]) {
+    this._state.debugCollisions = val;
   }
 
   /**
@@ -197,6 +212,18 @@ export default class Engine {
   public static set selectedObject(val: GameObject | null) { this._state.selectedObject = val; }
 
   /**
+   * Whether the global object list needs to be re-sorted by z-index.
+   */
+  public static get zOrderDirty(): boolean { return this._state.zOrderDirty; }
+  public static set zOrderDirty(val: boolean) { this._state.zOrderDirty = val; }
+
+  /**
+   * The cached list of globally registered game objects, sorted by z-index.
+   */
+  public static get sortedObjects(): GameObject[] { return this._state.sortedObjects; }
+  public static set sortedObjects(val: GameObject[]) { this._state.sortedObjects = val; }
+
+  /**
    * The global camera instance.
    */
   public static get camera(): Camera { return this._state.camera; }
@@ -213,6 +240,7 @@ export default class Engine {
    */
   public static set currentScene(scene: Scene | null) {
     this._state.currentScene = scene;
+    this.zOrderDirty = true;
     if (scene) {
       this.camera.reset();
       scene.onLoad();
@@ -513,6 +541,7 @@ export default class Engine {
    * @param object The object to register.
    */
   static registerObject(object: GameObject) {
+    this.zOrderDirty = true;
     if (Engine.currentScene) {
       Engine.currentScene.add(object);
     } else {
@@ -525,6 +554,7 @@ export default class Engine {
    * @param object The object to destroy.
    */
   static destroyObject(object: GameObject) {
+    this.zOrderDirty = true;
     if (this.selectedObject === object) {
       this.selectedObject = null;
     }
@@ -538,6 +568,7 @@ export default class Engine {
 
   /** Destroy all objects in the active scene or global engine. */
   static destroyAll() {
+    this.zOrderDirty = true;
     if (Engine.currentScene) {
       Engine.currentScene.clear();
     } else {

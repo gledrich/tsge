@@ -5,7 +5,6 @@ import Vector2 from './Vector2';
 import PhysicsComponent from './PhysicsComponent';
 import BoundsComponent from './BoundsComponent';
 import RenderingSystem from './RenderingSystem';
-import Camera from './Camera';
 import System from './System';
 
 class MockScene extends Scene {
@@ -42,21 +41,8 @@ describe('Engine', () => {
 
   beforeEach(() => {
     // Reset global shared state manually
-    const globalObj = globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState };
-    globalObj.__DINO_ENGINE_STATE__ = {
-      objects: new ObjectSet(),
-      paused: false,
-      debug: false,
-      selectedObject: null,
-      camera: new Camera(),
-      systems: [],
-      events: new EventTarget(),
-      currentScene: null,
-      debugCollisions: [],
-      showPhysicsVectors: false,
-      showCollisionLines: false
-    };
-
+    Engine.resetState();
+    Engine.renderingSystem = undefined;
     // Mock Canvas and Context
     mockCtx = {
       fillRect: jest.fn(),
@@ -497,5 +483,30 @@ describe('Engine', () => {
     expect(Engine.showCollisionLines).toBe(false);
     Engine.showCollisionLines = true;
     expect(Engine.showCollisionLines).toBe(true);
+  });
+
+  it('manages z-order dirty flag and sorted cache', () => {
+    Engine.resetState();
+    expect(Engine.zOrderDirty).toBe(true);
+    
+    const obj1 = new MockGameObject('obj1', 10);
+    Engine.registerObject(obj1);
+    expect(Engine.zOrderDirty).toBe(true);
+    
+    // Simulate RenderingSystem clearing the flag
+    Engine.sortedObjects = [obj1];
+    Engine.zOrderDirty = false;
+    
+    const obj2 = new MockGameObject('obj2', 5);
+    Engine.registerObject(obj2);
+    expect(Engine.zOrderDirty).toBe(true);
+    
+    Engine.zOrderDirty = false;
+    Engine.destroyObject(obj1);
+    expect(Engine.zOrderDirty).toBe(true);
+    
+    Engine.zOrderDirty = false;
+    obj2.metadata.zIndex = 20;
+    expect(Engine.zOrderDirty).toBe(true);
   });
 });

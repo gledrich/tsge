@@ -2,14 +2,33 @@
  * Class representing a 2D vector or point.
  */
 export default class Vector2 {
+  private _x: number;
+  private _y: number;
+
+  /** Optional callback fired when x or y is modified. */
+  public onChange?: () => void;
+
   /** X coordinate. */
-  x: number;
+  get x(): number { return this._x; }
+  set x(val: number) {
+    if (this._x !== val) {
+      this._x = val;
+      this.onChange?.();
+    }
+  }
+
   /** Y coordinate. */
-  y: number;
+  get y(): number { return this._y; }
+  set y(val: number) {
+    if (this._y !== val) {
+      this._y = val;
+      this.onChange?.();
+    }
+  }
 
   constructor(x: number = 0, y: number = 0) {
-    this.x = x;
-    this.y = y;
+    this._x = x;
+    this._y = y;
   }
 
   /**
