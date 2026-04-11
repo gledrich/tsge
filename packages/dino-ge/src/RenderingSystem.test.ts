@@ -363,9 +363,7 @@ describe('RenderingSystem', () => {
   });
 
   it('early returns from update if state is missing', () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const system = new RenderingSystem(ctx);
+    const system = new RenderingSystem(mockCtx);
     
     const g = globalThis as unknown as Record<string, unknown>;
     const originalState = g.__DINO_ENGINE_STATE__;
