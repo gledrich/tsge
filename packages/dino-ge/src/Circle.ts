@@ -33,12 +33,15 @@ export default class Circle extends GameObject {
   /** Fill colour. */
   colour: string;
 
-  /** Center point of the circle. */
+  /** Center point of the circle in world space. */
   get center(): Vector2 {
-    return new Vector2(
-      this.transform.position.x + this.radius,
-      this.transform.position.y + this.radius
-    );
+    const r = this.radius * this.transform.worldScale.x;
+    return this.transform.worldPosition.add(new Vector2(r, r));
+  }
+
+  /** Radius of the circle in world space. */
+  get worldRadius(): number {
+    return this.radius * this.transform.worldScale.x;
   }
 
   constructor(props: CircleProps) {

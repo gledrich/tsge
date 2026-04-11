@@ -14,7 +14,7 @@ export interface CollisionManifold {
   obj2: GameObject;
   /** Normalized direction of the collision from obj1 to obj2. */
   normal: Vector2;
-  /** Penetration depth. */
+  /** Penetration depth in world space. */
   depth: number;
 }
 
@@ -49,7 +49,10 @@ export default class Physics {
   }
 
   private static circleVsCircle(c1: Circle, c2: Circle): CollisionManifold | null {
-    const combinedRadius = c1.radius + c2.radius;
+    const r1 = c1.worldRadius;
+    const r2 = c2.worldRadius;
+    const combinedRadius = r1 + r2;
+    
     const diff = c2.center.clone().subtract(c1.center);
     const distSq = diff.x * diff.x + diff.y * diff.y;
 
@@ -67,15 +70,17 @@ export default class Physics {
   }
 
   private static aabbVsAabb(obj1: GameObject, obj2: GameObject): CollisionManifold | null {
-    const w1 = obj1.bounds?.width ?? 0;
-    const h1 = obj1.bounds?.height ?? 0;
-    const w2 = obj2.bounds?.width ?? 0;
-    const h2 = obj2.bounds?.height ?? 0;
+    const scale1 = obj1.transform.worldScale;
+    const scale2 = obj2.transform.worldScale;
+    const w1 = (obj1.bounds?.width ?? 0) * scale1.x;
+    const h1 = (obj1.bounds?.height ?? 0) * scale1.y;
+    const w2 = (obj2.bounds?.width ?? 0) * scale2.x;
+    const h2 = (obj2.bounds?.height ?? 0) * scale2.y;
 
-    const pos1 = obj1.transform.position;
-    const pos2 = obj2.transform.position;
+    const pos1 = obj1.transform.worldPosition;
+    const pos2 = obj2.transform.worldPosition;
 
-    // Center to center distance
+    // Center to center distance in world space
     const center1 = new Vector2(pos1.x + w1 / 2, pos1.y + h1 / 2);
     const center2 = new Vector2(pos2.x + w2 / 2, pos2.y + h2 / 2);
     const diff = center2.clone().subtract(center1);
@@ -106,17 +111,21 @@ export default class Physics {
   }
 
   private static circleVsRect(circle: Circle, rect: GameObject): CollisionManifold | null {
-    const rectWidth = rect.bounds?.width ?? 0;
-    const rectHeight = rect.bounds?.height ?? 0;
-    const rectPos = rect.transform.position;
+    const cRadius = circle.worldRadius;
+    const cCenter = circle.center;
 
-    const closestX = Math.max(rectPos.x, Math.min(circle.center.x, rectPos.x + rectWidth));
-    const closestY = Math.max(rectPos.y, Math.min(circle.center.y, rectPos.y + rectHeight));
+    const rScale = rect.transform.worldScale;
+    const rectWidth = (rect.bounds?.width ?? 0) * rScale.x;
+    const rectHeight = (rect.bounds?.height ?? 0) * rScale.y;
+    const rectPos = rect.transform.worldPosition;
 
-    const diff = new Vector2(closestX, closestY).subtract(circle.center);
+    const closestX = Math.max(rectPos.x, Math.min(cCenter.x, rectPos.x + rectWidth));
+    const closestY = Math.max(rectPos.y, Math.min(cCenter.y, rectPos.y + rectHeight));
+
+    const diff = new Vector2(closestX, closestY).subtract(cCenter);
     const distSq = diff.x * diff.x + diff.y * diff.y;
 
-    if (distSq > circle.radius * circle.radius) return null;
+    if (distSq > cRadius * cRadius) return null;
 
     const dist = Math.sqrt(distSq);
     let normal: Vector2;
@@ -124,14 +133,13 @@ export default class Physics {
 
     if (dist === 0) {
       // Circle center is inside the rectangle
-      const center = circle.center;
-      const dLeft = center.x - rectPos.x;
-      const dRight = rectPos.x + rectWidth - center.x;
-      const dTop = center.y - rectPos.y;
-      const dBottom = rectPos.y + rectHeight - center.y;
+      const dLeft = cCenter.x - rectPos.x;
+      const dRight = rectPos.x + rectWidth - cCenter.x;
+      const dTop = cCenter.y - rectPos.y;
+      const dBottom = rectPos.y + rectHeight - cCenter.y;
 
       const minDist = Math.min(dLeft, dRight, dTop, dBottom);
-      depth = circle.radius + minDist;
+      depth = cRadius + minDist;
 
       if (minDist === dLeft) normal = new Vector2(-1, 0);
       else if (minDist === dRight) normal = new Vector2(1, 0);
@@ -139,7 +147,7 @@ export default class Physics {
       else normal = new Vector2(0, 1);
     } else {
       normal = diff.multiply(1 / dist);
-      depth = circle.radius - dist;
+      depth = cRadius - dist;
     }
 
     return {
@@ -190,6 +198,7 @@ export default class Physics {
     const correctionMagnitude = (Math.max(depth - slop, 0) / ((isStatic1 ? 0 : 1) + (isStatic2 ? 0 : 1))) * percent;
     const correction = normal.clone().multiply(correctionMagnitude);
 
+    // Apply correction to LOCAL position based on world normal
     if (!isStatic1) obj1.transform.position.subtract(correction);
     if (!isStatic2) obj2.transform.position.add(correction);
 

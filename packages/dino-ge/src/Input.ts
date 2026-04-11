@@ -25,41 +25,46 @@ export default class Input {
     this.isInitialized = true;
 
     document.addEventListener('mousemove', (event: MouseEvent) => {
-      this.mousePosition.x = event.clientX;
-      this.mousePosition.y = event.clientY;
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      if (canvas && typeof canvas.getBoundingClientRect === 'function') {
+        const rect = canvas.getBoundingClientRect();
+        this.mousePosition.x = event.clientX - rect.left;
+        this.mousePosition.y = event.clientY - rect.top;
+      } else {
+        this.mousePosition.x = event.clientX;
+        this.mousePosition.y = event.clientY;
+      }
 
       if (this.isResizing && Engine.selectedObject && Engine.debug) {
         const obj = Engine.selectedObject;
         const { worldPosition } = obj.transform;
-        const newWidth = Math.max(5, this.mouseX - worldPosition.x);
-        const newHeight = Math.max(5, this.mouseY - worldPosition.y);
+        const scale = obj.transform.scale || new Vector2(1, 1);
+        const worldWidth = Math.max(5, this.mouseX - worldPosition.x);
+        const worldHeight = Math.max(5, this.mouseY - worldPosition.y);
 
         const sprite = obj.getComponent(SpriteComponent);
         if (sprite && sprite.frameWidth > 0 && sprite.frameHeight > 0) {
-          // Update scale to match the new desired bounds
-          obj.transform.scale.x = newWidth / sprite.frameWidth;
-          obj.transform.scale.y = newHeight / sprite.frameHeight;
-          
-          // Sync bounds immediately
-          if (obj.bounds) {
-            obj.bounds.width = newWidth;
-            obj.bounds.height = newHeight;
-          }
+          // Resizing sprites changes their transform scale
+          obj.transform.scale.x = worldWidth / sprite.frameWidth;
+          obj.transform.scale.y = worldHeight / sprite.frameHeight;
         } else {
-          // Check for ShapeComponent or TextComponent which have width/height props
+          // Resizing other components changes their local dimensions
+          // We must compensate for current scale so that: localDim * scale = worldWidth
+          const localWidth = worldWidth / scale.x;
+          const localHeight = worldHeight / scale.y;
+
           const shape = obj.getComponent(ShapeComponent);
           const text = obj.getComponent(TextComponent);
 
           if (shape) {
-            shape.width = newWidth;
-            shape.height = newHeight;
+            shape.width = localWidth;
+            shape.height = localHeight;
           } else if (text) {
-            text.width = newWidth;
-            text.height = newHeight;
+            text.width = localWidth;
+            text.height = localHeight;
           } else if (obj.bounds) {
-            // Fallback for objects without these specific components
-            obj.bounds.width = newWidth;
-            obj.bounds.height = newHeight;
+            obj.bounds.width = localWidth;
+            obj.bounds.height = localHeight;
           }
         }
         return;
@@ -81,9 +86,10 @@ export default class Input {
       // Cursor feedback for resize handle
       if (Engine.debug && Engine.selectedObject && !this.isDragging && !this.isResizing) {
         const obj = Engine.selectedObject;
-        const width = obj.bounds?.width ?? 0;
-        const height = obj.bounds?.height ?? 0;
         const { worldPosition } = obj.transform;
+        const worldScale = obj.transform.worldScale || new Vector2(1, 1);
+        const width = (obj.bounds?.width ?? 0) * worldScale.x;
+        const height = (obj.bounds?.height ?? 0) * worldScale.y;
         const handleSize = 8 / Engine.camera.zoom;
         const worldPos = new Vector2(this.mouseX, this.mouseY);
 
@@ -116,9 +122,10 @@ export default class Input {
         // First check if we're clicking the resize handle of the ALREADY selected object
         if (Engine.selectedObject) {
           const obj = Engine.selectedObject;
-          const width = obj.bounds?.width ?? 0;
-          const height = obj.bounds?.height ?? 0;
           const { worldPosition } = obj.transform;
+          const worldScale = obj.transform.worldScale || new Vector2(1, 1);
+          const width = (obj.bounds?.width ?? 0) * worldScale.x;
+          const height = (obj.bounds?.height ?? 0) * worldScale.y;
           const handleSize = 8 / Engine.camera.zoom;
 
           if (
@@ -142,9 +149,10 @@ export default class Input {
           const obj = sorted[i];
           if (!obj.bounds) continue;
           
-          const width = obj.bounds.width;
-          const height = obj.bounds.height;
           const { worldPosition } = obj.transform;
+          const worldScale = obj.transform.worldScale || new Vector2(1, 1);
+          const width = obj.bounds.width * worldScale.x;
+          const height = obj.bounds.height * worldScale.y;
           if (
             worldPos.x > worldPosition.x &&
             worldPos.x < worldPosition.x + width &&
