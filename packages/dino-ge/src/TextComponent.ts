@@ -19,22 +19,30 @@ export default class TextComponent extends RenderComponent {
   /** Vertical alignment. */
   verticalAlign: VerticalAlign;
 
-  private _width: number;
-  private _height: number;
-
   /** Width of the background box or interaction area. */
-  get width(): number { return this._width; }
+  get width(): number {
+    return this.gameObject?.bounds?.width ?? this._initialWidth;
+  }
   set width(val: number) {
-    this._width = val;
-    this._updateGameObjectBounds();
+    this._initialWidth = val;
+    if (this.gameObject?.bounds) {
+      this.gameObject.bounds.width = val;
+    }
   }
 
   /** Height of the background box or interaction area. */
-  get height(): number { return this._height; }
-  set height(val: number) {
-    this._height = val;
-    this._updateGameObjectBounds();
+  get height(): number {
+    return this.gameObject?.bounds?.height ?? this._initialHeight;
   }
+  set height(val: number) {
+    this._initialHeight = val;
+    if (this.gameObject?.bounds) {
+      this.gameObject.bounds.height = val;
+    }
+  }
+
+  private _initialWidth: number;
+  private _initialHeight: number;
 
   constructor(
     text: string,
@@ -52,28 +60,29 @@ export default class TextComponent extends RenderComponent {
     this.colour = colour;
     this.horizontalAlign = horizontalAlign;
     this.verticalAlign = verticalAlign;
-    this._width = width;
-    this._height = height;
+    this._initialWidth = width;
+    this._initialHeight = height;
     this.backgroundColour = backgroundColour;
   }
 
   /**
    * Ensures the parent GameObject has a BoundsComponent synced with this component.
+   * Note: Bounds represent the BASE local size (unscaled).
    */
   private _updateGameObjectBounds() {
     if (!this.gameObject) return;
 
     if (!this.gameObject.bounds) {
-      this.gameObject.bounds = new BoundsComponent(this._width, this._height);
+      this.gameObject.bounds = new BoundsComponent(this._initialWidth, this._initialHeight);
       this.gameObject.addComponent(this.gameObject.bounds);
     } else {
-      this.gameObject.bounds.width = this._width;
-      this.gameObject.bounds.height = this._height;
+      this.gameObject.bounds.width = this._initialWidth;
+      this.gameObject.bounds.height = this._initialHeight;
     }
   }
 
   /**
-   * Lifecycle hook called by GameObject when component is added.
+   * Lifecycle hook called when the component is added to a GameObject.
    */
   onAttach() {
     this._updateGameObjectBounds();
@@ -84,9 +93,10 @@ export default class TextComponent extends RenderComponent {
    * @param ctx The canvas 2D rendering context.
    */
   draw(ctx: CanvasRenderingContext2D) {
-    if (!this.gameObject) return;
+    if (!this.gameObject || !this.gameObject.bounds) return;
 
     const { worldPosition, worldRotation, worldScale } = this.gameObject.transform;
+    const { width, height } = this.gameObject.bounds;
 
     ctx.save();
     ctx.translate(worldPosition.x, worldPosition.y);
@@ -98,8 +108,8 @@ export default class TextComponent extends RenderComponent {
       ctx.fillRect(
         0,
         0,
-        this._width,
-        this._height
+        width,
+        height
       );
     }
 
@@ -107,11 +117,18 @@ export default class TextComponent extends RenderComponent {
     ctx.fillStyle = this.colour;
     ctx.textAlign = this.horizontalAlign;
     ctx.textBaseline = this.verticalAlign;
-    ctx.fillText(
-      this.text,
-      this._width / 2,
-      this._height / 2
-    );
+
+    // Calculate draw position based on alignment
+    let x = 0;
+    let y = 0;
+
+    if (this.horizontalAlign === 'center') x = width / 2;
+    else if (this.horizontalAlign === 'right' || this.horizontalAlign === 'end') x = width;
+
+    if (this.verticalAlign === 'middle') y = height / 2;
+    else if (this.verticalAlign === 'bottom') y = height;
+
+    ctx.fillText(this.text, x, y);
     
     ctx.restore();
   }

@@ -144,10 +144,9 @@ describe('Sprite', () => {
     const sprite = new Sprite({ ...mockProps, scale: 2 });
     expect(sprite.transform.scale.x).toBe(2);
     expect(sprite.transform.scale.y).toBe(2);
-    // mockImg width is 100, cols is 10, so frameWidth is 10.
-    // with scale 2, bounds width should be 20.
-    expect(sprite.bounds!.width).toBe(20);
-    expect(sprite.bounds!.height).toBe(200); // 100 height / 1 row * 2 scale = 200
+    // Bounds width is now BASE local width (10). 
+    expect(sprite.bounds!.width).toBe(10);
+    expect(sprite.bounds!.height).toBe(100);
   });
 
   it('defaults scale to 1 and calculates bounds', () => {
@@ -157,12 +156,13 @@ describe('Sprite', () => {
     expect(sprite.bounds!.height).toBe(100);
   });
 
-  it('updates bounds when scale is changed via setter', () => {
+  it('updates transform scale when scale is changed via setter', () => {
     const sprite = new Sprite(mockProps);
     sprite.scale = 5;
     expect(sprite.transform.scale.x).toBe(5);
-    expect(sprite.bounds!.width).toBe(50);
-    expect(sprite.bounds!.height).toBe(500);
+    // Bounds remain base size
+    expect(sprite.bounds!.width).toBe(10);
+    expect(sprite.bounds!.height).toBe(100);
   });
 
   it('handles Vector2 scale in setter', () => {
@@ -172,16 +172,16 @@ describe('Sprite', () => {
     expect(sprite.scale.y).toBe(3);
     expect(sprite.transform.scale.x).toBe(2);
     expect(sprite.transform.scale.y).toBe(3);
-    expect(sprite.bounds!.width).toBe(20);
-    expect(sprite.bounds!.height).toBe(300);
+    expect(sprite.bounds!.width).toBe(10);
+    expect(sprite.bounds!.height).toBe(100);
   });
 
   it('handles scale as Vector2 in constructor', () => {
     const sprite = new Sprite({ ...mockProps, scale: new Vector2(4, 5) });
     expect(sprite.transform.scale.x).toBe(4);
     expect(sprite.transform.scale.y).toBe(5);
-    expect(sprite.bounds!.width).toBe(40);
-    expect(sprite.bounds!.height).toBe(500);
+    expect(sprite.bounds!.width).toBe(10);
+    expect(sprite.bounds!.height).toBe(100);
   });
 
   it('updates bounds when image finishes loading', () => {
@@ -217,10 +217,15 @@ describe('Sprite', () => {
 
   it('does nothing in _updateBounds if bounds is missing', () => {
     const sprite = new Sprite(mockProps);
-    delete sprite.bounds;
-    // Calling setter which calls _updateBounds
+    delete (sprite as unknown as { bounds?: unknown }).bounds;
     expect(() => {
-      sprite.scale = 2;
+      (sprite as unknown as { _updateBounds: () => void })._updateBounds();
     }).not.toThrow();
+  });
+
+  it('manually calling _updateBounds with existing bounds', () => {
+    const sprite = new Sprite(mockProps);
+    (sprite as unknown as { _updateBounds: () => void })._updateBounds();
+    expect(sprite.bounds!.width).toBe(10);
   });
 });

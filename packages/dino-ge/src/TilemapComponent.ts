@@ -24,6 +24,7 @@ export default class TilemapComponent extends RenderComponent {
 
   /**
    * Ensures the parent GameObject has a BoundsComponent synced with this tilemap.
+   * Note: Bounds represent the BASE local size (unscaled).
    */
   private _updateGameObjectBounds() {
     if (!this.gameObject) return;
@@ -41,7 +42,7 @@ export default class TilemapComponent extends RenderComponent {
   }
 
   /**
-   * Lifecycle hook called by GameObject when component is added.
+   * Lifecycle hook called when the component is added to a GameObject.
    */
   onAttach() {
     this._updateGameObjectBounds();

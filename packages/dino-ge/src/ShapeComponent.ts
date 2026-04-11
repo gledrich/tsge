@@ -15,56 +15,82 @@ export default class ShapeComponent extends RenderComponent {
   /** Fill colour. */
   colour: string;
 
-  private _width: number;
-  private _height: number;
-
   /** Width (for rect) or radius (for circle). */
-  get width(): number { return this._width; }
+  get width(): number {
+    if (this.gameObject?.bounds) {
+      if (this.type === 'circle') {
+        return this.gameObject.bounds.width / 2;
+      }
+      return this.gameObject.bounds.width;
+    }
+    return this._initialWidth;
+  }
+
   set width(val: number) {
-    this._width = val;
-    this._updateGameObjectBounds();
+    this._initialWidth = val;
+    if (this.gameObject?.bounds) {
+      if (this.type === 'circle') {
+        this.gameObject.bounds.width = val * 2;
+        this.gameObject.bounds.height = val * 2;
+      } else {
+        this.gameObject.bounds.width = val;
+      }
+    }
   }
 
   /** Height (for rect) or unused (for circle). */
-  get height(): number { return this._height; }
-  set height(val: number) {
-    this._height = val;
-    this._updateGameObjectBounds();
+  get height(): number {
+    if (this.gameObject?.bounds) {
+      return this.gameObject.bounds.height;
+    }
+    return this._initialHeight;
   }
+
+  set height(val: number) {
+    this._initialHeight = val;
+    if (this.gameObject?.bounds) {
+      this.gameObject.bounds.height = val;
+    }
+  }
+
+  private _initialWidth: number;
+  private _initialHeight: number;
 
   constructor(type: ShapeType, colour: string, width: number = 0, height: number = 0) {
     super();
     this.type = type;
     this.colour = colour;
-    this._width = width;
-    this._height = height;
+    this._initialWidth = width;
+    this._initialHeight = height;
   }
 
   /**
    * Ensures the parent GameObject has a BoundsComponent synced with this shape.
+   * Note: Bounds represent the BASE local size (unscaled).
    */
   private _updateGameObjectBounds() {
     if (!this.gameObject) return;
 
-    let targetWidth = this._width;
-    let targetHeight = this._height;
-
-    if (this.type === 'circle') {
-      targetWidth = this._width * 2;
-      targetHeight = this._width * 2;
-    }
-
     if (!this.gameObject.bounds) {
+      let targetWidth = this._initialWidth;
+      let targetHeight = this._initialHeight;
+
+      if (this.type === 'circle') {
+        targetWidth = this._initialWidth * 2;
+        targetHeight = this._initialWidth * 2;
+      }
+
       this.gameObject.bounds = new BoundsComponent(targetWidth, targetHeight);
       this.gameObject.addComponent(this.gameObject.bounds);
     } else {
-      this.gameObject.bounds.width = targetWidth;
-      this.gameObject.bounds.height = targetHeight;
+      // Sync initial values if bounds already exist
+      this.width = this._initialWidth;
+      this.height = this._initialHeight;
     }
   }
 
   /**
-   * Lifecycle hook called by GameObject when component is added.
+   * Lifecycle hook called when the component is added to a GameObject.
    */
   onAttach() {
     this._updateGameObjectBounds();
@@ -75,9 +101,10 @@ export default class ShapeComponent extends RenderComponent {
    * @param ctx The canvas 2D rendering context.
    */
   draw(ctx: CanvasRenderingContext2D) {
-    if (!this.gameObject) return;
+    if (!this.gameObject || !this.gameObject.bounds) return;
 
     const { worldPosition, worldRotation, worldScale } = this.gameObject.transform;
+    const { width, height } = this.gameObject.bounds;
     
     ctx.save();
     ctx.translate(worldPosition.x, worldPosition.y);
@@ -87,11 +114,12 @@ export default class ShapeComponent extends RenderComponent {
     ctx.fillStyle = this.colour;
 
     if (this.type === 'rect') {
-      ctx.fillRect(0, 0, this._width, this._height);
+      ctx.fillRect(0, 0, width, height);
     } else if (this.type === 'circle') {
+      const radius = width / 2;
       ctx.beginPath();
-      // width is radius. In local space center is at (radius, radius)
-      ctx.arc(this._width, this._width, this._width, 0, Math.PI * 2);
+      // In local space center is at (radius, radius)
+      ctx.arc(radius, radius, radius, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();
     }

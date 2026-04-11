@@ -87,7 +87,6 @@ export default class Sprite extends GameObject {
     } else {
       this.transform.scale = val;
     }
-    this._updateBounds();
   }
 
   constructor(props: SpriteProps) {
@@ -134,13 +133,14 @@ export default class Sprite extends GameObject {
   }
 
   /**
-   * Updates the bounds of the sprite based on its current frame size and scale.
+   * Updates the bounds of the sprite based on its current frame size.
+   * Note: Bounds represent the BASE local size (unscaled).
    * @private
    */
   private _updateBounds() {
     if (this.bounds) {
-      this.bounds.width = this.frameWidth * this.transform.scale.x;
-      this.bounds.height = this.frameHeight * this.transform.scale.y;
+      this.bounds.width = this.frameWidth;
+      this.bounds.height = this.frameHeight;
     }
   }
 

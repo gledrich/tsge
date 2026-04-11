@@ -91,9 +91,9 @@ export default class RenderingSystem extends System {
     const sorted = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
 
     sorted.forEach((object) => {
-      const { worldPosition } = object.transform;
-      const width = object.bounds?.width ?? 0;
-      const height = object.bounds?.height ?? 0;
+      const { worldPosition, worldScale } = object.transform;
+      const width = (object.bounds?.width ?? 0) * worldScale.x;
+      const height = (object.bounds?.height ?? 0) * worldScale.y;
 
       // Frustum Culling
       if (

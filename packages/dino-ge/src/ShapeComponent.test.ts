@@ -31,7 +31,7 @@ describe('ShapeComponent', () => {
     const component = new ShapeComponent('rect', 'green', 10, 20);
     const obj = new MockGameObject('test', 0);
     obj.transform.position = new Vector2(100, 100);
-    component.gameObject = obj;
+    obj.addComponent(component); // automatically creates bounds 10x20
 
     const mockCtx = {
       save: jest.fn(),
@@ -54,7 +54,7 @@ describe('ShapeComponent', () => {
   it('draws a circle to the context', () => {
     const component = new ShapeComponent('circle', 'yellow', 15);
     const obj = new MockGameObject('test', 0);
-    component.gameObject = obj;
+    obj.addComponent(component); // automatically creates bounds 30x30
 
     const mockCtx = {
       save: jest.fn(),
@@ -89,11 +89,24 @@ describe('ShapeComponent', () => {
     expect(mockCtx.save).not.toHaveBeenCalled();
   });
 
+  it('early returns from draw if no bounds is attached', () => {
+    const component = new ShapeComponent('rect', 'red', 10, 10);
+    const obj = new MockGameObject('test', 0);
+    component.gameObject = obj; // Manual set bypasses onAttach bounds creation
+    const mockCtx = {
+      save: jest.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    component.draw(mockCtx);
+
+    expect(mockCtx.save).not.toHaveBeenCalled();
+  });
+
   it('applies rotation during draw', () => {
     const component = new ShapeComponent('rect', 'green', 10, 20);
     const obj = new MockGameObject('test', 0);
+    obj.addComponent(component);
     obj.transform.rotation = Math.PI / 2;
-    component.gameObject = obj;
 
     const mockCtx = {
       save: jest.fn(),
@@ -116,7 +129,7 @@ describe('ShapeComponent', () => {
     (component as unknown as { type: string }).type = 'invalid';
     
     const obj = new MockGameObject('test', 0);
-    component.gameObject = obj;
+    obj.addComponent(component);
 
     const mockCtx = {
       save: jest.fn(),
@@ -149,13 +162,36 @@ describe('ShapeComponent', () => {
     expect(obj.bounds!.width).toBe(100);
     expect(obj.bounds!.height).toBe(50);
     
-    // Updating component width should update bounds
     component.width = 200;
     expect(obj.bounds!.width).toBe(200);
 
     // Updating component height should update bounds
     component.height = 300;
     expect(obj.bounds!.height).toBe(300);
+  });
+
+  it('handles setters when attached to bounds', () => {
+    const obj = new MockGameObject('test', 0);
+    const component = new ShapeComponent('rect', 'red', 10, 10);
+    obj.addComponent(component);
+    
+    // Test width getter/setter on attached rect
+    component.width = 50;
+    expect(component.width).toBe(50);
+    expect(obj.bounds!.width).toBe(50);
+    
+    // Test height getter/setter on attached rect
+    component.height = 60;
+    expect(component.height).toBe(60);
+    expect(obj.bounds!.height).toBe(60);
+
+    const circleComp = new ShapeComponent('circle', 'blue', 10);
+    obj.addComponent(circleComp);
+    
+    // Test width getter/setter on attached circle (as radius)
+    circleComp.width = 20; // Radius 20 -> Width 40
+    expect(circleComp.width).toBe(20);
+    expect(obj.bounds!.width).toBe(40);
   });
 
   it('updates existing BoundsComponent on GameObject', () => {
@@ -189,5 +225,25 @@ describe('ShapeComponent', () => {
     expect(() => {
       (component as unknown as { _updateGameObjectBounds: () => void })._updateGameObjectBounds();
     }).not.toThrow();
+  });
+
+  it('handles setters when attached to object WITHOUT bounds', () => {
+    const obj = new MockGameObject('test', 0);
+    const component = new ShapeComponent('rect', 'red', 10, 10);
+    component.gameObject = obj; // Manual set bypasses onAttach bounds creation
+    
+    expect(() => {
+      component.width = 50;
+      component.height = 60;
+    }).not.toThrow();
+  });
+
+  it('handles setters when completely unattached', () => {
+    const component = new ShapeComponent('rect', 'red', 10, 10);
+    expect(() => {
+      component.width = 50;
+      component.height = 60;
+    }).not.toThrow();
+    expect(component.width).toBe(50);
   });
 });
