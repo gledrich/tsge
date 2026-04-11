@@ -17,9 +17,13 @@ export interface AbstractConstructor<T> {
  * Base class for all entities in the game world.
  */
 export default abstract class GameObject {
+  /** Unique identifier for the game object. */
   public readonly id: string = Math.random().toString(36).substring(2, 9);
   private _components: Map<string, Component> = new Map();
 
+  /**
+   * The transform component for this object, managing position and scale.
+   */
   public get transform(): TransformComponent {
     let transform = this.getComponent(TransformComponent);
     if (!transform) {
@@ -29,6 +33,9 @@ export default abstract class GameObject {
     return transform;
   }
 
+  /**
+   * The tag component for this object, managing its name and rendering order.
+   */
   public get metadata(): TagComponent {
     let tag = this.getComponent(TagComponent);
     if (!tag) {
@@ -38,10 +45,16 @@ export default abstract class GameObject {
     return tag;
   }
 
+  /**
+   * The bounds component for this object, defining its physical area.
+   */
   public get bounds(): BoundsComponent | undefined {
     return this.getComponent(BoundsComponent);
   }
 
+  /**
+   * Sets the bounds component for this object.
+   */
   public set bounds(val: BoundsComponent | undefined) {
     if (val) {
       this.addComponent(val);
@@ -50,12 +63,22 @@ export default abstract class GameObject {
     }
   }
 
+  /**
+   * Initializes a new instance of a GameObject.
+   * @param tag A descriptive name for the object.
+   * @param zIndex The rendering order (higher numbers are drawn on top).
+   */
   constructor(tag: string = 'obj', zIndex: number = 0) {
     this.addComponent(new TagComponent(tag, zIndex));
     this.addComponent(new TransformComponent());
   }
 
-  on(type: string, callback: (event: CustomEvent) => void) {
+  /**
+   * Listens for an event on this object's event bus.
+   * @param type The event type.
+   * @param callback The function to run when the event occurs.
+   */
+  public on(type: string, callback: (event: CustomEvent) => void) {
     let bus = this.getComponent(EventBusComponent);
     if (!bus) {
       bus = new EventBusComponent();
@@ -64,15 +87,29 @@ export default abstract class GameObject {
     bus.on(type, callback);
   }
 
-  off(type: string, callback: (event: CustomEvent) => void) {
+  /**
+   * Stops listening for an event on this object's event bus.
+   * @param type The event type.
+   * @param callback The function to remove.
+   */
+  public off(type: string, callback: (event: CustomEvent) => void) {
     this.getComponent(EventBusComponent)?.off(type, callback);
   }
 
-  emit(type: string, detail?: unknown) {
+  /**
+   * Emits a custom event on this object's event bus.
+   * @param type The event type.
+   * @param detail Optional data to pass with the event.
+   */
+  public emit(type: string, detail?: unknown) {
     this.getComponent(EventBusComponent)?.emit(type, detail);
   }
 
-  addComponent(component: Component) {
+  /**
+   * Adds a component to this game object.
+   * @param component The component instance to add.
+   */
+  public addComponent(component: Component) {
     component.gameObject = this;
     let proto = Object.getPrototypeOf(component);
     while (proto && proto.constructor.name !== 'Object') {
@@ -84,7 +121,11 @@ export default abstract class GameObject {
     component.onAttach?.();
   }
 
-  removeComponent<T extends Component>(componentClass: AbstractConstructor<T>) {
+  /**
+   * Removes a component from this game object by its class.
+   * @param componentClass The class of the component to remove.
+   */
+  public removeComponent<T extends Component>(componentClass: AbstractConstructor<T>) {
     const component = this.getComponent(componentClass);
     if (!component) return;
     for (const [key, value] of this._components.entries()) {
@@ -94,22 +135,38 @@ export default abstract class GameObject {
     }
   }
 
-  hasComponent<T extends Component>(componentClass: AbstractConstructor<T>): boolean {
+  /**
+   * Checks if this object has a component of the specified class.
+   * @param componentClass The class to check for.
+   * @returns True if the component exists.
+   */
+  public hasComponent<T extends Component>(componentClass: AbstractConstructor<T>): boolean {
     return this._components.has(componentClass.name);
   }
 
-  getComponent<T extends Component>(componentClass: AbstractConstructor<T>): T | undefined {
+  /**
+   * Retrieves a component from this object by its class.
+   * @param componentClass The class of the component to retrieve.
+   * @returns The component instance, or undefined if not found.
+   */
+  public getComponent<T extends Component>(componentClass: AbstractConstructor<T>): T | undefined {
     return this._components.get(componentClass.name) as T;
   }
 
-  registerSelf() {
+  /**
+   * Registers this object with the active scene or global engine loop.
+   */
+  public registerSelf() {
     Registry.registerObject(this);
   }
 
   /** Static helper for tests to bypass Registry circularity if mocked. */
   static _registry = Registry;
 
-  destroySelf() {
+  /**
+   * Removes this object from the active scene or global engine loop.
+   */
+  public destroySelf() {
     GameObject._registry.destroyObject(this);
   }
 }

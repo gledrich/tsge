@@ -8,23 +8,37 @@ export default abstract class Scene {
   /** The set of game objects currently in the scene. */
   public objects: Set<GameObject> = new Set();
 
-  /** Called when the scene is loaded. */
-  onLoad(): void {}
-  /** Called every frame to update the scene. */
-  update(): void {}
+  /**
+   * Called once when the scene becomes active.
+   * Useful for initializing scene-specific objects.
+   */
+  public onLoad(): void {}
 
-  /** Adds an object to the scene. */
-  add(object: GameObject) {
+  /**
+   * Called every frame to update game logic within the scene.
+   */
+  public update(): void {}
+
+  /**
+   * Adds a game object to the scene.
+   * @param object The object to add.
+   */
+  public add(object: GameObject) {
     this.objects.add(object);
   }
 
-  /** Removes an object from the scene. */
-  remove(object: GameObject) {
+  /**
+   * Removes a game object from the scene.
+   * @param object The object to remove.
+   */
+  public remove(object: GameObject) {
     this.objects.delete(object);
   }
 
-  /** Clears all objects from the scene. */
-  clear() {
+  /**
+   * Removes all objects from the scene.
+   */
+  public clear() {
     this.objects.clear();
   }
 }

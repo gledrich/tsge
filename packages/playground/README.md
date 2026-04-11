@@ -2,6 +2,8 @@
 
 Interactive, live-editing playground and inspector for the **Dino GE** game engine.
 
+![Dino GE Playground Preview](assets/preview.png)
+
 ⚠️ **This project is in alpha** ⚠️
 
 ## Installation
@@ -22,16 +24,21 @@ Once running, access the editor and inspector at `http://localhost:3000`.
 
 ### Features
 
-- **Live Code Editor:** Modify your game logic in real-time with an integrated Ace editor.
-- **Property Inspector:** Inspect and adjust game object properties while the engine is running.
-- **Hot Refresh:** Automatically apply changes to your scripts.
-- **Integrated Console:** Debug output directly in the playground UI.
-- **Snippet Library:** Quick access to standard Dino GE object templates.
+- **Monaco Code Editor:** Modify your game logic in real-time with an integrated Monaco editor (the engine behind VS Code).
+  ![Monaco Editor](assets/editor.png)
+- **Property Inspector:** Toggle the UI to inspect and adjust game object properties in real-time.
+  ![Property Inspector](assets/inspector.png)
+- **Debug Mode:** Visualize collision boxes, velocity vectors, and engine state.
+- **Hot Refresh:** Quickly apply changes to your code (`Ctrl + Enter` or click the refresh icon).
+- **Play/Pause Controls:** Easily manage the engine loop state during development.
+- **Auto-Formatting:** Integrated Prettier support for clean, consistent code.
 
 ### Script Storage
 
-The playground saves your scripts (e.g., `script.js`) directly in the directory where the command is executed.
+The playground automatically creates and manages a `scripts/` directory in the folder where the command is executed. All your JavaScript game scripts are stored here.
 
 ## License
 
 MIT
+
+

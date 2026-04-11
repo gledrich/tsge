@@ -10,15 +10,18 @@ export default class Camera {
   /** Zoom level of the camera. */
   public zoom: number = 1;
 
+  /**
+   * Initializes a new instance of Camera.
+   */
   constructor() {}
 
   /**
-   * Center the camera on a target object.
+   * Centers the camera on a target object.
    * @param target The object to follow.
    * @param viewportWidth Width of the viewport.
    * @param viewportHeight Height of the viewport.
    */
-  follow(target: GameObject, viewportWidth: number, viewportHeight: number) {
+  public follow(target: GameObject, viewportWidth: number, viewportHeight: number) {
     const width = target.bounds?.width ?? 0;
     const height = target.bounds?.height ?? 0;
     this.position.x = (target.transform.position.x + width / 2) - (viewportWidth / 2) / this.zoom;
@@ -27,10 +30,11 @@ export default class Camera {
 
   /**
    * Returns the current viewport bounds in world space.
-   * @param width Width of the viewport.
-   * @param height Height of the viewport.
+   * @param width Width of the viewport in pixels.
+   * @param height Height of the viewport in pixels.
+   * @returns An object representing the x, y, width, and height of the visible area.
    */
-  getViewportBounds(width: number, height: number) {
+  public getViewportBounds(width: number, height: number) {
     return {
       x: this.position.x,
       y: this.position.y,
@@ -40,9 +44,9 @@ export default class Camera {
   }
 
   /**
-   * Reset camera position to origin and zoom to 1.
+   * Resets the camera position to the origin (0, 0) and zoom to 1.
    */
-  reset() {
+  public reset() {
     this.position.x = 0;
     this.position.y = 0;
     this.zoom = 1;

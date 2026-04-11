@@ -67,36 +67,36 @@ export default class Sprite extends GameObject {
 
   /** The pixel width of a single animation frame (calculated automatically). */
   get frameWidth(): number { return this._spriteComponent.frameWidth; }
-  /** The pixel height of a single animation frame (calculated automatically). */
-  get frameHeight(): number { return this._spriteComponent.frameHeight; }
+  /** Pixel height of a single animation frame (calculated automatically). */
+  public get frameHeight(): number { return this._spriteComponent.frameHeight; }
 
   /** Whether the sprite is currently registered with the engine. */
-  registered: boolean = false;
+  public registered: boolean = false;
 
   /** The current frame index being displayed. */
-  get currentFrame(): number { return this._spriteComponent.currentFrame; }
-  set currentFrame(val: number) { 
+  public get currentFrame(): number { return this._spriteComponent.currentFrame; }
+  public set currentFrame(val: number) { 
     this._spriteComponent.currentFrame = val; 
     this._updateBounds();
   }
 
   /** Whether the sprite is horizontally flipped. */
-  get flip(): boolean { return this._spriteComponent.flip; }
-  set flip(val: boolean) { this._spriteComponent.flip = val; }
+  public get flip(): boolean { return this._spriteComponent.flip; }
+  public set flip(val: boolean) { this._spriteComponent.flip = val; }
 
   /** Duration of each animation frame in milliseconds. */
-  get frameDuration(): number { return this._spriteComponent.frameDuration; }
-  set frameDuration(val: number) { this._spriteComponent.frameDuration = val; }
+  public get frameDuration(): number { return this._spriteComponent.frameDuration; }
+  public set frameDuration(val: number) { this._spriteComponent.frameDuration = val; }
 
   /**
    * Gets or sets the scale of the sprite.
    * Returns the world-space scale of the transform.
    */
-  get scale(): Vector2 {
+  public get scale(): Vector2 {
     return this.transform.scale;
   }
 
-  set scale(val: number | Vector2) {
+  public set scale(val: number | Vector2) {
     if (typeof val === 'number') {
       this.transform.scale.set(val, val);
     } else {
@@ -104,6 +104,10 @@ export default class Sprite extends GameObject {
     }
   }
 
+  /**
+   * Initializes a new instance of a Sprite.
+   * @param props Configuration properties for the sprite.
+   */
   constructor(props: SpriteProps) {
     if (!props.tag) {
       throw new Error('You must provide a tag for a Sprite');

@@ -28,9 +28,13 @@ const defaultProps = {
  * A basic rectangle shape that can be drawn to the screen.
  */
 export default class Rectangle extends GameObject {
-  /** Fill colour. */
-  colour: string;
+  /** Fill colour (CSS colour string). */
+  public colour: string;
 
+  /**
+   * Initializes a new instance of a Rectangle.
+   * @param props Configuration properties for the rectangle.
+   */
   constructor(props: RectProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
     

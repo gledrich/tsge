@@ -33,14 +33,18 @@ const defaultProps = {
  */
 export default class Tilemap extends GameObject {
   /** The source image for the tileset. */
-  tileset: HTMLImageElement;
+  public tileset: HTMLImageElement;
   /** 2D array of tile indices. */
-  data: number[][];
+  public data: number[][];
   /** Tile size in pixels. */
-  tileSize: number;
+  public tileSize: number;
   /** Number of columns in the tileset image. */
-  tilesetCols: number;
+  public tilesetCols: number;
 
+  /**
+   * Initializes a new instance of a Tilemap.
+   * @param props Configuration properties for the tilemap.
+   */
   constructor(props: TilemapProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 

@@ -28,22 +28,30 @@ const defaultProps = {
  * A basic circle shape that can be drawn to the screen.
  */
 export default class Circle extends GameObject {
-  /** Radius of the circle. */
-  radius: number;
-  /** Fill colour. */
-  colour: string;
+  /** Radius of the circle in local space. */
+  public radius: number;
+  /** Fill colour (CSS colour string). */
+  public colour: string;
 
-  /** Center point of the circle in world space. */
-  get center(): Vector2 {
+  /**
+   * The center point of the circle in world space.
+   */
+  public get center(): Vector2 {
     const r = this.radius * this.transform.worldScale.x;
     return this.transform.worldPosition.add(new Vector2(r, r));
   }
 
-  /** Radius of the circle in world space. */
-  get worldRadius(): number {
+  /**
+   * The radius of the circle in world space (accounting for scale).
+   */
+  public get worldRadius(): number {
     return this.radius * this.transform.worldScale.x;
   }
 
+  /**
+   * Initializes a new instance of a Circle.
+   * @param props Configuration properties for the circle.
+   */
   constructor(props: CircleProps) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 

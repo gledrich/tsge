@@ -75,42 +75,49 @@ export default class Text extends GameObject {
   set colour(val: string) { this._textComponent.colour = val; }
 
   /** Background box colour. */
-  get backgroundColour(): string { return this._textComponent.backgroundColour; }
-  set backgroundColour(val: string) { this._textComponent.backgroundColour = val; }
+  public get backgroundColour(): string { return this._textComponent.backgroundColour; }
+  public set backgroundColour(val: string) { this._textComponent.backgroundColour = val; }
 
   /** Font size in pixels. */
-  fontSize: number;
+  public fontSize: number;
 
   /** Compiled font string (e.g., '25px Helvetica'). */
-  get font(): string { return this._textComponent.font; }
-  set font(val: string) { this._textComponent.font = val; }
+  public get font(): string { return this._textComponent.font; }
+  public set font(val: string) { this._textComponent.font = val; }
 
   /** The text content. */
-  get text(): string { return this._textComponent.text; }
-  set text(val: string) {
+  public get text(): string { return this._textComponent.text; }
+  public set text(val: string) {
     this._textComponent.text = val;
     this.length = val.length;
   }
 
-  /** Number of characters in the text. */
-  length: number;
+  /** Number of characters in the text string. */
+  public length: number;
 
-  /** Horizontal alignment. */
-  get horizontalAlign(): HorizontalAlign { return this._textComponent.horizontalAlign; }
-  set horizontalAlign(val: HorizontalAlign) { this._textComponent.horizontalAlign = val; }
+  /** Horizontal alignment ('left', 'center', 'right'). */
+  public get horizontalAlign(): HorizontalAlign { return this._textComponent.horizontalAlign; }
+  public set horizontalAlign(val: HorizontalAlign) { this._textComponent.horizontalAlign = val; }
 
-  /** Vertical alignment. */
-  get verticalAlign(): VerticalAlign { return this._textComponent.verticalAlign; }
-  set verticalAlign(val: VerticalAlign) { this._textComponent.verticalAlign = val; }
+  /** Vertical alignment ('top', 'middle', 'bottom'). */
+  public get verticalAlign(): VerticalAlign { return this._textComponent.verticalAlign; }
+  public set verticalAlign(val: VerticalAlign) { this._textComponent.verticalAlign = val; }
 
-  /** Whether the object should be registered. */
-  register: boolean = true;
-  /** Whether the object is currently registered. */
-  registered: boolean = false;
+  /** Whether the object should be automatically registered with the engine. */
+  public register: boolean = true;
+  /** Whether the object is currently registered with the engine. */
+  public registered: boolean = false;
 
-  /** Callback for click events. */
-  onClick: () => void = function defaultOnClick() {};
+  /** 
+   * Callback function for click events.
+   * Only triggered if the object is registered.
+   */
+  public onClick: () => void = function defaultOnClick() {};
 
+  /**
+   * Initializes a new instance of a Text object.
+   * @param props Configuration properties for the text.
+   */
   constructor(props: TextProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 

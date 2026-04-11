@@ -228,35 +228,44 @@ export default class Engine {
   private _resizeHandler: () => void;
 
   /** Current background colour. */
-  backgroundColour: string;
+  public backgroundColour: string;
   /** Registered engine callbacks. */
-  callbacks: EngineCallbacks;
+  public callbacks: EngineCallbacks;
 
   /** Pixel width of the canvas. */
-  width: number;
+  public width: number;
   /** Pixel height of the canvas. */
-  height: number;
+  public height: number;
 
-  /** Current mouse x position in world space. */
-  get mouseX() {
+  /**
+   * Current mouse x position in world space.
+   */
+  public get mouseX(): number {
     return Input.mouseX;
   }
 
-  /** Current mouse y position in world space. */
-  get mouseY() {
+  /**
+   * Current mouse y position in world space.
+   */
+  public get mouseY(): number {
     return Input.mouseY;
   }
 
   /** Current frames per second (rolling average). */
-  fps: number = 0;
+  public fps: number = 0;
   /** Current frame time in milliseconds. */
-  frameTime: number = 0;
+  public frameTime: number = 0;
   private _oldTimestamp: number = 0;
   private _secondsPassed: number = 0;
   private _accumulator: number = 0;
   private _fixedDelta: number = 1 / 60;
   private _fpsValues: number[] = [];
 
+  /**
+   * Initializes a new instance of the Engine.
+   * @param callbacks Lifecycle and update callbacks.
+   * @param opts Configuration options for the engine.
+   */
   constructor(callbacks: EngineCallbacks, opts: Partial<EngineOpts> = {}) {
     // Terminate existing engine if any
     const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine };
@@ -497,26 +506,35 @@ export default class Engine {
 
   /**
    * Schedules a function to run after a delay.
+   * @param callback The function to run.
+   * @param delay The delay in milliseconds.
+   * @returns A timer ID.
    */
-  setTimeout(callback: () => void, delay: number): number {
+  public setTimeout(callback: () => void, delay: number): number {
     return window.setTimeout(callback, delay);
   }
 
   /**
-   * Starts a countdown timer.
+   * Starts a countdown timer that runs a function every second and an ending function.
+   * @param milliseconds The total duration of the countdown.
+   * @param fn The function to run every second.
+   * @param onEnded The function to run when the countdown is finished.
    */
-  countdown(milliseconds: number, fn: () => void, onEnded: () => void) {
-    setTimeout(onEnded, milliseconds);
+  public countdown(milliseconds: number, fn: () => void, onEnded: () => void) {
+    this.setTimeout(onEnded, milliseconds);
 
     for (let i = 1; i <= milliseconds; i += 1) {
       if (i % 1000 === 0) {
-        setTimeout(fn, i);
+        this.setTimeout(fn, i);
       }
     }
   }
 
-  /** Sets the CSS cursor style for the game canvas. */
-  set cursor(value: string) {
+  /**
+   * Sets the CSS cursor style for the game canvas.
+   * @param value The CSS cursor value (e.g., 'pointer', 'crosshair').
+   */
+  public set cursor(value: string) {
     const canvas = document.getElementById('canvas');
     if (canvas) canvas.style.cursor = value;
   }
@@ -525,7 +543,7 @@ export default class Engine {
    * Registers a game object with the active scene or global engine loop.
    * @param object The object to register.
    */
-  static registerObject(object: GameObject) {
+  public static registerObject(object: GameObject) {
     Registry.registerObject(object);
   }
 
@@ -533,12 +551,14 @@ export default class Engine {
    * Removes a game object from the active scene or global engine loop.
    * @param object The object to destroy.
    */
-  static destroyObject(object: GameObject) {
+  public static destroyObject(object: GameObject) {
     Registry.destroyObject(object);
   }
 
-  /** Destroy all objects in the active scene or global engine. */
-  static destroyAll() {
+  /**
+   * Destroy all objects in the active scene or global engine.
+   */
+  public static destroyAll() {
     this.zOrderDirty = true;
     if (Engine.currentScene) {
       Engine.currentScene.clear();

@@ -27,6 +27,11 @@ export default class Vector2 {
     }
   }
 
+  /**
+   * Initializes a new instance of Vector2.
+   * @param x Initial x coordinate.
+   * @param y Initial y coordinate.
+   */
   constructor(x: number = 0, y: number = 0) {
     this._x = x;
     this._y = y;
@@ -38,7 +43,7 @@ export default class Vector2 {
    * @param y New y coordinate.
    * @returns This vector for chaining.
    */
-  set(x: number, y: number): this {
+  public set(x: number, y: number): this {
     if (this._x !== x || this._y !== y) {
       this._x = x;
       this._y = y;
@@ -52,7 +57,7 @@ export default class Vector2 {
    * @param other The vector to copy from.
    * @returns This vector for chaining.
    */
-  copy(other: Vector2): this {
+  public copy(other: Vector2): this {
     return this.set(other.x, other.y);
   }
 
@@ -62,7 +67,7 @@ export default class Vector2 {
    * @param v2 Second vector.
    * @returns The distance between v1 and v2.
    */
-  static distance(v1: Vector2, v2: Vector2): number {
+  public static distance(v1: Vector2, v2: Vector2): number {
     const dx = v1.x - v2.x;
     const dy = v1.y - v2.y;
     return Math.sqrt(dx * dx + dy * dy);
@@ -72,18 +77,24 @@ export default class Vector2 {
    * Calculates the dot product of two vectors.
    * @param v1 First vector.
    * @param v2 Second vector.
+   * @returns The dot product of v1 and v2.
    */
-  static dot(v1: Vector2, v2: Vector2): number {
+  public static dot(v1: Vector2, v2: Vector2): number {
     return v1.x * v2.x + v1.y * v2.y;
   }
 
-  /** Returns the length of the vector. */
-  get magnitude(): number {
+  /**
+   * The length (magnitude) of the vector.
+   */
+  public get magnitude(): number {
     return Math.sqrt(this._x * this._x + this._y * this._y);
   }
 
-  /** Returns a new normalized (unit length) version of this vector. */
-  get normalized(): Vector2 {
+  /**
+   * A new normalized (unit length) version of this vector.
+   * Does not mutate the original vector.
+   */
+  public get normalized(): Vector2 {
     const mag = this.magnitude;
     if (mag === 0) return new Vector2(0, 0);
     return new Vector2(this._x / mag, this._y / mag);
@@ -93,7 +104,7 @@ export default class Vector2 {
    * Normalizes this vector in place.
    * @returns This vector for chaining.
    */
-  normalize(): this {
+  public normalize(): this {
     const mag = this.magnitude;
     if (mag !== 0) {
       this.multiply(1 / mag);
@@ -103,9 +114,10 @@ export default class Vector2 {
 
   /** 
    * Adds another vector to this one (mutates). 
+   * @param other The vector to add.
    * @returns This vector for chaining.
    */
-  add(other: Vector2): this {
+  public add(other: Vector2): this {
     this.x += other.x;
     this.y += other.y;
     return this;
@@ -113,9 +125,10 @@ export default class Vector2 {
 
   /** 
    * Subtracts another vector from this one (mutates). 
+   * @param other The vector to subtract.
    * @returns This vector for chaining.
    */
-  subtract(other: Vector2): this {
+  public subtract(other: Vector2): this {
     this.x -= other.x;
     this.y -= other.y;
     return this;
@@ -123,16 +136,20 @@ export default class Vector2 {
 
   /** 
    * Multiplies this vector by a scalar (mutates). 
+   * @param scalar The value to multiply by.
    * @returns This vector for chaining.
    */
-  multiply(scalar: number): this {
+  public multiply(scalar: number): this {
     this.x *= scalar;
     this.y *= scalar;
     return this;
   }
 
-  /** Returns a copy of this vector. */
-  clone(): Vector2 {
+  /**
+   * Creates a new vector with the same x and y values as this one.
+   * @returns A new Vector2 instance.
+   */
+  public clone(): Vector2 {
     return new Vector2(this._x, this._y);
   }
 }

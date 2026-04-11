@@ -28,14 +28,18 @@ class MyGame {
   constructor() {
     new Engine({
       onLoad: () => this.onLoad(),
-      update: (dt) => this.onUpdate(dt)
+      update: () => this.onUpdate()
+    }, {
+      title: 'My Game',
+      width: '100%',
+      height: '100%'
     });
   }
 
   onLoad() {
     const player = new Sprite({
       tag: 'player',
-      img: 'player',
+      img: 'player', // Asset tag from ResourceLoader
       rows: 1,
       cols: 4,
       position: new Vector2(400, 300),
@@ -45,7 +49,7 @@ class MyGame {
     player.play();
   }
 
-  onUpdate(dt: number) {
+  onUpdate() {
     // Game logic here
   }
 }

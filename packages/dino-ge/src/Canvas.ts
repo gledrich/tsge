@@ -4,12 +4,16 @@
  */
 export default class Canvas {
   /** The underlying HTMLCanvasElement. */
-  canvas: HTMLCanvasElement;
+  public canvas: HTMLCanvasElement;
   /** Optional callback fired when the canvas resizes. */
-  onResize?: () => void;
+  public onResize?: () => void;
 
   private _resizeObserver?: ResizeObserver;
 
+  /**
+   * Initializes a new instance of Canvas.
+   * @param parentElement Optional HTML element to inject the canvas into.
+   */
   constructor(parentElement?: HTMLElement) {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'canvas';
@@ -37,7 +41,7 @@ export default class Canvas {
    * Resizes the canvas to match its container or window dimensions.
    * @param parent Optional parent element to match size with.
    */
-  resize(parent?: HTMLElement) {
+  public resize(parent?: HTMLElement) {
     if (parent) {
       this.canvas.width = parent.clientWidth;
       this.canvas.height = parent.clientHeight;
@@ -52,9 +56,9 @@ export default class Canvas {
   }
 
   /**
-   * Cleans up resources.
+   * Completely removes the canvas element and cleans up its observers.
    */
-  destroy() {
+  public destroy() {
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }

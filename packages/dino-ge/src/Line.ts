@@ -31,20 +31,24 @@ const defaultProps = {
  * A basic line object that can be drawn between two points.
  */
 export default class Line extends GameObject {
-  /** Stroke width of the line. */
-  strokeWidth: number;
-  /** Start x coordinate. */
-  x1: number;
-  /** Start y coordinate. */
-  y1: number;
-  /** End x coordinate. */
-  x2: number;
-  /** End y coordinate. */
-  y2: number;
+  /** Stroke width of the line in pixels. */
+  public strokeWidth: number;
+  /** Start x coordinate in world space. */
+  public x1: number;
+  /** Start y coordinate in world space. */
+  public y1: number;
+  /** End x coordinate in world space. */
+  public x2: number;
+  /** End y coordinate in world space. */
+  public y2: number;
 
-  /** Gets the starting position of the line. */
-  get startPosition() { return new Vector2(this.x1, this.y1); }
+  /** Gets the starting position of the line as a Vector2. */
+  public get startPosition(): Vector2 { return new Vector2(this.x1, this.y1); }
 
+  /**
+   * Initializes a new instance of a Line.
+   * @param props Configuration properties for the line.
+   */
   constructor(props: LineProperties) {
     super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
 
