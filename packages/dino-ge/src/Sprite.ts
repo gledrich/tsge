@@ -113,11 +113,11 @@ export default class Sprite extends GameObject {
     );
     this.addComponent(this._spriteComponent);
 
-    const scale = props.scale !== undefined ? props.scale : 1;
-    if (typeof scale === 'number') {
-      this.transform.scale = new Vector2(scale, scale);
+    const initialScale = props.scale !== undefined ? props.scale : 1;
+    if (typeof initialScale === 'number') {
+      this.transform.scale = new Vector2(initialScale, initialScale);
     } else {
-      this.transform.scale = scale;
+      this.transform.scale = initialScale;
     }
 
     this.bounds = new BoundsComponent(0, 0);

@@ -6,13 +6,12 @@ A lightweight, performant 2D game engine built from the ground up in TypeScript.
 
 ## Features
 
-- **Composition-based Architecture:** Flexible `GameObject` system for managing game entities.
-- **Built-in Physics:** Integrated 2D physics with support for AABB collision detection.
-- **Rendering System:** High-performance canvas-based rendering for sprites, tilemaps, and primitives.
-- **Input Management:** Easy-to-use handling for keyboard and mouse events.
-- **Asset Loading:** Efficient resource management and preloading for textures and images.
-- **Camera System:** Dynamic camera with support for zooming and following.
-- **TypeScript Native:** Full type safety and modern ES module support.
+- **Composition-based ECS:** Built around a flexible Entity Component System for modular game design.
+- **Hierarchical Transform System:** Supports complex parent-child relationships with nested position, rotation, and scaling.
+- **Pixel-Perfect Sprite Animation:** Efficiently handles spritesheets with automatic frame calculation and smooth playback.
+- **Robust 2D Physics:** Impulse-based resolution with support for AABB and Circle collision primitives.
+- **Customisable Camera:** Built-in support for following targets, world-to-viewport coordinate mapping, and smooth zooming.
+- **Playground Integration:** Seamlessly compatible with the Dino GE Playground for rapid prototyping and live editing.
 
 ## Installation
 
@@ -23,30 +22,16 @@ npm install dino-ge
 ## Quick Start
 
 ```typescript
-import { Engine, Scene, Sprite, Vector2, Loader } from 'dino-ge';
+import { Engine, Sprite, Vector2 } from 'dino-ge';
 
-const engine = new Engine(
-  {
-    onLoad: async () => {
-      // Load assets
-      Loader.queueImage('player', 'assets/player.png');
-      await Loader.loadAll();
-
-      // Create and set scene
-      const scene = new MyGameScene();
-      Engine.currentScene = scene;
-    },
-    update: () => {
-      // Global update logic
-    }
-  },
-  {
-    title: 'My Dino Game',
-    backgroundColour: '#264653'
+class MyGame {
+  constructor() {
+    new Engine({
+      onLoad: () => this.onLoad(),
+      update: (dt) => this.onUpdate(dt)
+    });
   }
-);
 
-class MyGameScene extends Scene {
   onLoad() {
     const player = new Sprite({
       tag: 'player',
@@ -58,6 +43,10 @@ class MyGameScene extends Scene {
       scale: 3
     });
     player.play();
+  }
+
+  onUpdate(dt: number) {
+    // Game logic here
   }
 }
 ```

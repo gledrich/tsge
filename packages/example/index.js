@@ -191,7 +191,7 @@ class PlayScene extends Scene {
       text: 'Dino',
       fontSize: 12,
       colour: 'white',
-      position: new Vector2(-5, 20), // Compensated for parent scale: 3
+      position: new Vector2(-5, 20), // Centered below player
       width: 100,
       zIndex: 6
     });
