@@ -1,6 +1,6 @@
 {
   "name": "dino-ge-playground",
-  "version": "1.10.7",
+  "version": "1.10.8",
   "description": "Interactive, live-editing playground and inspector for Dino GE",
   "bin": {
     "dino-ge-playground": "server.js"
@@ -15,11 +15,12 @@
   "files": [
     "server.js",
     "dist/",
-    "scripts/"
+    "scripts/",
+    "assets/"
   ],
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
-    "dino-ge": "^1.10.7",
+    "dino-ge": "^1.10.8",
     "express": "^4.21.2",
     "monaco-editor": "^0.55.1",
     "prettier": "^3.8.1",
