@@ -9,14 +9,11 @@ import {
   Sprite,
   Scene,
   Circle,
-  Physics,
-  Loader as ResourceLoader,
-  Input,
-  Tilemap,
-  PhysicsComponent,
-  TransformComponent,
   VisibilityComponent,
-  Group
+  PhysicsComponent,
+  Input,
+  GameObject,
+  Loader as ResourceLoader
 } from 'dino-ge';
 
 class MenuScene extends Scene {
@@ -31,25 +28,33 @@ class MenuScene extends Scene {
 
     new Text({
       tag: 'title',
-      text: 'Dino Survival',
-      fontSize: 60,
-      colour: 'white',
-      position: new Vector2(this.game.width / 2 - 250, 150),
+      text: 'DINO SURVIVAL',
+      fontSize: 64,
+      colour: '#43aa8b',
+      position: new Vector2(this.game.width / 2 - 250, 100),
       width: 500,
       zIndex: 10
     });
 
     new Text({
-      tag: 'startBtn',
-      text: 'Click to Start',
-      fontSize: 30,
-      colour: '#43aa8b',
-      backgroundColour: 'white',
-      position: new Vector2(this.game.width / 2 - 100, 350),
-      width: 200,
-      height: 60,
+      tag: 'start-btn',
+      text: 'CLICK TO START',
+      fontSize: 32,
+      colour: 'white',
+      position: new Vector2(this.game.width / 2 - 150, 300),
+      width: 300,
       zIndex: 10,
       onClick: () => this.onStart()
+    });
+
+    new Text({
+      tag: 'controls',
+      text: 'WASD to Move - SPACE to Shoot',
+      fontSize: 20,
+      colour: '#a0a0a0',
+      position: new Vector2(this.game.width / 2 - 150, 450),
+      width: 300,
+      zIndex: 10
     });
   }
 }
@@ -62,82 +67,42 @@ class PlayScene extends Scene {
     super();
     this.game = game;
     this.onGameOver = onGameOver;
-    this.starsFar = [];
-    this.starsMid = [];
-    this.starsNear = [];
-    this.meteors = [];
-    this.fireballs = [];
-    this.particles = [];
-    this.startTime = Date.now();
-    this.lastShotTime = 0;
-    this.shotCooldown = 250; // ms
     this.score = 0;
     this.lives = 3;
+    this.lastShotTime = 0;
+    this.shotCooldown = 250;
+    this.lastMeteorSpawn = 0;
     this.isInvulnerable = false;
-    this.invulnerabilityDuration = 1500; // 1.5s
+    this.invulnerabilityDuration = 2000;
     this.lastHitTime = 0;
+    this.highScore = parseInt(localStorage.getItem('dinoHighScore') || '0', 10);
+    this.startTime = Date.now();
+
+    this.fireballs = [];
+    this.meteors = [];
+    this.particles = [];
+    this.starsMid = [];
+    this.starsNear = [];
+
     this.shakeIntensity = 0;
     this.shakeDecay = 0.9;
-    this.highScore = parseInt(localStorage.getItem('dinoHighScore') || '0', 10);
   }
 
   onLoad() {
     this.game.cursor = 'none';
+    this.startTime = Date.now();
 
-    // Generate a programmatic Grid Tile for the Tilemap
-    const c = document.createElement('canvas');
-    c.width = 100;
-    c.height = 100;
-    const ctx = c.getContext('2d');
-    ctx.strokeStyle = 'rgba(67, 170, 139, 0.15)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, 100, 100);
-    const gridImg = new Image();
-    gridImg.src = c.toDataURL();
+    // Background Layers (Hierarchical)
+    const background = new GameObject('background', -10);
+    this.add(background);
 
-    // 20x20 grid of tile index 0
-    const mapData = Array(20)
-      .fill(0)
-      .map(() => Array(20).fill(0));
+    const midStarsLayer = new GameObject('stars-mid', -5);
+    background.transform.addChild(midStarsLayer.transform);
 
-    new Tilemap({
-      tag: 'grid',
-      tileset: gridImg,
-      data: mapData,
-      tileSize: 100,
-      tilesetCols: 1,
-      position: new Vector2(0, 0),
-      zIndex: -1 // Behind everything
-    });
+    const nearStarsLayer = new GameObject('stars-near', -2);
+    background.transform.addChild(nearStarsLayer.transform);
 
-    // Group Stars for a cleaner Scene Explorer
-    this.starsContainer = new Group('stars-root', 0);
-
-    const farStarsLayer = new Group('stars-far', 0);
-    const midStarsLayer = new Group('stars-mid', 1);
-    const nearStarsLayer = new Group('stars-near', 2);
-
-    this.starsContainer.transform.addChild(farStarsLayer.transform);
-    this.starsContainer.transform.addChild(midStarsLayer.transform);
-    this.starsContainer.transform.addChild(nearStarsLayer.transform);
-
-    // Distant Stars (Static-ish, very faint)
-    for (let i = 0; i < 200; i++) {
-      const star = new Rectangle({
-        position: new Vector2(
-          Math.random() * PlayScene.WORLD_WIDTH,
-          Math.random() * PlayScene.WORLD_HEIGHT
-        ),
-        width: 1,
-        height: 1,
-        colour: 'rgba(255, 255, 255, 0.1)',
-        zIndex: 0
-      });
-      farStarsLayer.transform.addChild(star.transform);
-      this.starsFar.push(star);
-    }
-
-    // Mid Stars (Moderate speed)
+    // Mid Stars (Slow, small)
     for (let i = 0; i < 100; i++) {
       const star = new Rectangle({
         position: new Vector2(
@@ -146,10 +111,10 @@ class PlayScene extends Scene {
         ),
         width: 2,
         height: 2,
-        colour: 'rgba(255, 255, 255, 0.4)',
+        colour: 'rgba(255, 255, 255, 0.5)',
         zIndex: 1
       });
-      star.speed = 0.5 + Math.random() * 1;
+      star.speed = 1 + Math.random() * 2;
       midStarsLayer.transform.addChild(star.transform);
       this.starsMid.push(star);
     }
@@ -189,14 +154,37 @@ class PlayScene extends Scene {
     this.player.addComponent(new PhysicsComponent());
     this.player.play();
 
+    // Auto-collision handling for player
+    this.player.on('collision', (e) => {
+      const { other } = e.detail;
+      if (other.metadata.tag === 'meteor' && !this.isInvulnerable) {
+        this.lives -= 1;
+        console.log(`Player hit! Lives remaining: ${this.lives}`);
+        this.livesText.text = `Lives: ${this.lives}`;
+        this.shakeIntensity = 20;
+
+        if (this.lives <= 0) {
+          const finalScore =
+            this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          this.onGameOver(finalScore);
+        } else {
+          this.isInvulnerable = true;
+          this.lastHitTime = Date.now();
+          this.spawnExplosion(this.player.transform.position, 20, '#F94144');
+          other.destroySelf();
+          this.meteors = this.meteors.filter((m) => m !== other);
+        }
+      }
+    });
+
     // Scene Graph Parenting
     // Create a name tag for the dino
     this.nameTag = new Text({
       tag: 'name-tag',
       text: 'Dino',
-      fontSize: 12,
+      fontSize: '12',
       colour: 'white',
-      position: new Vector2(-5, 20), // Centered below player
+      position: new Vector2(-5, 20), // Compensated for parent scale: 3
       width: 100,
       zIndex: 6
     });
@@ -204,35 +192,39 @@ class PlayScene extends Scene {
     this.player.transform.addChild(this.nameTag.transform);
 
     // Group UI elements under a container
-    this.uiContainer = new Group('ui-root', 10);
+    this.uiContainer = new GameObject('ui-root', 10);
+    this.add(this.uiContainer);
 
     this.scoreText = new Text({
       tag: 'score',
       text: 'Score: 0',
-      fontSize: 24,
+      fontSize: '24',
       colour: 'white',
       position: new Vector2(this.game.width / 2 - 75, 20),
       width: 150,
-      zIndex: 10
+      zIndex: 11
     });
+    this.uiContainer.transform.addChild(this.scoreText.transform);
 
     this.livesText = new Text({
       tag: 'lives',
-      text: 'Lives: 3',
-      fontSize: 24,
+      text: `Lives: ${this.lives}`,
+      fontSize: '24',
       colour: '#F94144',
-      position: new Vector2(20, 60),
-      width: 100,
-      zIndex: 10
+      position: new Vector2(20, 20),
+      width: 150,
+      zIndex: 11,
+      horizontalAlign: 'left'
     });
-
-    this.uiContainer.transform.addChild(this.scoreText.transform);
     this.uiContainer.transform.addChild(this.livesText.transform);
   }
 
   update() {
-    // Determine target velocity from keyboard
-    const moveSpeed = 200; // Reduced from 250/400
+    const playerTransform = this.player.transform;
+    const now = Date.now();
+
+    // Movement Logic
+    const moveSpeed = 400;
     let targetVX = 0;
     let targetVY = 0;
 
@@ -246,7 +238,6 @@ class PlayScene extends Scene {
     else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright'))
       targetVX = moveSpeed;
 
-    // Basic normalization if moving diagonally
     if (targetVX !== 0 && targetVY !== 0) {
       targetVX *= 0.707;
       targetVY *= 0.707;
@@ -256,39 +247,27 @@ class PlayScene extends Scene {
     playerPhysics.velocity.x = targetVX;
     playerPhysics.velocity.y = targetVY;
 
-    const playerTransform = this.player.getComponent(TransformComponent);
-
     // Bounds Checking
-    if (playerTransform.position.x < 0) playerTransform.position.x = 0;
-    if (
-      playerTransform.position.x >
-      PlayScene.WORLD_WIDTH - this.player.bounds.width
-    )
-      playerTransform.position.x =
-        PlayScene.WORLD_WIDTH - this.player.bounds.width;
-    if (playerTransform.position.y < 0) playerTransform.position.y = 0;
-    if (
-      playerTransform.position.y >
-      PlayScene.WORLD_HEIGHT - this.player.bounds.height
-    )
-      playerTransform.position.y =
-        PlayScene.WORLD_HEIGHT - this.player.bounds.height;
+    const pw = this.player.bounds ? this.player.bounds.width : 0;
+    const ph = this.player.bounds ? this.player.bounds.height : 0;
 
-    if (targetVX < 0) {
-      this.player.flip = true;
-    } else if (targetVX > 0) {
-      this.player.flip = false;
-    }
+    if (playerTransform.position.x < 0) playerTransform.position.x = 0;
+    if (playerTransform.position.x > PlayScene.WORLD_WIDTH - pw)
+      playerTransform.position.x = PlayScene.WORLD_WIDTH - pw;
+    if (playerTransform.position.y < 0) playerTransform.position.y = 0;
+    if (playerTransform.position.y > PlayScene.WORLD_HEIGHT - ph)
+      playerTransform.position.y = PlayScene.WORLD_HEIGHT - ph;
+
+    if (targetVX < 0) this.player.flip = true;
+    else if (targetVX > 0) this.player.flip = false;
 
     // Shooting System
-    const canShoot = Date.now() - this.lastShotTime > this.shotCooldown;
     const isShooting = Input.isKeyDown(' ') || Input.isKeyDown('mouse0');
-
-    if (canShoot && isShooting) {
+    if (now - this.lastShotTime > this.shotCooldown && isShooting) {
       const fireball = new Circle({
         position: new Vector2(
-          this.player.transform.position.x + this.player.bounds.width / 2 - 5,
-          this.player.transform.position.y
+          playerTransform.position.x + pw / 2 - 5,
+          playerTransform.position.y
         ),
         radius: 5,
         colour: '#FFB703',
@@ -296,37 +275,32 @@ class PlayScene extends Scene {
         tag: 'fireball'
       });
       fireball.addComponent(new PhysicsComponent());
-      fireball.getComponent(PhysicsComponent).velocity.y = -600; // Fast upwards
+      fireball.getComponent(PhysicsComponent).velocity.y = -600;
+
+      fireball.on('collision', (e) => {
+        const { other } = e.detail;
+        if (other.metadata.tag === 'meteor') {
+          this.spawnExplosion(
+            other.transform.position,
+            other.radius,
+            other.colour
+          );
+          other.destroySelf();
+          fireball.destroySelf();
+          this.score += 10;
+          this.shakeIntensity = Math.max(this.shakeIntensity, 5);
+          this.meteors = this.meteors.filter((m) => m !== other);
+          this.fireballs = this.fireballs.filter((fb) => fb !== fireball);
+        }
+      });
+
       this.fireballs.push(fireball);
-      this.lastShotTime = Date.now();
+      this.lastShotTime = now;
     }
 
     // Cleanup off-screen fireballs
     this.fireballs = this.fireballs.filter((fb) => {
       if (fb.transform.position.y < Engine.camera.position.y - 50) {
-        fb.destroySelf();
-        return false;
-      }
-      return true;
-    });
-
-    // Fireball Collision with Meteors
-    this.fireballs = this.fireballs.filter((fb) => {
-      let hit = false;
-      this.meteors = this.meteors.filter((m) => {
-        if (Physics.checkCollision(fb, m)) {
-          console.log(`Meteor destroyed! Score +10. Total: ${this.score + 10}`);
-          this.spawnExplosion(m.transform.position, m.radius, m.colour);
-          m.destroySelf();
-          this.score += 10;
-          this.shakeIntensity = Math.max(this.shakeIntensity, 5); // Small shake on destroy
-          hit = true;
-          return false;
-        }
-        return true;
-      });
-
-      if (hit) {
         fb.destroySelf();
         return false;
       }
@@ -359,39 +333,34 @@ class PlayScene extends Scene {
     if (this.isInvulnerable) {
       const visibility = this.player.getComponent(VisibilityComponent);
       if (visibility) {
-        // Flicker effect
-        visibility.visible = Math.floor(Date.now() / 100) % 2 === 0;
-
-        if (Date.now() - this.lastHitTime > this.invulnerabilityDuration) {
+        visibility.visible = Math.floor(now / 100) % 2 === 0;
+        if (now - this.lastHitTime > this.invulnerabilityDuration) {
           this.isInvulnerable = false;
           visibility.visible = true;
         }
       }
     }
 
-    // Keep UI fixed by moving the container with camera
+    // Fixed UI container
     this.uiContainer.transform.position.x = Engine.camera.position.x;
     this.uiContainer.transform.position.y = Engine.camera.position.y;
 
-    // Star drift (Parallax)
-    this.starsMid.forEach((star) => {
-      star.transform.position.y += star.speed;
-      if (star.transform.position.y > PlayScene.WORLD_HEIGHT)
-        star.transform.position.y = 0;
+    // Parallax
+    this.starsMid.forEach((s) => {
+      s.transform.position.y += s.speed;
+      if (s.transform.position.y > PlayScene.WORLD_HEIGHT)
+        s.transform.position.y = 0;
     });
-    this.starsNear.forEach((star) => {
-      star.transform.position.y += star.speed;
-      if (star.transform.position.y > PlayScene.WORLD_HEIGHT)
-        star.transform.position.y = 0;
+    this.starsNear.forEach((s) => {
+      s.transform.position.y += s.speed;
+      if (s.transform.position.y > PlayScene.WORLD_HEIGHT)
+        s.transform.position.y = 0;
     });
 
-    // Spawn Meteors (Spawn within camera view)
+    // Spawn Meteors
     if (Math.random() < 0.05) {
-      // Increased spawn rate
       const radius = 15 + Math.random() * 20;
-      const spawnX =
-        Engine.camera.position.x + Math.random() * this.game.width;
-
+      const spawnX = Engine.camera.position.x + Math.random() * this.game.width;
       const meteor = new Circle({
         position: new Vector2(spawnX, Engine.camera.position.y - 100),
         radius: radius,
@@ -399,58 +368,30 @@ class PlayScene extends Scene {
         zIndex: 4,
         tag: 'meteor'
       });
-      // Set initial velocity
       meteor.addComponent(new PhysicsComponent());
       const meteorPhys = meteor.getComponent(PhysicsComponent);
       meteorPhys.velocity.y = 100 + Math.random() * 200;
-      // Add small gravity
       meteorPhys.acceleration.y = 50;
       this.meteors.push(meteor);
     }
 
-    // Update Meteors & Collision
-    this.meteors = this.meteors.filter((meteor) => {
-      if (!this.isInvulnerable && Physics.checkCollision(this.player, meteor)) {
-        this.lives -= 1;
-        console.log(`Player hit! Lives remaining: ${this.lives}`);
-        this.livesText.text = `Lives: ${this.lives}`;
-        this.shakeIntensity = 20; // Big shake on hit
-
-        if (this.lives <= 0) {
-          const finalScore =
-            this.score + Math.floor((Date.now() - this.startTime) / 1000);
-          console.log(`Game Over! Final Score: ${finalScore}`);
-          if (finalScore > this.highScore) {
-            console.log(`New High Score: ${finalScore}!`);
-            localStorage.setItem('dinoHighScore', finalScore.toString());
-          }
-          this.onGameOver(finalScore);
-          return false;
-        } else {
-          this.isInvulnerable = true;
-          this.lastHitTime = Date.now();
-          this.spawnExplosion(this.player.transform.position, 20, '#F94144'); // Mini explosion on hit
-          return false; // Destroy the meteor that hit us
-        }
-      }
-
+    this.meteors = this.meteors.filter((m) => {
       if (
-        meteor.transform.position.y >
+        m.transform.position.y >
         Engine.camera.position.y + this.game.height + 100
       ) {
-        meteor.destroySelf();
+        m.destroySelf();
         return false;
       }
       return true;
     });
 
-    const timeScore = Math.floor((Date.now() - this.startTime) / 1000);
+    const timeScore = Math.floor((now - this.startTime) / 1000);
     this.scoreText.text = `Score: ${this.score + timeScore}`;
   }
 
   spawnExplosion(pos, radius, colour) {
-    const particleCount = 8;
-    for (let i = 0; i < particleCount; i++) {
+    for (let i = 0; i < 8; i++) {
       const p = new Circle({
         position: new Vector2(pos.x + radius, pos.y + radius),
         radius: 2 + Math.random() * 3,
@@ -462,7 +403,7 @@ class PlayScene extends Scene {
       const pPhys = p.getComponent(PhysicsComponent);
       pPhys.velocity.x = (Math.random() - 0.5) * 400;
       pPhys.velocity.y = (Math.random() - 0.5) * 400;
-      p.life = 1.0; // Life starts at 1.0 and fades
+      p.life = 1.0;
       this.particles.push(p);
     }
   }
@@ -483,7 +424,7 @@ class GameOverScene extends Scene {
     new Text({
       tag: 'gameOver',
       text: 'GAME OVER',
-      fontSize: 60,
+      fontSize: '60',
       colour: '#F94144',
       position: new Vector2(this.game.width / 2 - 200, 150),
       width: 400,
@@ -493,32 +434,43 @@ class GameOverScene extends Scene {
     new Text({
       tag: 'finalScore',
       text: `Score: ${this.score}`,
-      fontSize: 30,
+      fontSize: '30',
       colour: 'white',
-      position: new Vector2(this.game.width / 2 - 200, 230),
-      width: 400,
+      position: new Vector2(this.game.width / 2 - 100, 250),
+      width: 200,
       zIndex: 10
     });
 
-    new Text({
-      tag: 'highScore',
-      text: `Best: ${this.highScore}`,
-      fontSize: 24,
-      colour: '#FFB703',
-      position: new Vector2(this.game.width / 2 - 200, 280),
-      width: 400,
-      zIndex: 10
-    });
+    if (this.score > this.highScore) {
+      localStorage.setItem('dinoHighScore', this.score.toString());
+      new Text({
+        tag: 'newHigh',
+        text: 'NEW HIGH SCORE!',
+        fontSize: '24',
+        colour: '#FFB703',
+        position: new Vector2(this.game.width / 2 - 100, 300),
+        width: 200,
+        zIndex: 10
+      });
+    } else {
+      new Text({
+        tag: 'highScore',
+        text: `High Score: ${this.highScore}`,
+        fontSize: '24',
+        colour: '#a0a0a0',
+        position: new Vector2(this.game.width / 2 - 100, 300),
+        width: 200,
+        zIndex: 10
+      });
+    }
 
     new Text({
-      tag: 'restartBtn',
-      text: 'Try Again',
-      fontSize: 25,
-      colour: 'white',
-      backgroundColour: '#577590',
+      tag: 'restart-btn',
+      text: 'PLAY AGAIN',
+      fontSize: '32',
+      colour: '#43aa8b',
       position: new Vector2(this.game.width / 2 - 100, 400),
       width: 200,
-      height: 50,
       zIndex: 10,
       onClick: () => this.onRestart()
     });
@@ -544,7 +496,11 @@ class DinoSurvival {
         },
         update: () => {}
       },
-      { title: 'Dino Survival', backgroundColour: '#264653', containerId: 'playground-canvas-container' }
+      {
+        title: 'Dino Survival',
+        backgroundColour: '#264653',
+        containerId: 'playground-canvas-container'
+      }
     );
   }
 
@@ -567,6 +523,5 @@ class DinoSurvival {
   }
 }
 
-// When using Playground
 new DinoSurvival();
 ```
