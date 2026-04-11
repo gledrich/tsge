@@ -98,13 +98,28 @@ export default class TransformComponent extends Component {
   }
 
   /**
-   * Calculates the world-space position.
+   * Gets the world-space position.
+   * Note: This returns a clone to prevent accidental cache mutation.
+   * For performance, use getWorldPosition(out).
    */
   get worldPosition(): Vector2 {
     if (this._isDirty) {
       this.updateWorldTransform();
     }
     return this._worldPosition.clone();
+  }
+
+  /**
+   * Writes the world-space position into the provided 'out' vector.
+   * Allocation-free alternative to the worldPosition getter.
+   * @param out The vector to write into.
+   * @returns The 'out' vector for chaining.
+   */
+  getWorldPosition(out: Vector2): Vector2 {
+    if (this._isDirty) {
+      this.updateWorldTransform();
+    }
+    return out.copy(this._worldPosition);
   }
 
   /**
@@ -119,12 +134,27 @@ export default class TransformComponent extends Component {
 
   /**
    * Calculates the world-space scale.
+   * Note: This returns a clone to prevent accidental cache mutation.
+   * For performance, use getWorldScale(out).
    */
   get worldScale(): Vector2 {
     if (this._isDirty) {
       this.updateWorldTransform();
     }
     return this._worldScale.clone();
+  }
+
+  /**
+   * Writes the world-space scale into the provided 'out' vector.
+   * Allocation-free alternative to the worldScale getter.
+   * @param out The vector to write into.
+   * @returns The 'out' vector for chaining.
+   */
+  getWorldScale(out: Vector2): Vector2 {
+    if (this._isDirty) {
+      this.updateWorldTransform();
+    }
+    return out.copy(this._worldScale);
   }
 
   /**
@@ -144,20 +174,17 @@ export default class TransformComponent extends Component {
       const parentWorldScale = this.parent.worldScale;
 
       // Apply parent's scale and rotation to local position
-      let localX = this.position.x * parentWorldScale.x;
-      let localY = this.position.y * parentWorldScale.y;
+      const localX = this.position.x * parentWorldScale.x;
+      const localY = this.position.y * parentWorldScale.y;
 
-      if (parentWorldRot !== 0) {
-        const cos = Math.cos(parentWorldRot);
-        const sin = Math.sin(parentWorldRot);
-        const rotatedX = localX * cos - localY * sin;
-        const rotatedY = localX * sin + localY * cos;
-        localX = rotatedX;
-        localY = rotatedY;
-      }
+      const cos = Math.cos(parentWorldRot);
+      const sin = Math.sin(parentWorldRot);
+      
+      const rotatedX = localX * cos - localY * sin;
+      const rotatedY = localX * sin + localY * cos;
 
-      this._worldPosition.x = parentWorldPos.x + localX;
-      this._worldPosition.y = parentWorldPos.y + localY;
+      this._worldPosition.x = parentWorldPos.x + rotatedX;
+      this._worldPosition.y = parentWorldPos.y + rotatedY;
       this._worldRotation = parentWorldRot + this.rotation;
       this._worldScale.x = parentWorldScale.x * this.scale.x;
       this._worldScale.y = parentWorldScale.y * this.scale.y;

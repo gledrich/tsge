@@ -76,6 +76,58 @@ describe('Vector2', () => {
     expect(v2).not.toBe(v1);
   });
 
+  it('sets coordinates correctly', () => {
+    const vec = new Vector2(0, 0);
+    const onChange = jest.fn();
+    vec.onChange = onChange;
+
+    // Both change
+    vec.set(10, 20);
+    expect(vec.x).toBe(10);
+    expect(vec.y).toBe(20);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    
+    // Only X changes
+    vec.set(15, 20);
+    expect(onChange).toHaveBeenCalledTimes(2);
+
+    // Only Y changes
+    vec.set(15, 25);
+    expect(onChange).toHaveBeenCalledTimes(3);
+
+    // Neither changes
+    vec.set(15, 25);
+    expect(onChange).toHaveBeenCalledTimes(3);
+    
+    // Test chaining
+    const res = vec.set(30, 40);
+    expect(res).toBe(vec);
+    expect(vec.x).toBe(30);
+  });
+
+  it('copies coordinates from another vector', () => {
+    const v1 = new Vector2(10, 20);
+    const v2 = new Vector2(0, 0);
+    v2.copy(v1);
+    expect(v2.x).toBe(10);
+    expect(v2.y).toBe(20);
+  });
+
+  it('normalizes in place', () => {
+    const vec = new Vector2(3, 4);
+    const res = vec.normalize();
+    expect(res).toBe(vec);
+    expect(vec.magnitude).toBeCloseTo(1);
+    expect(vec.x).toBeCloseTo(0.6);
+    expect(vec.y).toBeCloseTo(0.8);
+
+    // Normalize zero vector
+    const zero = new Vector2(0, 0);
+    zero.normalize();
+    expect(zero.x).toBe(0);
+    expect(zero.y).toBe(0);
+  });
+
   it('triggers onChange when x or y is modified', () => {
     const vec = new Vector2(0, 0);
     const onChange = jest.fn();

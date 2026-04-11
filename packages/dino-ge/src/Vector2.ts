@@ -1,5 +1,6 @@
 /**
  * Class representing a 2D vector or point.
+ * Implements a fluent, mutating API to reduce object allocations.
  */
 export default class Vector2 {
   private _x: number;
@@ -32,6 +33,30 @@ export default class Vector2 {
   }
 
   /**
+   * Sets the components of this vector.
+   * @param x New x coordinate.
+   * @param y New y coordinate.
+   * @returns This vector for chaining.
+   */
+  set(x: number, y: number): this {
+    if (this._x !== x || this._y !== y) {
+      this._x = x;
+      this._y = y;
+      this.onChange?.();
+    }
+    return this;
+  }
+
+  /**
+   * Copies the components of another vector into this one.
+   * @param other The vector to copy from.
+   * @returns This vector for chaining.
+   */
+  copy(other: Vector2): this {
+    return this.set(other.x, other.y);
+  }
+
+  /**
    * Calculates the Euclidean distance between two vectors.
    * @param v1 First vector.
    * @param v2 Second vector.
@@ -54,32 +79,53 @@ export default class Vector2 {
 
   /** Returns the length of the vector. */
   get magnitude(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+    return Math.sqrt(this._x * this._x + this._y * this._y);
   }
 
   /** Returns a new normalized (unit length) version of this vector. */
   get normalized(): Vector2 {
     const mag = this.magnitude;
     if (mag === 0) return new Vector2(0, 0);
-    return new Vector2(this.x / mag, this.y / mag);
+    return new Vector2(this._x / mag, this._y / mag);
   }
 
-  /** Adds another vector to this one. */
-  add(other: Vector2): Vector2 {
+  /**
+   * Normalizes this vector in place.
+   * @returns This vector for chaining.
+   */
+  normalize(): this {
+    const mag = this.magnitude;
+    if (mag !== 0) {
+      this.multiply(1 / mag);
+    }
+    return this;
+  }
+
+  /** 
+   * Adds another vector to this one (mutates). 
+   * @returns This vector for chaining.
+   */
+  add(other: Vector2): this {
     this.x += other.x;
     this.y += other.y;
     return this;
   }
 
-  /** Subtracts another vector from this one. */
-  subtract(other: Vector2): Vector2 {
+  /** 
+   * Subtracts another vector from this one (mutates). 
+   * @returns This vector for chaining.
+   */
+  subtract(other: Vector2): this {
     this.x -= other.x;
     this.y -= other.y;
     return this;
   }
 
-  /** Multiplies this vector by a scalar. */
-  multiply(scalar: number): Vector2 {
+  /** 
+   * Multiplies this vector by a scalar (mutates). 
+   * @returns This vector for chaining.
+   */
+  multiply(scalar: number): this {
     this.x *= scalar;
     this.y *= scalar;
     return this;
@@ -87,6 +133,6 @@ export default class Vector2 {
 
   /** Returns a copy of this vector. */
   clone(): Vector2 {
-    return new Vector2(this.x, this.y);
+    return new Vector2(this._x, this._y);
   }
 }

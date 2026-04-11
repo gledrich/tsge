@@ -111,21 +111,13 @@ describe('TransformComponent', () => {
     leaf.position = new Vector2(10, 0);
     leaf.parent = mid;
     
-    // root (100, 100)
-    // mid local (50, 0) * root scale (2) = (100, 0)
-    // mid local (100, 0) rotated by 180 = (-100, 0)
-    // mid world = root (100, 100) + mid local (-100, 0) = (0, 100)
-    expect(mid.worldPosition.x).toBeCloseTo(0);
-    expect(mid.worldPosition.y).toBeCloseTo(100);
-    
-    // leaf local (10, 0) * mid world scale (2) = (20, 0)
-    // leaf local (20, 0) rotated by 180 = (-20, 0)
-    // leaf world = mid world (0, 100) + leaf local (-20, 0) = (-20, 100)
-    expect(leaf.worldPosition.x).toBeCloseTo(-20);
-    expect(leaf.worldPosition.y).toBeCloseTo(100);
-    
+    // Access world props hits dirty paths
     expect(leaf.worldRotation).toBeCloseTo(Math.PI);
     expect(leaf.worldScale.x).toBe(2);
+    expect(mid.worldPosition.x).toBeCloseTo(0);
+    expect(mid.worldPosition.y).toBeCloseTo(100);
+    expect(leaf.worldPosition.x).toBeCloseTo(-20);
+    expect(leaf.worldPosition.y).toBeCloseTo(100);
   });
 
   it('caches world properties and only recalculates when dirty', () => {
@@ -136,8 +128,9 @@ describe('TransformComponent', () => {
     // Initial access to populate cache
     expect(child.worldPosition).toBeDefined();
     
-    // Since worldPosition returns a clone, we can't check identity, 
-    // but we can check if the underlying update method was called.
+    // Access again - hits false branch of if(_isDirty)
+    expect(child.worldPosition).toBeDefined();
+    
     const updateSpy = jest.spyOn(child as unknown as { updateWorldTransform: () => void }, 'updateWorldTransform');
     
     // Access again - should NOT call update
@@ -147,11 +140,11 @@ describe('TransformComponent', () => {
     // Modify parent - should set child as dirty
     parent.position = new Vector2(100, 100);
     
-    // Access again - SHOULD call update now
+    // Access again - SHOULD call update now (hits true branch)
     expect(child.worldPosition).toBeDefined();
     expect(updateSpy).toHaveBeenCalledTimes(1);
     
-    // Access again - should NOT call update (cached again)
+    // Access again - should NOT call update (cached again, hits false branch)
     expect(child.worldPosition).toBeDefined();
     expect(updateSpy).toHaveBeenCalledTimes(1);
   });
@@ -252,6 +245,79 @@ describe('TransformComponent', () => {
     newPos.x = 20;
     expect(transform.worldPosition.x).toBe(20);
     expect(updateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('calculates world position with varying parent rotation (branch coverage)', () => {
+    const parent = new TransformComponent();
+    const child = new TransformComponent();
+    child.position = new Vector2(10, 0);
+    parent.addChild(child);
+    
+    // Case 1: parentWorldRot === 0 (initial state)
+    expect(child.worldPosition.x).toBe(10);
+    expect(child.worldPosition.y).toBe(0);
+
+    // Case 2: parentWorldRot !== 0
+    parent.rotation = Math.PI / 2; // 90 deg
+    expect(child.worldPosition.x).toBeCloseTo(0);
+    expect(child.worldPosition.y).toBeCloseTo(10);
+
+    // Case 3: back to parentWorldRot === 0
+    parent.rotation = 0;
+    expect(child.worldPosition.x).toBe(10);
+    expect(child.worldPosition.y).toBe(0);
+  });
+
+  it('provides allocation-free getters getWorldPosition and getWorldScale', () => {
+    const parent = new TransformComponent();
+    parent.position = new Vector2(100, 100);
+    parent.scale = new Vector2(2, 2);
+    
+    const child = new TransformComponent();
+    child.position = new Vector2(10, 10);
+    child.scale = new Vector2(0.5, 0.5);
+    parent.addChild(child);
+    
+    // Populate cache hits true branch
+    const outPos = new Vector2();
+    child.getWorldPosition(outPos);
+    expect(outPos.x).toBe(120);
+    
+    // Call again hits false branch
+    child.getWorldPosition(outPos);
+    expect(outPos.x).toBe(120);
+    
+    const outScale = new Vector2();
+    // Hits true branch
+    child.getWorldScale(outScale);
+    expect(outScale.x).toBe(1);
+
+    // Hits false branch
+    child.getWorldScale(outScale);
+    expect(outScale.x).toBe(1);
+
+    // Trigger dirty paths for coverage
+    child.setDirty();
+    const outPos2 = new Vector2();
+    child.getWorldPosition(outPos2);
+    expect(outPos2.x).toBe(120);
+
+    child.setDirty();
+    const outScale2 = new Vector2();
+    child.getWorldScale(outScale2);
+    expect(outScale2.x).toBe(1);
+
+    // Trigger worldRotation dirty path
+    child.setDirty();
+    expect(child.worldRotation).toBe(0);
+    // Call again for false branch
+    expect(child.worldRotation).toBe(0);
+
+    // worldScale getter coverage
+    child.setDirty();
+    expect(child.worldScale.x).toBe(1);
+    // Call again for false branch
+    expect(child.worldScale.x).toBe(1);
   });
 
   it('manually triggers onChange anonymous function for coverage', () => {
