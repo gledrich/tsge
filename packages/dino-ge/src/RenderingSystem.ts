@@ -5,6 +5,7 @@ import VisibilityComponent from './VisibilityComponent.js';
 import Engine from './Engine.js';
 import PhysicsComponent from './PhysicsComponent.js';
 import Vector2 from './Vector2.js';
+import { getEngineState } from './EngineState.js';
 
 /**
  * A system that processes entities with RenderComponents.
@@ -33,6 +34,9 @@ export default class RenderingSystem extends System {
    * @param debug Whether to draw debug overlays (hitboxes/tags).
    */
   public override update(entities: Set<GameObject>, deltaTime?: number, debug: boolean = false): void {
+    const state = getEngineState();
+    if (!state) return;
+
     const bounds = Engine.camera.getViewportBounds(
       (this.ctx.canvas as HTMLCanvasElement).width,
       (this.ctx.canvas as HTMLCanvasElement).height
@@ -45,9 +49,9 @@ export default class RenderingSystem extends System {
     this.ctx.translate(-Engine.camera.position.x, -Engine.camera.position.y);
 
     // Update sorted cache if dirty
-    if (Engine.zOrderDirty || !Engine.sortedObjects) {
-      Engine.sortedObjects = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
-      Engine.zOrderDirty = false;
+    if (state.zOrderDirty || !state.sortedObjects) {
+      state.sortedObjects = Array.from(entities).sort((a, b) => (a.metadata.zIndex > b.metadata.zIndex ? 1 : -1));
+      state.zOrderDirty = false;
     }
 
     // Draw Debug Collisions (Briefly)
@@ -93,7 +97,7 @@ export default class RenderingSystem extends System {
       });
     }
 
-    Engine.sortedObjects.forEach((object) => {
+    state.sortedObjects.forEach((object) => {
       const { worldPosition, worldScale } = object.transform;
       const width = (object.bounds?.width ?? 0) * worldScale.x;
       const height = (object.bounds?.height ?? 0) * worldScale.y;

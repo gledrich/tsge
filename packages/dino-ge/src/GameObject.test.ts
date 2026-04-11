@@ -1,9 +1,12 @@
 import GameObject from './GameObject';
 import TagComponent from './TagComponent';
 import TransformComponent from './TransformComponent';
+import BoundsComponent from './BoundsComponent';
 import EventBusComponent from './EventBusComponent';
 import Component from './Component';
 import Engine from './Engine';
+import Registry from './Registry';
+import { type EngineState } from './EngineState';
 
 class MockGameObject extends GameObject {}
 class MockComponent extends Component {}
@@ -20,13 +23,30 @@ class AnotherDerivedComponent extends BaseComponent {
   value = 'another';
 }
 
+/**
+ * Interface for globalThis with engine state for testing.
+ */
+interface GlobalWithEngineState {
+  __DINO_ENGINE_STATE__?: EngineState;
+}
+
 describe('GameObject', () => {
+  beforeEach(() => {
+    Engine.resetState();
+  });
+
   it('initialises with required default components', () => {
     const obj = new MockGameObject('player', 10);
     expect(obj.hasComponent(TagComponent)).toBe(true);
     expect(obj.hasComponent(TransformComponent)).toBe(true);
     // EventBus should not be there yet (lazy loaded)
     expect(obj.hasComponent(EventBusComponent)).toBe(false);
+  });
+
+  it('initialises with default constructor params', () => {
+    const obj = new MockGameObject();
+    expect(obj.metadata.tag).toBe('obj');
+    expect(obj.metadata.zIndex).toBe(0);
   });
 
   it('handles component management correctly', () => {
@@ -59,6 +79,32 @@ describe('GameObject', () => {
     expect(obj.transform).toBeInstanceOf(TransformComponent);
     expect(obj.metadata.tag).toBe('player');
     expect(obj.metadata.zIndex).toBe(10);
+    
+    // Bounds check
+    expect(obj.bounds).toBeUndefined();
+    const bounds = new BoundsComponent(10, 10);
+    obj.addComponent(bounds);
+    expect(obj.bounds).toBe(bounds);
+  });
+
+  it('handles transform fallback if missing', () => {
+    const obj = new MockGameObject('test', 0);
+    obj.removeComponent(TransformComponent);
+    
+    // Accessing getter should trigger fallback creation
+    const transform = obj.transform;
+    expect(transform).toBeInstanceOf(TransformComponent);
+    expect(obj.hasComponent(TransformComponent)).toBe(true);
+  });
+
+  it('handles metadata fallback if missing', () => {
+    const obj = new MockGameObject('test', 0);
+    obj.removeComponent(TagComponent);
+    
+    // Accessing getter should trigger fallback creation
+    const metadata = obj.metadata;
+    expect(metadata).toBeInstanceOf(TagComponent);
+    expect(obj.hasComponent(TagComponent)).toBe(true);
   });
 
   it('manages parent-child relationships via transform', () => {
@@ -136,13 +182,46 @@ describe('GameObject', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('registers and destroys itself via Engine', () => {
+  it('registers and destroys itself via Registry', () => {
     const obj = new MockGameObject('test', 0);
     
+    const regSpy = jest.spyOn(Registry, 'registerObject');
+    const destSpy = jest.spyOn(Registry, 'destroyObject');
+
     obj.registerSelf();
+    expect(regSpy).toHaveBeenCalledWith(obj);
     expect(Engine.objects.has(obj)).toBe(true);
     
     obj.destroySelf();
+    expect(destSpy).toHaveBeenCalledWith(obj);
     expect(Engine.objects.has(obj)).toBe(false);
+  });
+
+  it('manages bounds setter', () => {
+    const obj = new MockGameObject('test', 0);
+    const bounds = new BoundsComponent(10, 10);
+    
+    obj.bounds = bounds;
+    expect(obj.hasComponent(BoundsComponent)).toBe(true);
+    
+    obj.bounds = undefined;
+    expect(obj.hasComponent(BoundsComponent)).toBe(false);
+  });
+
+  it('covers Registry and TagComponent edge cases for coverage', () => {
+    const obj = new MockGameObject('test', 0);
+    
+    const g = globalThis as unknown as GlobalWithEngineState;
+    const originalState = g.__DINO_ENGINE_STATE__;
+    
+    // Test Registry branches without active state
+    delete g.__DINO_ENGINE_STATE__;
+    
+    Registry.registerObject(obj);
+    Registry.destroyObject(obj);
+    obj.metadata.zIndex = 100;
+    
+    // Restore
+    g.__DINO_ENGINE_STATE__ = originalState;
   });
 });

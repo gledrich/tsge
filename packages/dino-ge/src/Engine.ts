@@ -6,8 +6,11 @@ import Camera from './Camera.js';
 import System from './System.js';
 import PhysicsSystem from './PhysicsSystem.js';
 import RenderingSystem from './RenderingSystem.js';
-import PhysicsComponent from './PhysicsComponent.js';
 import type { CollisionManifold } from './Physics.js';
+import { type EngineState } from './EngineState.js';
+import Registry from './Registry.js';
+import PhysicsComponent from './PhysicsComponent.js';
+import { ObjectSet } from './ObjectSet.js';
 
 /**
  * Options for initializing the Engine.
@@ -35,42 +38,6 @@ export interface EngineCallbacks {
   update: () => void;
   /** Optional callback for physics or fixed-step logic. */
   fixedUpdate?: () => void;
-}
-
-/**
- * Specialized Set for managing game objects with helper methods.
- */
-export class ObjectSet extends Set<GameObject> {
-  /**
-   * Find all objects with a specific tag.
-   * @param tag The tag to search for.
-   */
-  findAll: (tag?: string) => GameObject[];
-
-  constructor() {
-    super();
-    this.findAll = () => [];
-  }
-}
-
-/**
- * Interface for the shared global state of the Engine.
- */
-export interface EngineState {
-  objects: ObjectSet;
-  paused: boolean;
-  debug: boolean;
-  selectedObject: GameObject | null;
-  camera: Camera;
-  systems: System[];
-  renderingSystem?: RenderingSystem;
-  events: EventTarget;
-  currentScene: Scene | null;
-  debugCollisions: { manifold: CollisionManifold, timestamp: number }[];
-  showPhysicsVectors: boolean;
-  showCollisionLines: boolean;
-  zOrderDirty: boolean;
-  sortedObjects: GameObject[];
 }
 
 /**
@@ -291,9 +258,6 @@ export default class Engine {
       ...opts,
     };
 
-
-    Engine.objects.findAll = this._findAllObjects.bind(this);
-
     this._title = document.createElement('title');
     this._title.innerHTML = defaultedOpts.title;
     const heads = document.getElementsByTagName('head');
@@ -466,10 +430,8 @@ export default class Engine {
       ];
 
       const tagComp = obj.metadata;
-      if (tagComp) {
-        properties.unshift(['Tag', tagComp.tag]);
-        properties.push(['Z-Index', tagComp.zIndex]);
-      }
+      properties.unshift(['Tag', tagComp.tag]);
+      properties.push(['Z-Index', tagComp.zIndex]);
 
       const physComp = obj.getComponent(PhysicsComponent);
       if (physComp) {
@@ -495,30 +457,15 @@ export default class Engine {
     this._ctx.restore();
   }
 
-  private _findAllObjects(tag: string = '') {
-    if (!tag) {
-      return Array.from(Engine.objects);
-    }
-    return Array.from(Engine.objects).filter((obj) => obj.metadata.tag === tag);
-  }
-
   /**
-   * Promisified setTimeout.
-   * @param timeoutFn The function to run after the timeout.
-   * @param time The time in milliseconds to wait.
+   * Schedules a function to run after a delay.
    */
-  async setTimeout(timeoutFn: () => void, time: number) {
-    await new Promise((resolve) => {
-      setTimeout(resolve, time);
-    });
-    timeoutFn();
+  setTimeout(callback: () => void, delay: number): number {
+    return window.setTimeout(callback, delay);
   }
 
   /**
-   * Run a function repeatedly for a duration and then run a final function.
-   * @param milliseconds Total duration.
-   * @param fn Function to run every second.
-   * @param onEnded Final function to run.
+   * Starts a countdown timer.
    */
   countdown(milliseconds: number, fn: () => void, onEnded: () => void) {
     setTimeout(onEnded, milliseconds);
@@ -537,33 +484,19 @@ export default class Engine {
   }
 
   /**
-   * Register a new game object with the active scene or global engine.
+   * Registers a game object with the active scene or global engine loop.
    * @param object The object to register.
    */
   static registerObject(object: GameObject) {
-    this.zOrderDirty = true;
-    if (Engine.currentScene) {
-      Engine.currentScene.add(object);
-    } else {
-      this.objects.add(object);
-    }
+    Registry.registerObject(object);
   }
 
   /**
-   * Remove a game object from the active scene or global engine.
+   * Removes a game object from the active scene or global engine loop.
    * @param object The object to destroy.
    */
   static destroyObject(object: GameObject) {
-    this.zOrderDirty = true;
-    if (this.selectedObject === object) {
-      this.selectedObject = null;
-    }
-    
-    if (Engine.currentScene) {
-      Engine.currentScene.remove(object);
-    } else {
-      this.objects.delete(object);
-    }
+    Registry.destroyObject(object);
   }
 
   /** Destroy all objects in the active scene or global engine. */

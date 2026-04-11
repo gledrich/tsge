@@ -4,19 +4,12 @@ import ResourceLoader from './Loader';
 import TilemapComponent from './TilemapComponent';
 import BoundsComponent from './BoundsComponent';
 import Engine from './Engine';
+import Registry from './Registry';
 
 jest.mock('./Loader', () => ({
   __esModule: true,
   default: {
     getImage: jest.fn()
-  }
-}));
-
-jest.mock('./Engine', () => ({
-  __esModule: true,
-  default: {
-    registerObject: jest.fn(),
-    currentScene: null
   }
 }));
 
@@ -32,10 +25,12 @@ describe('Tilemap', () => {
   };
 
   beforeEach(() => {
+    Engine.resetState();
     jest.clearAllMocks();
   });
 
   it('initialises with an Image element', () => {
+    const spy = jest.spyOn(Registry, 'registerObject');
     const tilemap = new Tilemap(mockProps);
     
     expect(tilemap.tileset).toBe(mockImg);
@@ -51,7 +46,7 @@ describe('Tilemap', () => {
     
     expect(tilemap.hasComponent(BoundsComponent)).toBe(true);
     expect(tilemap.hasComponent(TilemapComponent)).toBe(true);
-    expect(Engine.registerObject).toHaveBeenCalledWith(tilemap);
+    expect(spy).toHaveBeenCalledWith(tilemap);
   });
 
   it('initialises with a tileset tag from ResourceLoader', () => {

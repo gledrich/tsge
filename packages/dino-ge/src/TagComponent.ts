@@ -1,5 +1,5 @@
 import Component from './Component.js';
-import Engine from './Engine.js';
+import { getEngineState } from './EngineState.js';
 
 /**
  * Component that holds metadata like tags and rendering order.
@@ -14,7 +14,10 @@ export default class TagComponent extends Component {
   set zIndex(val: number) {
     if (this._zIndex !== val) {
       this._zIndex = val;
-      Engine.zOrderDirty = true;
+      const state = getEngineState();
+      if (state) {
+        state.zOrderDirty = true;
+      }
     }
   }
 

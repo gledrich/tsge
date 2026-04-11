@@ -2,6 +2,7 @@ import Sprite from './Sprite';
 import Vector2 from './Vector2';
 import Engine from './Engine';
 import SpriteComponent from './SpriteComponent';
+import BoundsComponent from './BoundsComponent';
 
 jest.mock('./Loader', () => {
   const mockImg = { 
@@ -58,6 +59,28 @@ describe('Sprite', () => {
     sprite.currentFrame = 3;
     expect(sprite.currentFrame).toBe(3);
     expect(sprite.getComponent(SpriteComponent)!.currentFrame).toBe(3);
+  });
+
+  it('handles missing bounds during frame update for coverage', () => {
+    const sprite = new Sprite(mockProps);
+    sprite.removeComponent(BoundsComponent);
+
+    // Setting currentFrame calls _updateBounds
+    sprite.currentFrame = 1;
+    expect(sprite.bounds).toBeUndefined();
+  });
+
+  it('handles missing optional props in constructor for coverage', () => {
+    const minProps = {
+      tag: 'min',
+      img: 'dino',
+      rows: 1,
+      cols: 10
+    };
+    const sprite = new Sprite(minProps);
+    expect(sprite.startCol).toBe(0);
+    expect(sprite.endCol).toBe(9);
+    expect(sprite.transform.position.x).toBe(0);
   });
 
   it('registers with engine on play', () => {

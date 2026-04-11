@@ -361,4 +361,19 @@ describe('RenderingSystem', () => {
     system.update(new Set([obj]));
     expect(render.draw).toHaveBeenCalled();
   });
+
+  it('early returns from update if state is missing', () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const system = new RenderingSystem(ctx);
+    
+    const g = globalThis as unknown as Record<string, unknown>;
+    const originalState = g.__DINO_ENGINE_STATE__;
+    delete g.__DINO_ENGINE_STATE__;
+    
+    // Should not throw
+    system.update(new Set());
+    
+    g.__DINO_ENGINE_STATE__ = originalState;
+  });
 });

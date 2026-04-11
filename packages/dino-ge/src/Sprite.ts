@@ -6,47 +6,56 @@ import SpriteComponent from './SpriteComponent.js';
 import BoundsComponent from './BoundsComponent.js';
 
 /**
- * Properties for creating a new Sprite.
+ * Configuration for creating a Sprite object.
  */
 export interface SpriteProps {
   /** Unique tag for the object. */
   tag: string;
-  /** Image element or tag from ResourceLoader. */
+  /** Image instance or tag from ResourceLoader. */
   img: HTMLImageElement | string;
   /** Number of rows in the spritesheet. */
   rows: number;
   /** Number of columns in the spritesheet. */
   cols: number;
-  /** Initial world position. */
-  position: Vector2;
-  /** Starting frame column for animation. */
-  startCol: number;
-  /** Ending frame column for animation. */
-  endCol: number;
+  /** Starting column index for the animation (0-based). */
+  startCol?: number;
+  /** Ending column index for the animation (0-based). */
+  endCol?: number;
+  /** Initial position in world space. */
+  position?: Vector2;
   /** Rendering order. */
   zIndex?: number;
-  /** Scale of the sprite (defaults to 1). */
+  /** Scale factor (number or Vector2). */
   scale?: number | Vector2;
 }
 
 /**
- * Represents an animated sprite using a spritesheet.
+ * A high-level object that represents an animated sprite.
+ * Wraps SpriteComponent and TransformComponent for ease of use.
  */
 export default class Sprite extends GameObject {
-  /** Internal sprite component for rendering and animation. */
   private _spriteComponent: SpriteComponent;
 
-  /** The source image for the sprite. */
+  /** The image element used by the sprite. */
   get img(): HTMLImageElement { return this._spriteComponent.img; }
-  set img(val: HTMLImageElement) { this._spriteComponent.img = val; }
+  set img(val: HTMLImageElement) { 
+    this._spriteComponent.img = val;
+    this._updateBounds();
+  }
 
   /** Number of rows in the spritesheet. */
   get rows(): number { return this._spriteComponent.rows; }
-  set rows(val: number) { this._spriteComponent.rows = val; }
+  set rows(val: number) { 
+    this._spriteComponent.rows = val;
+    this._updateBounds();
+  }
 
   /** Number of columns in the spritesheet. */
   get cols(): number { return this._spriteComponent.cols; }
-  set cols(val: number) { this._spriteComponent.cols = val; }
+  set cols(val: number) { 
+    this._spriteComponent.cols = val;
+    this._updateBounds();
+  }
 
   /** The starting column for the current animation loop. */
   get startCol(): number { return this._spriteComponent.startCol; }
@@ -66,7 +75,10 @@ export default class Sprite extends GameObject {
 
   /** The current frame index being displayed. */
   get currentFrame(): number { return this._spriteComponent.currentFrame; }
-  set currentFrame(val: number) { this._spriteComponent.currentFrame = val; }
+  set currentFrame(val: number) { 
+    this._spriteComponent.currentFrame = val; 
+    this._updateBounds();
+  }
 
   /** Whether the sprite is horizontally flipped. */
   get flip(): boolean { return this._spriteComponent.flip; }
@@ -78,14 +90,17 @@ export default class Sprite extends GameObject {
 
   /**
    * Gets or sets the scale of the sprite.
-   * Updating this will also update the object's bounds.
+   * Returns the world-space scale of the transform.
    */
-  get scale(): Vector2 { return this.transform.scale; }
+  get scale(): Vector2 {
+    return this.transform.scale;
+  }
+
   set scale(val: number | Vector2) {
     if (typeof val === 'number') {
-      this.transform.scale = new Vector2(val, val);
+      this.transform.scale.set(val, val);
     } else {
-      this.transform.scale = val;
+      this.transform.scale.copy(val);
     }
   }
 
@@ -93,8 +108,7 @@ export default class Sprite extends GameObject {
     if (!props.tag) {
       throw new Error('You must provide a tag for a Sprite');
     }
-
-    super(props.tag, props.zIndex || 1);
+    super(props.tag, props.zIndex ?? 1);
 
     let img: HTMLImageElement;
     if (typeof props.img === 'string') {
@@ -107,8 +121,8 @@ export default class Sprite extends GameObject {
       img,
       props.rows,
       props.cols,
-      props.startCol,
-      props.endCol
+      props.startCol ?? 0,
+      props.endCol ?? props.cols - 1
     );
     this.addComponent(this._spriteComponent);
 
@@ -128,8 +142,9 @@ export default class Sprite extends GameObject {
       img.addEventListener('load', () => this._updateBounds(), { once: true });
     }
 
-    this.transform.position = props.position;
-    this.registered = false;
+    if (props.position) {
+      this.transform.position.copy(props.position);
+    }
   }
 
   /**

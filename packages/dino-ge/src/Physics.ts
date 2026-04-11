@@ -184,6 +184,10 @@ export default class Physics {
       this.resolveCollision(manifold, phys1, phys2);
     }
 
+    // Emit collision events on both objects
+    obj1.emit('collision', { other: obj2, manifold });
+    obj2.emit('collision', { other: obj1, manifold });
+
     return true;
   }
 

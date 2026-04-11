@@ -1,4 +1,6 @@
-import Engine, { EngineOpts, EngineCallbacks, ObjectSet, EngineState } from './Engine';
+import Engine, { EngineOpts, EngineCallbacks } from './Engine';
+import { type EngineState } from './EngineState';
+import { ObjectSet } from './ObjectSet';
 import Scene from './Scene';
 import GameObject from './GameObject';
 import Vector2 from './Vector2';
@@ -18,16 +20,26 @@ class MockGameObject extends GameObject {
   }
 }
 
+/** Interface for global state during testing. */
+interface GlobalWithState {
+  __DINO_ENGINE_STATE__?: EngineState;
+  __DINO_ENGINE_INSTANCE__?: unknown;
+}
+
 describe('Engine', () => {
   beforeAll(() => {
     global.ResizeObserver = class ResizeObserver {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       constructor(callback: (entries: unknown[], observer: ResizeObserver) => void) {
-        // Just a mock
+        // Mock implementation
+        this._callback = callback;
       }
+      private _callback: (entries: unknown[], observer: ResizeObserver) => void;
       observe = jest.fn();
       unobserve = jest.fn();
       disconnect = jest.fn();
+      
+      // Getter to satisfy type and potentially use in tests
+      get callback() { return this._callback; }
     } as unknown as { new (callback: unknown): ResizeObserver; prototype: ResizeObserver; };
   });
 
@@ -43,6 +55,10 @@ describe('Engine', () => {
     // Reset global shared state manually
     Engine.resetState();
     Engine.renderingSystem = undefined;
+    
+    const g = globalThis as unknown as GlobalWithState;
+    delete g.__DINO_ENGINE_INSTANCE__;
+
     // Mock Canvas and Context
     mockCtx = {
       fillRect: jest.fn(),
@@ -263,7 +279,7 @@ describe('Engine', () => {
 
   it('handles resize events', () => {
     const engine = new Engine(callbacks);
-    const canvasObj = (engine as unknown as { _canvas: { resize: () => void } })._canvas;
+    const canvasObj = (engine as unknown as { _canvas: { resize: (container?: HTMLElement) => void } })._canvas;
     const resizeSpy = jest.spyOn(canvasObj, 'resize');
     
     window.dispatchEvent(new Event('resize'));
@@ -289,13 +305,13 @@ describe('Engine', () => {
     
     // Smooth FPS calc needs some time delta
     rafCallback(1000);
-    rafCallback(1020); // 20ms later (> 16.6ms fixedDelta)
+    rafCallback(1020); // 20ms later (~1.2 fixedDelta)
     
     expect(mockSys.fixedUpdate).toHaveBeenCalled();
     
     const scene = new MockScene();
     Engine.currentScene = scene;
-    rafCallback(1040); // 20ms later (> 16.6ms fixedDelta), triggers fixedUpdate with scene active
+    rafCallback(1040); // 20ms later triggers fixedUpdate with scene active
     expect(scene.update).toHaveBeenCalled();
 
     Engine.paused = true;
@@ -380,13 +396,14 @@ describe('Engine', () => {
 
     // Test when object lacks metadata (TagComponent)
     const noTagObj = new MockGameObject('notag', 0);
-    Object.defineProperty(noTagObj, 'metadata', { value: undefined, writable: true });
     Engine.selectedObject = noTagObj;
     (engine as unknown as { _draw: () => void })._draw();
 
-    Engine.objects.add(simpleObj);    Engine.selectedObject = simpleObj;
+    Engine.objects.add(simpleObj);
+    Engine.selectedObject = simpleObj;
     (engine as unknown as { _draw: () => void })._draw();
 
+    // Raw object mock for branch coverage
     const rawObj = {
       transform: { 
         position: new Vector2(),
@@ -508,5 +525,9 @@ describe('Engine', () => {
     Engine.zOrderDirty = false;
     obj2.metadata.zIndex = 20;
     expect(Engine.zOrderDirty).toBe(true);
+
+    expect(Engine.sortedObjects).toBeDefined();
+    Engine.sortedObjects = [];
+    expect(Engine.sortedObjects).toEqual([]);
   });
 });

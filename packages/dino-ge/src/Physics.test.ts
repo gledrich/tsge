@@ -226,8 +226,16 @@ describe('Physics', () => {
     });
 
     it('resolves collision when only one object has a PhysicsComponent', () => {
-      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
-      const r2 = new Rectangle({ position: new Vector2(40, 0), width: 50, height: 50 });
+      const r1 = new Rectangle({
+        position: new Vector2(0, 0),
+        width: 50,
+        height: 50
+      });
+      const r2 = new Rectangle({
+        position: new Vector2(40, 0),
+        width: 50,
+        height: 50
+      });
 
       const phys1 = new PhysicsComponent();
       phys1.velocity = new Vector2(100, 0);
@@ -247,7 +255,27 @@ describe('Physics', () => {
       Physics.checkCollision(r3, r4);
       expect(phys4.velocity.x).toBeGreaterThan(-100);
     });
-  });
+
+    it('emits collision events on colliding objects', () => {
+      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
+      const r2 = new Rectangle({ position: new Vector2(25, 0), width: 50, height: 50 });
+
+      const onCollision1 = jest.fn();
+      const onCollision2 = jest.fn();
+
+      r1.on('collision', onCollision1);
+      r2.on('collision', onCollision2);
+
+      Physics.checkCollision(r1, r2);
+
+      expect(onCollision1).toHaveBeenCalledTimes(1);
+      expect(onCollision2).toHaveBeenCalledTimes(1);
+
+      const eventDetail = onCollision1.mock.calls[0][0].detail;
+      expect(eventDetail.other).toBe(r2);
+      expect(eventDetail.manifold).toBeDefined();
+    });
+    });
 
   describe('Edge Cases and Branch Coverage', () => {
     it('flips normal correctly in Rect vs Circle', () => {

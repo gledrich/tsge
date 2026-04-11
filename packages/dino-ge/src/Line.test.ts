@@ -3,14 +3,7 @@ import Vector2 from './Vector2';
 import LineComponent from './LineComponent';
 import BoundsComponent from './BoundsComponent';
 import Engine from './Engine';
-
-jest.mock('./Engine', () => ({
-  __esModule: true,
-  default: {
-    registerObject: jest.fn(),
-    currentScene: null
-  }
-}));
+import Registry from './Registry';
 
 describe('Line', () => {
   const mockProps: LineProperties = {
@@ -22,10 +15,12 @@ describe('Line', () => {
   };
 
   beforeEach(() => {
+    Engine.resetState();
     jest.clearAllMocks();
   });
 
   it('initialises with provided properties', () => {
+    const spy = jest.spyOn(Registry, 'registerObject');
     const line = new Line(mockProps);
     
     expect(line.metadata.tag).toBe('separator');
@@ -45,7 +40,7 @@ describe('Line', () => {
     
     expect(line.hasComponent(BoundsComponent)).toBe(true);
     expect(line.hasComponent(LineComponent)).toBe(true);
-    expect(Engine.registerObject).toHaveBeenCalledWith(line);
+    expect(spy).toHaveBeenCalledWith(line);
   });
 
   it('initialises with default properties', () => {

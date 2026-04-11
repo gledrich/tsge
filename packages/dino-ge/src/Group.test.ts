@@ -1,18 +1,11 @@
 import Group from './Group';
 import GameObject from './GameObject';
 import Engine from './Engine';
-
-jest.mock('./Engine', () => ({
-  __esModule: true,
-  default: {
-    registerObject: jest.fn(),
-    currentScene: null,
-    objects: new Set()
-  }
-}));
+import Registry from './Registry';
 
 describe('Group', () => {
   beforeEach(() => {
+    Engine.resetState();
     jest.clearAllMocks();
   });
 
@@ -34,7 +27,8 @@ describe('Group', () => {
   });
 
   it('should register itself with the engine upon creation', () => {
-    new Group();
-    expect(Engine.registerObject).toHaveBeenCalled();
+    const spy = jest.spyOn(Registry, 'registerObject');
+    const group = new Group();
+    expect(spy).toHaveBeenCalledWith(group);
   });
 });
