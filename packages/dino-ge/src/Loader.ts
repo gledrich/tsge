@@ -3,7 +3,7 @@
  */
 interface LoaderState {
   assets: Map<string, HTMLImageElement>;
-  loadingQueue: Set<string>;
+  loadingQueue: Map<string, string>;
   totalToLoad: number;
   loadedCount: number;
 }
@@ -13,7 +13,7 @@ interface LoaderState {
  */
 const INITIAL_STATE: LoaderState = {
   assets: new Map(),
-  loadingQueue: new Set(),
+  loadingQueue: new Map(),
   totalToLoad: 0,
   loadedCount: 0
 };
@@ -44,13 +44,9 @@ export default class ResourceLoader {
    * @param src Path to the image file.
    */
   static queueImage(tag: string, src: string) {
-    if (this.assets.has(tag)) return;
+    if (this.assets.has(tag) || this.loadingQueue.has(tag)) return;
     
-    // Check if tag already exists in queue
-    const isAlreadyQueued = Array.from(this.loadingQueue).some(item => JSON.parse(item).tag === tag);
-    if (isAlreadyQueued) return;
-
-    this.loadingQueue.add(JSON.stringify({ tag, src }));
+    this.loadingQueue.set(tag, src);
     this.totalToLoad++;
   }
 
@@ -61,8 +57,7 @@ export default class ResourceLoader {
   static async loadAll(onProgress?: (percent: number) => void): Promise<void> {
     if (this.loadingQueue.size === 0) return Promise.resolve();
 
-    const promises = Array.from(this.loadingQueue).map(item => {
-      const { tag, src } = JSON.parse(item);
+    const promises = Array.from(this.loadingQueue.entries()).map(([tag, src]) => {
       return new Promise<void>((resolve, reject) => {
         const img = new Image();
         img.src = src;

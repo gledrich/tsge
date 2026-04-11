@@ -1,7 +1,7 @@
 import ResourceLoader from './Loader';
 
 describe('ResourceLoader', () => {
-  const getPrivateState = () => (ResourceLoader as unknown as { _state: { totalToLoad: number, loadingQueue: Set<string>, assets: Map<string, HTMLImageElement>, loadedCount: number } })._state;
+  const getPrivateState = () => (ResourceLoader as unknown as { _state: { totalToLoad: number, loadingQueue: Map<string, string>, assets: Map<string, HTMLImageElement>, loadedCount: number } })._state;
 
   beforeEach(() => {
     ResourceLoader.clear();
@@ -12,6 +12,7 @@ describe('ResourceLoader', () => {
     ResourceLoader.queueImage('test', 'test.png');
     expect(getPrivateState().totalToLoad).toBe(1);
     expect(getPrivateState().loadingQueue.size).toBe(1);
+    expect(getPrivateState().loadingQueue.get('test')).toBe('test.png');
   });
 
   it('prevents duplicate queuing of the same tag', () => {
