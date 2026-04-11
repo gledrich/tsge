@@ -20,6 +20,18 @@ class MockGameObject extends GameObject {
 }
 
 describe('Engine', () => {
+  beforeAll(() => {
+    global.ResizeObserver = class ResizeObserver {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      constructor(callback: (entries: unknown[], observer: ResizeObserver) => void) {
+        // Just a mock
+      }
+      observe = jest.fn();
+      unobserve = jest.fn();
+      disconnect = jest.fn();
+    } as unknown as { new (callback: unknown): ResizeObserver; prototype: ResizeObserver; };
+  });
+
   it('ObjectSet default findAll returns empty array', () => {
     const objSet = new ObjectSet();
     expect(objSet.findAll()).toEqual([]);
