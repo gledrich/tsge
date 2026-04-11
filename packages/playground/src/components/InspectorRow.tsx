@@ -149,7 +149,7 @@ const InspectorRow: React.FC<{
 
   // Fetch the current value from the editor code to establish a baseline
   const refreshBaseline = React.useCallback(() => {
-    const tag = selectedObject.metadata.tag;
+    const tag = selectedObject?.metadata?.tag;
     if (!tag) return;
 
     const onValueReceived = (event: Event) => {

@@ -13,9 +13,17 @@ interface SceneNodeProps {
 
 const SceneNode: React.FC<SceneNodeProps> = ({ object, selectedId, onSelect, depth }) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const children = Array.from(object.transform.children)
-    .map(t => t.gameObject)
-    .filter((obj): obj is Dino.GameObject => !!obj);
+  
+  let children: Dino.GameObject[] = [];
+  try {
+    if (object && object.transform && object.transform.children) {
+      children = Array.from(object.transform.children)
+        .map(t => t.gameObject)
+        .filter((obj): obj is Dino.GameObject => !!obj);
+    }
+  } catch (err) {
+    console.error('Error mapping children in SceneNode:', err);
+  }
 
   const hasChildren = children.length > 0;
   const isSelected = selectedId === object;
@@ -39,7 +47,7 @@ const SceneNode: React.FC<SceneNodeProps> = ({ object, selectedId, onSelect, dep
           <span className="spacer" />
         )}
         <i className={`fa-solid ${getIconForObject(object)} type-icon`} />
-        <span className="node-tag">{object.metadata.tag || 'GameObject'}</span>
+        <span className="node-tag">{object.metadata?.tag || 'GameObject'}</span>
       </div>
       {hasChildren && isExpanded && (
         <div className="node-children">
@@ -86,7 +94,14 @@ const SceneExplorer: React.FC = () => {
         allObjects = Array.from(globalObjects);
       }
 
-      const roots = allObjects.filter(obj => !obj.transform.parent);
+      const roots = allObjects.filter(obj => {
+        try {
+          return obj && obj.transform && !obj.transform.parent;
+        } catch (err) {
+          console.error('Error filtering root objects:', err);
+          return false;
+        }
+      });
       setRootObjects(roots);
     };
 

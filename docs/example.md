@@ -34,7 +34,7 @@ class MenuScene extends Scene {
       text: 'Dino Survival',
       fontSize: 60,
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 250, 150),
+      position: new Vector2(this.game.width / 2 - 250, 150),
       width: 500,
       zIndex: 10
     });
@@ -45,7 +45,7 @@ class MenuScene extends Scene {
       fontSize: 30,
       colour: '#43aa8b',
       backgroundColour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 100, 350),
+      position: new Vector2(this.game.width / 2 - 100, 350),
       width: 200,
       height: 60,
       zIndex: 10,
@@ -211,7 +211,7 @@ class PlayScene extends Scene {
       text: 'Score: 0',
       fontSize: 24,
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 75, 20),
+      position: new Vector2(this.game.width / 2 - 75, 20),
       width: 150,
       zIndex: 10
     });
@@ -344,7 +344,7 @@ class PlayScene extends Scene {
     });
 
     // Camera follows player
-    Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
+    Engine.camera.follow(this.player, this.game.width, this.game.height);
 
     // Apply Screen Shake
     if (this.shakeIntensity > 0.1) {
@@ -390,7 +390,7 @@ class PlayScene extends Scene {
       // Increased spawn rate
       const radius = 15 + Math.random() * 20;
       const spawnX =
-        Engine.camera.position.x + Math.random() * window.innerWidth;
+        Engine.camera.position.x + Math.random() * this.game.width;
 
       const meteor = new Circle({
         position: new Vector2(spawnX, Engine.camera.position.y - 100),
@@ -436,7 +436,7 @@ class PlayScene extends Scene {
 
       if (
         meteor.transform.position.y >
-        Engine.camera.position.y + window.innerHeight + 100
+        Engine.camera.position.y + this.game.height + 100
       ) {
         meteor.destroySelf();
         return false;
@@ -485,7 +485,7 @@ class GameOverScene extends Scene {
       text: 'GAME OVER',
       fontSize: 60,
       colour: '#F94144',
-      position: new Vector2(window.innerWidth / 2 - 200, 150),
+      position: new Vector2(this.game.width / 2 - 200, 150),
       width: 400,
       zIndex: 10
     });
@@ -495,7 +495,7 @@ class GameOverScene extends Scene {
       text: `Score: ${this.score}`,
       fontSize: 30,
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 200, 230),
+      position: new Vector2(this.game.width / 2 - 200, 230),
       width: 400,
       zIndex: 10
     });
@@ -505,7 +505,7 @@ class GameOverScene extends Scene {
       text: `Best: ${this.highScore}`,
       fontSize: 24,
       colour: '#FFB703',
-      position: new Vector2(window.innerWidth / 2 - 200, 280),
+      position: new Vector2(this.game.width / 2 - 200, 280),
       width: 400,
       zIndex: 10
     });
@@ -516,7 +516,7 @@ class GameOverScene extends Scene {
       fontSize: 25,
       colour: 'white',
       backgroundColour: '#577590',
-      position: new Vector2(window.innerWidth / 2 - 100, 400),
+      position: new Vector2(this.game.width / 2 - 100, 400),
       width: 200,
       height: 50,
       zIndex: 10,
@@ -544,7 +544,7 @@ class DinoSurvival {
         },
         update: () => {}
       },
-      { title: 'Dino Survival', backgroundColour: '#264653' }
+      { title: 'Dino Survival', backgroundColour: '#264653', containerId: 'playground-canvas-container' }
     );
   }
 

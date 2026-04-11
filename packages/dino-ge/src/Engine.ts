@@ -176,7 +176,12 @@ export default class Engine {
    * The currently selected object in debug mode.
    */
   public static get selectedObject(): GameObject | null { return this._state.selectedObject; }
-  public static set selectedObject(val: GameObject | null) { this._state.selectedObject = val; }
+  public static set selectedObject(val: GameObject | null) {
+    if (this._state.selectedObject !== val) {
+      this._state.selectedObject = val;
+      this.emit('selectedObjectChanged', val);
+    }
+  }
 
   /**
    * Whether the global object list needs to be re-sorted by z-index.
@@ -218,6 +223,9 @@ export default class Engine {
   private _ctx: CanvasRenderingContext2D;
   private _window: HTMLDivElement;
   private _title: HTMLTitleElement;
+  private _isWindowInternal: boolean = false;
+  private _destroyed: boolean = false;
+  private _resizeHandler: () => void;
 
   /** Current background colour. */
   backgroundColour: string;
@@ -250,6 +258,13 @@ export default class Engine {
   private _fpsValues: number[] = [];
 
   constructor(callbacks: EngineCallbacks, opts: Partial<EngineOpts> = {}) {
+    // Terminate existing engine if any
+    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine };
+    if (global.__DINO_ENGINE_INSTANCE__) {
+      global.__DINO_ENGINE_INSTANCE__.terminate();
+    }
+    global.__DINO_ENGINE_INSTANCE__ = this;
+
     const defaultedOpts = {
       width: '100%',
       height: '100%',
@@ -291,6 +306,7 @@ export default class Engine {
     }
 
     if (!container) {
+      this._isWindowInternal = true;
       this._window = document.createElement('div');
       this._window.id = 'canvas-container';
       this._window.style.width = defaultedOpts.width;
@@ -307,13 +323,33 @@ export default class Engine {
 
     Input.init();
 
-    window.addEventListener('resize', () => {
+    this._resizeHandler = () => {
       this._canvas.resize(container || undefined);
       this.width = this._canvas.canvas.width;
       this.height = this._canvas.canvas.height;
-    });
+    };
+    window.addEventListener('resize', this._resizeHandler);
 
     setTimeout(() => this.callbacks.onLoad?.(), 0);
+  }
+
+  /**
+   * Completely stops the engine and cleans up all resources.
+   */
+  public terminate() {
+    this._destroyed = true;
+    window.removeEventListener('resize', this._resizeHandler);
+    this._canvas.destroy();
+    if (this._isWindowInternal && this._window) {
+      this._window.remove();
+    }
+    if (this._title) {
+      this._title.remove();
+    }
+    const global = globalThis as unknown as { __DINO_ENGINE_INSTANCE__?: Engine | null };
+    if (global.__DINO_ENGINE_INSTANCE__ === this) {
+      global.__DINO_ENGINE_INSTANCE__ = null;
+    }
   }
 
   private _onLoad() {
@@ -323,6 +359,8 @@ export default class Engine {
   }
 
   private _update(timestamp: number) {
+    if (this._destroyed) return;
+    
     if (this._oldTimestamp === 0) this._oldTimestamp = timestamp;
     
     if (!Engine.paused) {

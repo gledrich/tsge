@@ -84,6 +84,7 @@ function App() {
     if (!isViewportReady) return;
 
     const id = currentScriptId;
+    (globalThis as any).__DINO_ENGINE_INSTANCE__?.terminate();
     Engine.destroyAll();
     
     document.querySelectorAll('script[data-playground-script]').forEach(s => s.remove());
@@ -262,9 +263,12 @@ function App() {
           collapsedSize={0} 
           panelRef={inspectorPanelRef}
           onResize={(size) => {
-            const isCurrentlyCollapsed = size.asPercentage === 0;
-            if (isCurrentlyCollapsed && isInspectorVisible) setIsInspectorVisible(false);
-            if (!isCurrentlyCollapsed && !isInspectorVisible) setIsInspectorVisible(true);
+            // Defer state update to avoid update-during-render crashes
+            requestAnimationFrame(() => {
+              const isCurrentlyCollapsed = size.asPercentage === 0;
+              if (isCurrentlyCollapsed && isInspectorVisible) setIsInspectorVisible(false);
+              if (!isCurrentlyCollapsed && !isInspectorVisible) setIsInspectorVisible(true);
+            });
           }}
         >
           <div className="panel-container">

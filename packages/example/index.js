@@ -28,7 +28,7 @@ class MenuScene extends Scene {
       text: 'DINO SURVIVAL',
       fontSize: 64,
       colour: '#43aa8b',
-      position: new Vector2(window.innerWidth / 2 - 250, 100),
+      position: new Vector2(this.game.width / 2 - 250, 100),
       width: 500,
       zIndex: 10
     });
@@ -38,7 +38,7 @@ class MenuScene extends Scene {
       text: 'CLICK TO START',
       fontSize: 32,
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 150, 300),
+      position: new Vector2(this.game.width / 2 - 150, 300),
       width: 300,
       zIndex: 10,
       onClick: () => this.onStart()
@@ -49,7 +49,7 @@ class MenuScene extends Scene {
       text: 'WASD to Move - SPACE to Shoot',
       fontSize: 20,
       colour: '#a0a0a0',
-      position: new Vector2(window.innerWidth / 2 - 150, 450),
+      position: new Vector2(this.game.width / 2 - 150, 450),
       width: 300,
       zIndex: 10
     });
@@ -196,7 +196,7 @@ class PlayScene extends Scene {
       text: 'Score: 0',
       fontSize: '24',
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 75, 20),
+      position: new Vector2(this.game.width / 2 - 75, 20),
       width: 150,
       zIndex: 11
     });
@@ -306,7 +306,7 @@ class PlayScene extends Scene {
     });
 
     // Camera follows player
-    Engine.camera.follow(this.player, window.innerWidth, window.innerHeight);
+    Engine.camera.follow(this.player, this.game.width, this.game.height);
 
     // Apply Screen Shake
     if (this.shakeIntensity > 0.1) {
@@ -346,7 +346,7 @@ class PlayScene extends Scene {
     // Spawn Meteors
     if (Math.random() < 0.05) {
       const radius = 15 + Math.random() * 20;
-      const spawnX = Engine.camera.position.x + Math.random() * window.innerWidth;
+      const spawnX = Engine.camera.position.x + Math.random() * this.game.width;
       const meteor = new Circle({
         position: new Vector2(spawnX, Engine.camera.position.y - 100),
         radius: radius,
@@ -362,7 +362,7 @@ class PlayScene extends Scene {
     }
 
     this.meteors = this.meteors.filter((m) => {
-      if (m.transform.position.y > Engine.camera.position.y + window.innerHeight + 100) {
+      if (m.transform.position.y > Engine.camera.position.y + this.game.height + 100) {
         m.destroySelf();
         return false;
       }
@@ -409,7 +409,7 @@ class GameOverScene extends Scene {
       text: 'GAME OVER',
       fontSize: '60',
       colour: '#F94144',
-      position: new Vector2(window.innerWidth / 2 - 200, 150),
+      position: new Vector2(this.game.width / 2 - 200, 150),
       width: 400,
       zIndex: 10
     });
@@ -419,7 +419,7 @@ class GameOverScene extends Scene {
       text: `Score: ${this.score}`,
       fontSize: '30',
       colour: 'white',
-      position: new Vector2(window.innerWidth / 2 - 100, 250),
+      position: new Vector2(this.game.width / 2 - 100, 250),
       width: 200,
       zIndex: 10
     });
@@ -431,7 +431,7 @@ class GameOverScene extends Scene {
         text: 'NEW HIGH SCORE!',
         fontSize: '24',
         colour: '#FFB703',
-        position: new Vector2(window.innerWidth / 2 - 100, 300),
+        position: new Vector2(this.game.width / 2 - 100, 300),
         width: 200,
         zIndex: 10
       });
@@ -441,7 +441,7 @@ class GameOverScene extends Scene {
         text: `High Score: ${this.highScore}`,
         fontSize: '24',
         colour: '#a0a0a0',
-        position: new Vector2(window.innerWidth / 2 - 100, 300),
+        position: new Vector2(this.game.width / 2 - 100, 300),
         width: 200,
         zIndex: 10
       });
@@ -452,7 +452,7 @@ class GameOverScene extends Scene {
       text: 'PLAY AGAIN',
       fontSize: '32',
       colour: '#43aa8b',
-      position: new Vector2(window.innerWidth / 2 - 100, 400),
+      position: new Vector2(this.game.width / 2 - 100, 400),
       width: 200,
       zIndex: 10,
       onClick: () => this.onRestart()
@@ -479,7 +479,7 @@ class DinoSurvival {
         },
         update: () => {}
       },
-      { title: 'Dino Survival', backgroundColour: '#264653' }
+      { title: 'Dino Survival', backgroundColour: '#264653', containerId: 'playground-canvas-container' }
     );
   }
 

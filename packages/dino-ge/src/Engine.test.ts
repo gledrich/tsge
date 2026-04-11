@@ -162,6 +162,10 @@ describe('Engine', () => {
     expect(Engine.objects.has(obj)).toBe(true);
     
     Engine.selectedObject = obj;
+    // Branch coverage: set same value again
+    Engine.selectedObject = obj;
+    expect(Engine.selectedObject).toBe(obj);
+    
     Engine.destroyObject(obj);
     expect(Engine.objects.has(obj)).toBe(false);
     expect(Engine.selectedObject).toBeNull();
