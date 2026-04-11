@@ -127,4 +127,79 @@ describe('TransformComponent', () => {
     expect(leaf.worldRotation).toBeCloseTo(Math.PI);
     expect(leaf.worldScale.x).toBe(2);
   });
+
+  it('caches world properties and only recalculates when dirty', () => {
+    const parent = new TransformComponent();
+    const child = new TransformComponent();
+    parent.addChild(child);
+    
+    // Initial access to cache values
+    const pos1 = child.worldPosition;
+    const pos2 = child.worldPosition;
+    
+    // Since worldPosition returns a clone, we can't check identity, 
+    // but we can check if the underlying update method was called.
+    const updateSpy = jest.spyOn(child as any, 'updateWorldTransform');
+    
+    // Access again - should NOT call update
+    child.worldPosition;
+    expect(updateSpy).not.toHaveBeenCalled();
+    
+    // Modify parent - should set child as dirty
+    parent.position = new Vector2(100, 100);
+    
+    // Access again - SHOULD call update now
+    child.worldPosition;
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    
+    // Access again - should NOT call update (cached again)
+    child.worldPosition;
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates dirty flag to deep children', () => {
+    const root = new TransformComponent();
+    const mid = new TransformComponent();
+    const leaf = new TransformComponent();
+    
+    root.addChild(mid);
+    mid.addChild(leaf);
+    
+    // Populate caches
+    root.worldPosition;
+    mid.worldPosition;
+    leaf.worldPosition;
+    
+    const rootSpy = jest.spyOn(root as any, 'updateWorldTransform');
+    const midSpy = jest.spyOn(mid as any, 'updateWorldTransform');
+    const leafSpy = jest.spyOn(leaf as any, 'updateWorldTransform');
+    
+    // Change root
+    root.rotation = 1;
+    
+    // Access leaf - should trigger updates up the chain
+    leaf.worldPosition;
+    expect(leafSpy).toHaveBeenCalled();
+    expect(midSpy).toHaveBeenCalled();
+    expect(rootSpy).toHaveBeenCalled();
+  });
+
+  it('handles addChild and removeChild dirty state correctly', () => {
+    const parent = new TransformComponent();
+    const child = new TransformComponent();
+    
+    // Initial access
+    child.worldPosition;
+    const spy = jest.spyOn(child as any, 'updateWorldTransform');
+    
+    // Add to parent - should become dirty
+    parent.addChild(child);
+    child.worldPosition;
+    expect(spy).toHaveBeenCalledTimes(1);
+    
+    // Remove from parent - should become dirty
+    parent.removeChild(child);
+    child.worldPosition;
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
 });

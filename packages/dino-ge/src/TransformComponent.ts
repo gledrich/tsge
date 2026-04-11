@@ -6,17 +6,51 @@ import Vector2 from './Vector2.js';
  * Supports hierarchical transformations (parent-child relationships).
  */
 export default class TransformComponent extends Component {
+  private _position: Vector2 = new Vector2(0, 0);
+  private _rotation: number = 0;
+  private _scale: Vector2 = new Vector2(1, 1);
+
   /** Local position relative to the parent. */
-  position: Vector2 = new Vector2(0, 0);
+  get position(): Vector2 { return this._position; }
+  set position(val: Vector2) {
+    this._position = val;
+    this.setDirty();
+  }
+
   /** Local rotation in radians relative to the parent. */
-  rotation: number = 0;
+  get rotation(): number { return this._rotation; }
+  set rotation(val: number) {
+    this._rotation = val;
+    this.setDirty();
+  }
+
   /** Local scale relative to the parent. */
-  scale: Vector2 = new Vector2(1, 1);
+  get scale(): Vector2 { return this._scale; }
+  set scale(val: Vector2) {
+    this._scale = val;
+    this.setDirty();
+  }
 
   /** Reference to the parent transform. */
   parent?: TransformComponent;
   /** List of children transforms. */
   children: Set<TransformComponent> = new Set();
+
+  // Cache for world-space properties
+  private _isDirty = true;
+  private _worldPosition: Vector2 = new Vector2(0, 0);
+  private _worldRotation: number = 0;
+  private _worldScale: Vector2 = new Vector2(1, 1);
+
+  /**
+   * Sets this transform and all its children as dirty, forcing a recalculation 
+   * of world-space properties on the next access.
+   */
+  public setDirty() {
+    if (this._isDirty) return;
+    this._isDirty = true;
+    this.children.forEach(child => child.setDirty());
+  }
 
   /**
    * Adds a child transform to this one.
@@ -31,6 +65,7 @@ export default class TransformComponent extends Component {
     
     child.parent = this;
     this.children.add(child);
+    child.setDirty();
   }
 
   /**
@@ -41,6 +76,7 @@ export default class TransformComponent extends Component {
     if (child.parent === this) {
       child.parent = undefined;
       this.children.delete(child);
+      child.setDirty();
     }
   }
 
@@ -48,54 +84,67 @@ export default class TransformComponent extends Component {
    * Calculates the world-space position.
    */
   get worldPosition(): Vector2 {
-    if (!this.parent) {
-      return new Vector2(this.position.x, this.position.y);
+    if (this._isDirty) {
+      this.updateWorldTransform();
     }
-
-    const parentWorldPos = this.parent.worldPosition;
-    const parentWorldRot = this.parent.worldRotation;
-    const parentWorldScale = this.parent.worldScale;
-
-    // Apply parent's scale and rotation to local position
-    let localX = this.position.x * parentWorldScale.x;
-    let localY = this.position.y * parentWorldScale.y;
-
-    if (parentWorldRot !== 0) {
-      const cos = Math.cos(parentWorldRot);
-      const sin = Math.sin(parentWorldRot);
-      const rotatedX = localX * cos - localY * sin;
-      const rotatedY = localX * sin + localY * cos;
-      localX = rotatedX;
-      localY = rotatedY;
-    }
-
-    return new Vector2(
-      parentWorldPos.x + localX,
-      parentWorldPos.y + localY
-    );
+    return this._worldPosition.clone();
   }
 
   /**
    * Calculates the world-space rotation.
    */
   get worldRotation(): number {
-    if (!this.parent) {
-      return this.rotation;
+    if (this._isDirty) {
+      this.updateWorldTransform();
     }
-    return this.parent.worldRotation + this.rotation;
+    return this._worldRotation;
   }
 
   /**
    * Calculates the world-space scale.
    */
   get worldScale(): Vector2 {
-    if (!this.parent) {
-      return new Vector2(this.scale.x, this.scale.y);
+    if (this._isDirty) {
+      this.updateWorldTransform();
     }
-    const parentScale = this.parent.worldScale;
-    return new Vector2(
-      parentScale.x * this.scale.x,
-      parentScale.y * this.scale.y
-    );
+    return this._worldScale.clone();
+  }
+
+  /**
+   * Recalculates all world-space properties from the root parent down.
+   * @private
+   */
+  private updateWorldTransform() {
+    if (!this.parent) {
+      this._worldPosition.x = this.position.x;
+      this._worldPosition.y = this.position.y;
+      this._worldRotation = this.rotation;
+      this._worldScale.x = this.scale.x;
+      this._worldScale.y = this.scale.y;
+    } else {
+      const parentWorldPos = this.parent.worldPosition;
+      const parentWorldRot = this.parent.worldRotation;
+      const parentWorldScale = this.parent.worldScale;
+
+      // Apply parent's scale and rotation to local position
+      let localX = this.position.x * parentWorldScale.x;
+      let localY = this.position.y * parentWorldScale.y;
+
+      if (parentWorldRot !== 0) {
+        const cos = Math.cos(parentWorldRot);
+        const sin = Math.sin(parentWorldRot);
+        const rotatedX = localX * cos - localY * sin;
+        const rotatedY = localX * sin + localY * cos;
+        localX = rotatedX;
+        localY = rotatedY;
+      }
+
+      this._worldPosition.x = parentWorldPos.x + localX;
+      this._worldPosition.y = parentWorldPos.y + localY;
+      this._worldRotation = parentWorldRot + this.rotation;
+      this._worldScale.x = parentWorldScale.x * this.scale.x;
+      this._worldScale.y = parentWorldScale.y * this.scale.y;
+    }
+    this._isDirty = false;
   }
 }
