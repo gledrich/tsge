@@ -13,6 +13,10 @@ interface PlaygroundContextType {
   setIsDebug: (debug: boolean) => void;
   isInspectorVisible: boolean;
   setIsInspectorVisible: (visible: boolean) => void;
+  isExplorerVisible: boolean;
+  setIsExplorerVisible: (visible: boolean) => void;
+  isEditorVisible: boolean;
+  setIsEditorVisible: (visible: boolean) => void;
   activeTab: 'editor' | 'console';
   setActiveTab: (tab: 'editor' | 'console') => void;
   isViewportReady: boolean;
@@ -31,6 +35,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isPaused, setIsPausedState] = useState(false);
   const [isDebug, setIsDebugState] = useState(false);
   const [isInspectorVisible, setIsInspectorVisible] = useState(true);
+  const [isExplorerVisible, setIsExplorerVisible] = useState(true);
+  const [isEditorVisible, setIsEditorVisible] = useState(true);
   const [activeTab, setActiveTab] = useState<'editor' | 'console'>('editor');
   const [isViewportReady, setIsViewportReady] = useState(false);
   const [arePanelsMinimized, setArePanelsMinimized] = useState(false);
@@ -88,6 +94,10 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setIsDebug,
     isInspectorVisible,
     setIsInspectorVisible,
+    isExplorerVisible,
+    setIsExplorerVisible,
+    isEditorVisible,
+    setIsEditorVisible,
     activeTab,
     setActiveTab,
     isViewportReady,

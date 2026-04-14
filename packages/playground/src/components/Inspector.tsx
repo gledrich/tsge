@@ -146,7 +146,7 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
         </div>
       </div>
       {syntaxError && (
-        <div className="syntax-error-banner" style={{ padding: '8px', background: '#dc3545', colour: 'white', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="syntax-error-banner" style={{ padding: '8px', background: '#dc3545', color: 'white', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <i className="fa-solid fa-triangle-exclamation"></i>
           <span>Code Sync Paused: {syntaxError}</span>
         </div>

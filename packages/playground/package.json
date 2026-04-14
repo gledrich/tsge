@@ -10,7 +10,8 @@
     "start": "ENVIRONMENT=prod node server.js",
     "dev": "ENVIRONMENT=dev concurrently \"nodemon server.js\" \"vite\"",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "npx playwright test"
   },
   "files": [
     "server.js",
@@ -29,6 +30,7 @@
     "react-resizable-panels": "^4.9.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/prettier": "^2.7.3",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",

@@ -49,7 +49,7 @@ const Viewport: React.FC = () => {
           justifyContent: 'center',
           background: 'var(--bg-primary)',
           zIndex: 200,
-          colour: 'var(--accent-primary)',
+          color: 'var(--accent-primary)',
           flexDirection: 'column',
           gap: '15px'
         }}>

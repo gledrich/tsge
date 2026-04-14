@@ -15,6 +15,10 @@ function App() {
     currentScriptId,
     isInspectorVisible,
     setIsInspectorVisible,
+    isExplorerVisible,
+    setIsExplorerVisible,
+    isEditorVisible,
+    setIsEditorVisible,
     activeTab,
     setActiveTab,
     arePanelsMinimized,
@@ -26,43 +30,32 @@ function App() {
   const editorPanelRef = usePanelRef();
   const inspectorPanelRef = usePanelRef();
 
-  // Sync inspector panel with state
+  // Sync panels with state
   useEffect(() => {
-    const panel = inspectorPanelRef.current;
-    if (!panel) return;
-    
-    if (isInspectorVisible && panel.isCollapsed()) {
-      panel.expand();
-    } else if (!isInspectorVisible && !panel.isCollapsed()) {
-      panel.collapse();
-    }
-  }, [isInspectorVisible, inspectorPanelRef]);
+    const syncPanel = (ref: any, visible: boolean) => {
+      const panel = ref.current;
+      if (!panel) return;
+      if (visible && panel.isCollapsed()) panel.expand();
+      else if (!visible && !panel.isCollapsed()) panel.collapse();
+    };
+
+    syncPanel(explorerPanelRef, isExplorerVisible);
+    syncPanel(editorPanelRef, isEditorVisible);
+    syncPanel(inspectorPanelRef, isInspectorVisible);
+  }, [isExplorerVisible, isEditorVisible, isInspectorVisible, explorerPanelRef, editorPanelRef, inspectorPanelRef]);
 
   // Sync all panels when arePanelsMinimized changes
   useEffect(() => {
     if (arePanelsMinimized) {
-      explorerPanelRef.current?.collapse();
-      editorPanelRef.current?.collapse();
-      inspectorPanelRef.current?.collapse();
+      setIsExplorerVisible(false);
+      setIsEditorVisible(false);
       setIsInspectorVisible(false);
     } else {
-      explorerPanelRef.current?.expand();
-      editorPanelRef.current?.expand();
-      inspectorPanelRef.current?.expand();
+      setIsExplorerVisible(true);
+      setIsEditorVisible(true);
       setIsInspectorVisible(true);
     }
-  }, [arePanelsMinimized, explorerPanelRef, editorPanelRef, inspectorPanelRef, setIsInspectorVisible]);
-
-  const togglePanel = (ref: any) => {
-    const panel = ref.current;
-    if (!panel) return;
-    
-    if (panel.isCollapsed()) {
-      panel.expand();
-    } else {
-      panel.collapse();
-    }
-  };
+  }, [arePanelsMinimized, setIsExplorerVisible, setIsEditorVisible, setIsInspectorVisible]);
 
   return (
     <div className="playground-root">
@@ -74,23 +67,56 @@ function App() {
           collapsible={true} 
           collapsedSize={0} 
           panelRef={explorerPanelRef}
+          onResize={(size: any) => {
+            requestAnimationFrame(() => {
+              const collapsed = size.asPercentage === 0;
+              if (collapsed && isExplorerVisible) setIsExplorerVisible(false);
+              if (!collapsed && !isExplorerVisible) setIsExplorerVisible(true);
+            });
+          }}
         >
-          <div className="panel-container">
-            <div className="panel-header">Explorer</div>
-            <div className="panel-content" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ flex: 1, overflow: 'auto' }}>
-                <SceneExplorer />
+          {isExplorerVisible && (
+            <div className="panel-container">
+              <div 
+                className="panel-header"
+                onClick={() => setIsExplorerVisible(false)}
+                style={{ cursor: 'pointer' }}
+              >
+                Explorer
               </div>
-              <div style={{ height: '50%', borderTop: '1px solid var(--border-color)' }}>
-                <Sidebar />
+              <div className="panel-content" style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflow: 'auto' }}>
+                  <SceneExplorer />
+                </div>
+                <div style={{ height: '50%', borderTop: '1px solid var(--border-color)' }}>
+                  <Sidebar />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Panel>
         
+        {!isExplorerVisible && (
+          <div 
+            style={{ 
+              width: '15px', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              cursor: 'pointer',
+              opacity: 0.6
+            }}
+            onClick={() => setIsExplorerVisible(true)}
+            data-testid="explorer-expand-button"
+          >
+            <i className="fa-solid fa-chevron-right" style={{ fontSize: '12px' }} />
+          </div>
+        )}
+
         <Separator 
           className="resize-handle-horizontal" 
-          onDoubleClick={() => togglePanel(explorerPanelRef)}
+          onDoubleClick={() => setIsExplorerVisible(!isExplorerVisible)}
         />
 
         {/* Centre Panel: Viewport & Editor/Console */}
@@ -101,9 +127,27 @@ function App() {
               <Viewport />
             </Panel>
             
+            {!isEditorVisible && (
+              <div 
+                style={{ 
+                  width: '100%', 
+                  height: '15px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  opacity: 0.6
+                }}
+                onClick={() => setIsEditorVisible(true)}
+                data-testid="editor-expand-button"
+              >
+                <i className="fa-solid fa-chevron-up" style={{ fontSize: '12px' }} />
+              </div>
+            )}
+
             <Separator 
               className="resize-handle-vertical" 
-              onDoubleClick={() => togglePanel(editorPanelRef)}
+              onDoubleClick={() => setIsEditorVisible(!isEditorVisible)}
             />
 
             {/* Bottom: Editor & Console Tabs */}
@@ -113,33 +157,49 @@ function App() {
               collapsible={true} 
               collapsedSize={0} 
               panelRef={editorPanelRef}
+              onResize={(size: any) => {
+                requestAnimationFrame(() => {
+                  const collapsed = size.asPercentage === 0;
+                  if (collapsed && isEditorVisible) setIsEditorVisible(false);
+                  if (!collapsed && !isEditorVisible) setIsEditorVisible(true);
+                });
+              }}
             >
-              <div className="panel-container">
-                <div className="panel-header" style={{ display: 'flex', gap: '10px' }}>
-                  <span 
-                    style={{ cursor: 'pointer', color: activeTab === 'editor' ? 'var(--accent-primary)' : 'inherit' }}
-                    onClick={() => setActiveTab('editor')}
-                  >
-                    Editor
-                  </span>
-                  <span 
-                    style={{ cursor: 'pointer', color: activeTab === 'console' ? 'var(--accent-primary)' : 'inherit' }}
-                    onClick={() => setActiveTab('console')}
-                  >
-                    Console
-                  </span>
+              {isEditorVisible && (
+                <div className="panel-container">
+                  <div className="panel-header" style={{ display: 'flex', gap: '10px' }}>
+                    <span 
+                      style={{ cursor: 'pointer', color: activeTab === 'editor' ? 'var(--accent-primary)' : 'inherit' }}
+                      onClick={() => setActiveTab('editor')}
+                    >
+                      Editor
+                    </span>
+                    <span 
+                      style={{ cursor: 'pointer', color: activeTab === 'console' ? 'var(--accent-primary)' : 'inherit' }}
+                      onClick={() => setActiveTab('console')}
+                    >
+                      Console
+                    </span>
+                    <span style={{ flex: 1 }} />
+                    <span 
+                      style={{ cursor: 'pointer', opacity: 0.6 }}
+                      onClick={() => setIsEditorVisible(false)}
+                    >
+                      <i className="fa-solid fa-chevron-down" style={{ fontSize: '10px' }} />
+                    </span>
+                  </div>
+                  <div className="panel-content">
+                    {activeTab === 'editor' ? (
+                      <Editor 
+                        currentScriptId={currentScriptId} 
+                        onRefresh={handleRefresh}
+                      />
+                    ) : (
+                      <Console />
+                    )}
+                  </div>
                 </div>
-                <div className="panel-content">
-                  {activeTab === 'editor' ? (
-                    <Editor 
-                      currentScriptId={currentScriptId} 
-                      onRefresh={handleRefresh}
-                    />
-                  ) : (
-                    <Console />
-                  )}
-                </div>
-              </div>
+              )}
             </Panel>
           </Group>
         </Panel>
@@ -148,7 +208,27 @@ function App() {
         <Separator 
           className="resize-handle-horizontal" 
           onDoubleClick={() => setIsInspectorVisible(!isInspectorVisible)}
+          data-testid="inspector-separator"
         />
+        
+        {!isInspectorVisible && (
+          <div 
+            style={{ 
+              width: '15px', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              cursor: 'pointer',
+              opacity: 0.6
+            }}
+            onClick={() => setIsInspectorVisible(true)}
+            data-testid="inspector-expand-button"
+          >
+            <i className="fa-solid fa-chevron-left" style={{ fontSize: '12px' }} />
+          </div>
+        )}
+
         <Panel 
           defaultSize={20} 
           minSize={20} 
@@ -164,12 +244,20 @@ function App() {
             });
           }}
         >
-          <div className="panel-container">
-            <div className="panel-header">Inspector</div>
-            <div className="panel-content">
-              <Inspector visible={isInspectorVisible} />
+          {isInspectorVisible && (
+            <div className="panel-container" data-testid="inspector-panel">
+              <div 
+                className="panel-header" 
+                onClick={() => setIsInspectorVisible(false)}
+                style={{ cursor: 'pointer' }}
+              >
+                Inspector
+              </div>
+              <div className="panel-content">
+                <Inspector visible={isInspectorVisible} />
+              </div>
             </div>
-          </div>
+          )}
         </Panel>
       </Group>
     </div>

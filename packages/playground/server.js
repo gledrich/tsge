@@ -89,7 +89,19 @@ app.put('/api/scripts/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Dino GE Playground (${ENV}): http://localhost:${PORT}`);
   console.log(`Scripts directory: ${SCRIPTS_DIR}`);
 });
+
+// Graceful shutdown
+const shutdown = () => {
+  console.log('Shutting down server...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

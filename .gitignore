@@ -30,6 +30,13 @@ packages/*/scripts/*.js
 # API keys and secrets
 .env
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+packages/playground/playwright-report/
+packages/playground/test-results/
+
 # Editors
 .vscode/
 .idea/
