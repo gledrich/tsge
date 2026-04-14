@@ -206,7 +206,7 @@ describe('RenderingSystem', () => {
     expect(debugCtx.beginPath).toHaveBeenCalledTimes(4);
     expect(debugCtx.stroke).toHaveBeenCalledTimes(4);
     
-    // Check if moveTo was called at object center
+    // Check if moveTo was called at object centre
     expect(debugCtx.moveTo).toHaveBeenCalledWith(25, 25);
   });
 

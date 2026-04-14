@@ -62,7 +62,7 @@ export default class Line extends GameObject {
   public get startPosition(): Vector2 { return new Vector2(this.x1, this.y1); }
 
   /**
-   * Initializes a new instance of a Line.
+   * initialises a new instance of a Line.
    * @param props Configuration properties for the line.
    */
   constructor(props: LineProperties) {

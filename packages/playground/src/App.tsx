@@ -93,7 +93,7 @@ function App() {
           onDoubleClick={() => togglePanel(explorerPanelRef)}
         />
 
-        {/* Center Panel: Viewport & Editor/Console */}
+        {/* Centre Panel: Viewport & Editor/Console */}
         <Panel defaultSize={60}>
           <Group orientation="vertical">
             {/* Top: Viewport */}

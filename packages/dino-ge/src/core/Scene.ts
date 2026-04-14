@@ -10,7 +10,7 @@ export default abstract class Scene {
 
   /**
    * Called once when the scene becomes active.
-   * Useful for initializing scene-specific objects.
+   * Useful for initialising scene-specific objects.
    */
   public onLoad(): void {}
 

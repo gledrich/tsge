@@ -11,12 +11,12 @@ export default class Camera {
   public zoom: number = 1;
 
   /**
-   * Initializes a new instance of Camera.
+   * initialises a new instance of Camera.
    */
   constructor() {}
 
   /**
-   * Centers the camera on a target object.
+   * centres the camera on a target object.
    * @param target The object to follow.
    * @param viewportWidth Width of the viewport.
    * @param viewportHeight Height of the viewport.

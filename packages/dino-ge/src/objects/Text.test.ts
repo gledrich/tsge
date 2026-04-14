@@ -134,7 +134,7 @@ describe('Text', () => {
     expect(textObj.metadata.zIndex).toBe(5);
     expect(textObj.colour).toBe('black');
     expect(textObj.fontSize).toBe(25);
-    expect(textObj.horizontalAlign).toBe('center');
+    expect(textObj.horizontalAlign).toBe('centre');
     expect(textObj.verticalAlign).toBe('middle');
     // Branch: width defaulted
     expect(textObj.bounds?.width).toBe(25 * 4);

@@ -26,7 +26,7 @@ describe('Input', () => {
     // Reset private static state
     (Input as unknown as { keys: Set<string> }).keys.clear();
     (Input as unknown as { clickListeners: Set<unknown> }).clickListeners.clear();
-    (Input as unknown as { isInitialized: boolean }).isInitialized = false;
+    (Input as unknown as { isinitialised: boolean }).isinitialised = false;
     (Input as unknown as { mousePosition: Vector2 }).mousePosition = new Vector2(0, 0);
     (Input as unknown as { isDragging: boolean }).isDragging = false;
     (Input as unknown as { isResizing: boolean }).isResizing = false;

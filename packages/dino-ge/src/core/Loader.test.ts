@@ -22,7 +22,7 @@ describe('ResourceLoader', () => {
   });
 
   it('loads queued assets and triggers callback', async () => {
-    // Mock Image and its onload behavior
+    // Mock Image and its onload behaviour
     const mockImageInstance = {
       set src(_val: string) {
         setTimeout(() => {
@@ -47,7 +47,7 @@ describe('ResourceLoader', () => {
   });
 
   it('handles image loading errors', async () => {
-    // Mock Image and its onerror behavior
+    // Mock Image and its onerror behaviour
     const mockImageInstance = {
       set src(_val: string) {
         setTimeout(() => {
@@ -71,7 +71,7 @@ describe('ResourceLoader', () => {
   });
 
   it('loads queued assets without progress callback', async () => {
-    // Mock Image and its onload behavior
+    // Mock Image and its onload behaviour
     const mockImageInstance = {
       set src(_val: string) {
         setTimeout(() => {

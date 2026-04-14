@@ -64,7 +64,7 @@ export default abstract class GameObject {
   }
 
   /**
-   * Initializes a new instance of a GameObject.
+   * initialises a new instance of a GameObject.
    * @param tag A descriptive name for the object.
    * @param zIndex The rendering order (higher numbers are drawn on top).
    * @param sourceId Hidden identifier linking runtime object to its source code location.

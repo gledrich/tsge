@@ -43,11 +43,11 @@ describe('Physics', () => {
       const c1 = new Circle({
         position: new Vector2(0, 0),
         radius: 10
-      }); // Center (10, 10)
+      }); // centre (10, 10)
       const c2 = new Circle({
         position: new Vector2(10, 10),
         radius: 10
-      }); // Center (20, 20)
+      }); // centre (20, 20)
       // Distance approx 14.14 < sum of radii (20)
       expect(Physics.checkCollision(c1, c2)).toBe(true);
     });
@@ -56,11 +56,11 @@ describe('Physics', () => {
       const c1 = new Circle({
         position: new Vector2(0, 0),
         radius: 10
-      }); // Center (10, 10)
+      }); // centre (10, 10)
       const c2 = new Circle({
         position: new Vector2(30, 30),
         radius: 10
-      }); // Center (40, 40)
+      }); // centre (40, 40)
       // Distance approx 42.4 > 20
       expect(Physics.checkCollision(c1, c2)).toBe(false);
     });
@@ -76,7 +76,7 @@ describe('Physics', () => {
       const circle = new Circle({
         position: new Vector2(90, 90),
         radius: 20
-      }); // Center (110, 110)
+      }); // centre (110, 110)
       expect(Physics.checkCollision(rect, circle)).toBe(true);
     });
 
@@ -90,7 +90,7 @@ describe('Physics', () => {
         position: new Vector2(40, 0),
         radius: 20
       }); 
-      // Circle center: (60, 20)
+      // Circle centre: (60, 20)
       // Rect: (0,0) to (50,50)
       // Closest point on rect: (50, 20)
       // Vector from rect to circle: (10, 0)
@@ -118,14 +118,14 @@ describe('Physics', () => {
       expect(circle.transform.position.x).toBeGreaterThan(initialCircleX);
     });
 
-    it('resolves correctly when circle center is inside rectangle', () => {
+    it('resolves correctly when circle centre is inside rectangle', () => {
       const rect = new Rectangle({
         position: new Vector2(0, 0),
         width: 100,
         height: 100
       });
       const circle = new Circle({
-        position: new Vector2(0, 0), // Center (10, 10) - inside rect
+        position: new Vector2(0, 0), // centre (10, 10) - inside rect
         radius: 10
       });
 
@@ -136,7 +136,7 @@ describe('Physics', () => {
 
       Physics.checkCollision(rect, circle);
 
-      // Circle center (10, 10) is closest to left edge (x=0, dist=10)
+      // Circle centre (10, 10) is closest to left edge (x=0, dist=10)
       // and top edge (y=0, dist=10).
       // If it picks left edge (dLeft), it should be pushed LEFT.
       // initialCircleX=0, so new x should be < 0.
@@ -556,7 +556,7 @@ describe('Physics', () => {
   describe('Edge Cases and Branch Coverage', () => {
     it('flips normal correctly in Rect vs Circle', () => {
       const rect = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
-      const circle = new Circle({ position: new Vector2(40, 0), radius: 25 }); // Center (65, 25)
+      const circle = new Circle({ position: new Vector2(40, 0), radius: 25 }); // centre (65, 25)
 
       const manifold = Physics.getCollisionManifold(rect, circle);
       expect(manifold).not.toBeNull();
@@ -565,9 +565,9 @@ describe('Physics', () => {
     });
 
     it('resolves AABB collision on X axis with 0 diff', () => {
-      // Objects perfectly aligned on X center.
-      // width 50. r1 pos -25 (center 0). r2 pos -20 (center 5). diff.x = 5.
-      // To get diff.x = 0, they must have same center X.
+      // Objects perfectly aligned on X centre.
+      // width 50. r1 pos -25 (centre 0). r2 pos -20 (centre 5). diff.x = 5.
+      // To get diff.x = 0, they must have same centre X.
       const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 100 });
       const r2 = new Rectangle({ position: new Vector2(0, 40), width: 50, height: 100 });
       // overlapX = 50. overlapY = 100 - 40 = 60.
@@ -661,26 +661,26 @@ describe('Physics', () => {
       expect(phys1.velocity.x).toBe(initialVel.x);
     });
 
-    it('handles circle centered inside rectangle (all edges)', () => {
+    it('handles circle centreed inside rectangle (all edges)', () => {
       const rect = new Rectangle({ position: new Vector2(0, 0), width: 100, height: 100 });
 
       // Closer to left
-      const cLeft = new Circle({ position: new Vector2(0, 40), radius: 10 }); // Center (10, 50)
+      const cLeft = new Circle({ position: new Vector2(0, 40), radius: 10 }); // centre (10, 50)
       let m = Physics.getCollisionManifold(cLeft, rect);
       expect(m!.normal.x).toBe(1);
 
       // Closer to right
-      const cRight = new Circle({ position: new Vector2(80, 40), radius: 10 }); // Center (90, 50)
+      const cRight = new Circle({ position: new Vector2(80, 40), radius: 10 }); // centre (90, 50)
       m = Physics.getCollisionManifold(cRight, rect);
       expect(m!.normal.x).toBe(-1);
 
       // Closer to top
-      const cTop = new Circle({ position: new Vector2(40, 0), radius: 10 }); // Center (50, 10)
+      const cTop = new Circle({ position: new Vector2(40, 0), radius: 10 }); // centre (50, 10)
       m = Physics.getCollisionManifold(cTop, rect);
       expect(m!.normal.y).toBe(1);
 
       // Closer to bottom
-      const cBottom = new Circle({ position: new Vector2(40, 80), radius: 10 }); // Center (50, 90)
+      const cBottom = new Circle({ position: new Vector2(40, 80), radius: 10 }); // centre (50, 90)
       m = Physics.getCollisionManifold(cBottom, rect);
       expect(m!.normal.y).toBe(-1);
     });
@@ -693,7 +693,7 @@ describe('Physics', () => {
       const o2 = new Rectangle({ position: new Vector2(0, 0), width: 100, height: 100 });
 
       // o1 has no bounds (w1=0, h1=0). o2 has width 100, height 100.
-      // center1 = (10, 10). center2 = (50, 50). diff = (40, 40).
+      // centre1 = (10, 10). centre2 = (50, 50). diff = (40, 40).
       // overlapX = (0 + 50) - 40 = 10.
       // overlapY = (0 + 50) - 40 = 10.
       // Both positive
@@ -711,11 +711,11 @@ describe('Physics', () => {
       // rectWidth/rectHeight will be 0.
       // closestX = max(5, min(5, 5+0)) = 5
       // closestY = max(5, min(5, 5+0)) = 5
-      // dist to (5,5) from center (5,5) is 0.
+      // dist to (5,5) from centre (5,5) is 0.
       // distSq = 0. Hits dist === 0 branch.
       const manifold = Physics.getCollisionManifold(circle, rect);
       expect(manifold).not.toBeNull();
-      // radius 10 - dist(center(10,10) to closest(5,5) which is sqrt(50))
+      // radius 10 - dist(centre(10,10) to closest(5,5) which is sqrt(50))
       // 10 - 7.071 = 2.9289...
       expect(manifold!.depth).toBeCloseTo(2.9289);
     });

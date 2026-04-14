@@ -20,7 +20,7 @@ export default class RenderingSystem extends System {
   }
 
   /**
-   * Updates the rendering context (used when the engine is re-initialized).
+   * Updates the rendering context (used when the engine is re-initialised).
    * @param ctx The new canvas rendering context.
    */
   public setContext(ctx: CanvasRenderingContext2D): void {
@@ -65,10 +65,10 @@ export default class RenderingSystem extends System {
         const { obj1, obj2, normal } = manifold;
         const opacity = 1 - (now - timestamp) / TTL;
         
-        // Calculate contact point (approx center between objects along normal)
+        // Calculate contact point (approx centre between objects along normal)
         const pos1 = obj1.transform.worldPosition;
         const pos2 = obj2.transform.worldPosition;
-        const center = new Vector2(
+        const centre = new Vector2(
           (pos1.x + pos2.x) / 2,
           (pos1.y + pos2.y) / 2
         );
@@ -80,14 +80,14 @@ export default class RenderingSystem extends System {
         this.ctx.lineWidth = 2 / Engine.camera.zoom;
         
         // Draw Normal
-        this.ctx.moveTo(center.x, center.y);
-        this.ctx.lineTo(center.x + normal.x * 20, center.y + normal.y * 20);
+        this.ctx.moveTo(centre.x, centre.y);
+        this.ctx.lineTo(centre.x + normal.x * 20, centre.y + normal.y * 20);
         this.ctx.stroke();
 
         // Draw Dot at contact
         this.ctx.fillStyle = '#ff00ff';
         this.ctx.beginPath();
-        this.ctx.arc(center.x, center.y, 3 / Engine.camera.zoom, 0, Math.PI * 2);
+        this.ctx.arc(centre.x, centre.y, 3 / Engine.camera.zoom, 0, Math.PI * 2);
         this.ctx.fill();
 
         this.ctx.restore();
@@ -155,15 +155,15 @@ export default class RenderingSystem extends System {
 
           // Draw Physics Vectors
           if (physics && Engine.showPhysicsVectors) {
-            const centerX = worldPosition.x + width / 2;
-            const centerY = worldPosition.y + height / 2;
+            const centreX = worldPosition.x + width / 2;
+            const centreY = worldPosition.y + height / 2;
 
             // Velocity (Blue)
             if (physics.velocity.x !== 0 || physics.velocity.y !== 0) {
               this.ctx.beginPath();
               this.ctx.strokeStyle = '#00bbff';
-              this.ctx.moveTo(centerX, centerY);
-              this.ctx.lineTo(centerX + physics.velocity.x, centerY + physics.velocity.y);
+              this.ctx.moveTo(centreX, centreY);
+              this.ctx.lineTo(centreX + physics.velocity.x, centreY + physics.velocity.y);
               this.ctx.stroke();
             }
 
@@ -171,8 +171,8 @@ export default class RenderingSystem extends System {
             if (physics.acceleration.x !== 0 || physics.acceleration.y !== 0) {
               this.ctx.beginPath();
               this.ctx.strokeStyle = '#ff9900';
-              this.ctx.moveTo(centerX, centerY);
-              this.ctx.lineTo(centerX + physics.acceleration.x, centerY + physics.acceleration.y);
+              this.ctx.moveTo(centreX, centreY);
+              this.ctx.lineTo(centreX + physics.acceleration.x, centreY + physics.acceleration.y);
               this.ctx.stroke();
             }
           }

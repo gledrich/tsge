@@ -11,18 +11,18 @@ export default class Input {
   private static mousePosition: Vector2 = new Vector2(0, 0);
   private static clickListeners: Set<(pos: Vector2) => void> = new Set();
   private static keys: Set<string> = new Set();
-  private static isInitialized = false;
+  private static isinitialised = false;
 
   private static isDragging = false;
   private static isResizing = false;
   private static dragOffset: Vector2 = new Vector2(0, 0);
 
   /**
-   * Initializes input event listeners.
+   * initialises input event listeners.
    */
   static init() {
-    if (this.isInitialized) return;
-    this.isInitialized = true;
+    if (this.isinitialised) return;
+    this.isinitialised = true;
 
     document.addEventListener('mousemove', (event: MouseEvent) => {
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;

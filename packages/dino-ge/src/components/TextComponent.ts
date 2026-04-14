@@ -115,14 +115,14 @@ export default class TextComponent extends RenderComponent {
 
     ctx.font = this.font;
     ctx.fillStyle = this.colour;
-    ctx.textAlign = this.horizontalAlign;
+    ctx.textAlign = (this.horizontalAlign === 'centre' ? 'center' : this.horizontalAlign) as CanvasTextAlign;
     ctx.textBaseline = this.verticalAlign;
 
     // Calculate draw position based on alignment
     let x = 0;
     let y = 0;
 
-    if (this.horizontalAlign === 'center') x = width / 2;
+    if (this.horizontalAlign === 'centre') x = width / 2;
     else if (this.horizontalAlign === 'right' || this.horizontalAlign === 'end') x = width;
 
     if (this.verticalAlign === 'middle') y = height / 2;

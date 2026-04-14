@@ -44,7 +44,7 @@ export default class Tilemap extends GameObject {
   public tilesetCols: number;
 
   /**
-   * Initializes a new instance of a Tilemap.
+   * initialises a new instance of a Tilemap.
    * @param props Configuration properties for the tilemap.
    */
   constructor(props: TilemapProps) {

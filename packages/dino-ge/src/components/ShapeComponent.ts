@@ -117,7 +117,7 @@ export default class ShapeComponent extends RenderComponent {
     } else if (this.type === 'circle') {
       const radius = width / 2;
       ctx.beginPath();
-      // In local space center is at (radius, radius)
+      // In local space centre is at (radius, radius)
       ctx.arc(radius, radius, radius, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();

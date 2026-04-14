@@ -49,13 +49,13 @@ const Viewport: React.FC = () => {
           justifyContent: 'center',
           background: 'var(--bg-primary)',
           zIndex: 200,
-          color: 'var(--accent-primary)',
+          colour: 'var(--accent-primary)',
           flexDirection: 'column',
           gap: '15px'
         }}>
           <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '40px' }} />
           <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>
-            Initializing Engine
+            initialising Engine
           </span>
         </div>
       )}

@@ -50,9 +50,9 @@ export default class Circle extends GameObject {
   public colour: string;
 
   /**
-   * The center point of the circle in world space.
+   * The centre point of the circle in world space.
    */
-  public get center(): Vector2 {
+  public get centre(): Vector2 {
     const r = this.radius * this.transform.worldScale.x;
     return this.transform.worldPosition.add(new Vector2(r, r));
   }
@@ -65,7 +65,7 @@ export default class Circle extends GameObject {
   }
 
   /**
-   * Initializes a new instance of a Circle.
+   * initialises a new instance of a Circle.
    * @param props Configuration properties for the circle.
    */
   constructor(props: CircleProps) {

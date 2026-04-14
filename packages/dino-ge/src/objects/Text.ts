@@ -7,7 +7,7 @@ import VisibilityComponent from '../components/VisibilityComponent.js';
 import PhysicsComponent from '../components/PhysicsComponent.js';
 
 /** Horizontal alignment options for text. */
-export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
+export type HorizontalAlign = 'left' | 'right' | 'centre' | 'start' | 'end';
 /** Vertical alignment options for text. */
 export type VerticalAlign =
   | 'top'
@@ -71,7 +71,7 @@ const defaultProps = {
   fontSize: '25', // px
   font: 'Helvetica',
   text: '',
-  horizontalAlign: 'center',
+  horizontalAlign: 'centre',
   verticalAlign: 'middle',
   position: new Vector2(0, 0),
   zIndex: 0,
@@ -111,7 +111,7 @@ export default class Text extends GameObject {
   /** Number of characters in the text string. */
   public length: number;
 
-  /** Horizontal alignment ('left', 'center', 'right'). */
+  /** Horizontal alignment ('left', 'centre', 'right'). */
   public get horizontalAlign(): HorizontalAlign { return this._textComponent.horizontalAlign; }
   public set horizontalAlign(val: HorizontalAlign) { this._textComponent.horizontalAlign = val; }
 
@@ -131,7 +131,7 @@ export default class Text extends GameObject {
   public onClick: () => void = function defaultOnClick() {};
 
   /**
-   * Initializes a new instance of a Text object.
+   * initialises a new instance of a Text object.
    * @param props Configuration properties for the text.
    */
   constructor(props: TextProperties) {

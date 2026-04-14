@@ -11,7 +11,7 @@ export default class Canvas {
   private _resizeObserver?: ResizeObserver;
 
   /**
-   * Initializes a new instance of Canvas.
+   * initialises a new instance of Canvas.
    * @param parentElement Optional HTML element to inject the canvas into.
    */
   constructor(parentElement?: HTMLElement) {

@@ -10,7 +10,7 @@ describe('TextComponent', () => {
       'Hello',
       '20px Arial',
       'white',
-      'center',
+      'centre',
       'middle',
       100,
       40,
@@ -20,7 +20,7 @@ describe('TextComponent', () => {
     expect(component.text).toBe('Hello');
     expect(component.font).toBe('20px Arial');
     expect(component.colour).toBe('white');
-    expect(component.horizontalAlign).toBe('center');
+    expect(component.horizontalAlign).toBe('centre');
     expect(component.verticalAlign).toBe('middle');
     expect(component.width).toBe(100);
     expect(component.height).toBe(40);
@@ -32,7 +32,7 @@ describe('TextComponent', () => {
       'Test',
       '10px Arial',
       'black',
-      'center',
+      'centre',
       'middle',
       50,
       20,

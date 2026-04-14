@@ -13,7 +13,7 @@ import PhysicsComponent from '../components/PhysicsComponent.js';
 import { ObjectSet } from './ObjectSet.js';
 
 /**
- * Options for initializing the Engine.
+ * Options for initialising the Engine.
  */
 export interface EngineOpts {
   /** The ID of the HTML element to inject the canvas into. */
@@ -32,7 +32,7 @@ export interface EngineOpts {
  * Lifecycle and update callbacks for the engine.
  */
 export interface EngineCallbacks {
-  /** Called once after the engine is initialized. */
+  /** Called once after the engine is initialised. */
   onLoad?: () => void;
   /** Called every frame for game logic and rendering. */
   update: () => void;
@@ -283,7 +283,7 @@ export default class Engine {
   private _fpsValues: number[] = [];
 
   /**
-   * Initializes a new instance of the Engine.
+   * initialises a new instance of the Engine.
    * @param callbacks Lifecycle and update callbacks.
    * @param opts Configuration options for the engine.
    */

@@ -24,7 +24,7 @@ describe('Camera', () => {
     const target = new MockGameObject('test', 0);
     target.transform.position = new Vector2(100, 100);
     
-    // Viewport 800x600. Target center is (125, 125).
+    // Viewport 800x600. Target centre is (125, 125).
     // Camera pos should be 125 - 400 = -275, 125 - 300 = -175
     camera.follow(target, 800, 600);
     
@@ -38,7 +38,7 @@ describe('Camera', () => {
     const target = new NoBoundsObject('test', 0);
     target.transform.position = new Vector2(100, 100);
     
-    // Viewport 800x600. Target center is (100, 100) since bounds are 0.
+    // Viewport 800x600. Target centre is (100, 100) since bounds are 0.
     // Camera pos should be 100 - 400 = -300, 100 - 300 = -200
     camera.follow(target, 800, 600);
     

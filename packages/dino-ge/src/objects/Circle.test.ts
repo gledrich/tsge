@@ -19,15 +19,15 @@ describe('Circle', () => {
     expect(circle.metadata.zIndex).toBe(0);
   });
 
-  it('calculates center point correctly', () => {
+  it('calculates centre point correctly', () => {
     const circle = new Circle({
       position: new Vector2(10, 10),
       radius: 20
     });
     
-    // center should be (10+20, 10+20) = (30, 30)
-    expect(circle.center.x).toBe(30);
-    expect(circle.center.y).toBe(30);
+    // centre should be (10+20, 10+20) = (30, 30)
+    expect(circle.centre.x).toBe(30);
+    expect(circle.centre.y).toBe(30);
   });
 
   it('adds ShapeComponent on creation', () => {

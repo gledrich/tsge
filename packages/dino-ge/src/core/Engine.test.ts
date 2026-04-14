@@ -298,7 +298,7 @@ describe('Engine', () => {
     jest.advanceTimersByTime(1);
   });
 
-  it('initializes with containerId', () => {
+  it('initialises with containerId', () => {
     const container = document.createElement('div');
     container.id = 'my-custom-container';
     document.body.appendChild(container);
@@ -309,7 +309,7 @@ describe('Engine', () => {
     expect(document.getElementById('canvas-container')).toBeNull();
   });
 
-  it('handles missing head during initialization', () => {
+  it('handles missing head during initialisation', () => {
     // Mock getElementsByTagName to return empty for 'head'
     const originalGetTags = document.getElementsByTagName;
     const spy = jest.spyOn(document, 'getElementsByTagName').mockImplementation((tag) => {

@@ -48,7 +48,7 @@ export default class Rectangle extends GameObject {
   public colour: string;
 
   /**
-   * Initializes a new instance of a Rectangle.
+   * initialises a new instance of a Rectangle.
    * @param props Configuration properties for the rectangle.
    */
   constructor(props: RectProps) {

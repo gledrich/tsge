@@ -121,7 +121,7 @@ export default class Sprite extends GameObject {
   }
 
   /**
-   * Initializes a new instance of a Sprite.
+   * initialises a new instance of a Sprite.
    * @param props Configuration properties for the sprite.
    */
   constructor(props: SpriteProps) {

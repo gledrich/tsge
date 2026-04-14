@@ -63,7 +63,7 @@ export default class Physics {
     const r2 = c2.worldRadius;
     const combinedRadius = r1 + r2;
 
-    const diff = c2.center.clone().subtract(c1.center);
+    const diff = c2.centre.clone().subtract(c1.centre);
     const distSq = diff.x * diff.x + diff.y * diff.y;
 
     if (distSq > combinedRadius * combinedRadius) return null;
@@ -90,10 +90,10 @@ export default class Physics {
     const pos1 = obj1.transform.worldPosition;
     const pos2 = obj2.transform.worldPosition;
 
-    // Center to center distance in world space
-    const center1 = new Vector2(pos1.x + w1 / 2, pos1.y + h1 / 2);
-    const center2 = new Vector2(pos2.x + w2 / 2, pos2.y + h2 / 2);
-    const diff = center2.clone().subtract(center1);
+    // centre to centre distance in world space
+    const centre1 = new Vector2(pos1.x + w1 / 2, pos1.y + h1 / 2);
+    const centre2 = new Vector2(pos2.x + w2 / 2, pos2.y + h2 / 2);
+    const diff = centre2.clone().subtract(centre1);
 
     // Overlap on x and y axes
     const overlapX = (w1 / 2 + w2 / 2) - Math.abs(diff.x);
@@ -122,17 +122,17 @@ export default class Physics {
 
   private static circleVsRect(circle: Circle, rect: GameObject): CollisionManifold | null {
     const cRadius = circle.worldRadius;
-    const cCenter = circle.center;
+    const ccentre = circle.centre;
 
     const rScale = rect.transform.worldScale;
     const rectWidth = (rect.bounds?.width ?? 0) * rScale.x;
     const rectHeight = (rect.bounds?.height ?? 0) * rScale.y;
     const rectPos = rect.transform.worldPosition;
 
-    const closestX = Math.max(rectPos.x, Math.min(cCenter.x, rectPos.x + rectWidth));
-    const closestY = Math.max(rectPos.y, Math.min(cCenter.y, rectPos.y + rectHeight));
+    const closestX = Math.max(rectPos.x, Math.min(ccentre.x, rectPos.x + rectWidth));
+    const closestY = Math.max(rectPos.y, Math.min(ccentre.y, rectPos.y + rectHeight));
 
-    const diff = new Vector2(closestX, closestY).subtract(cCenter);
+    const diff = new Vector2(closestX, closestY).subtract(ccentre);
     const distSq = diff.x * diff.x + diff.y * diff.y;
 
     if (distSq > cRadius * cRadius) return null;
@@ -142,11 +142,11 @@ export default class Physics {
     let depth: number;
 
     if (dist === 0) {
-      // Circle center is inside the rectangle
-      const dLeft = cCenter.x - rectPos.x;
-      const dRight = rectPos.x + rectWidth - cCenter.x;
-      const dTop = cCenter.y - rectPos.y;
-      const dBottom = rectPos.y + rectHeight - cCenter.y;
+      // Circle centre is inside the rectangle
+      const dLeft = ccentre.x - rectPos.x;
+      const dRight = rectPos.x + rectWidth - ccentre.x;
+      const dTop = ccentre.y - rectPos.y;
+      const dBottom = rectPos.y + rectHeight - ccentre.y;
 
       const minDist = Math.min(dLeft, dRight, dTop, dBottom);
       depth = cRadius + minDist;

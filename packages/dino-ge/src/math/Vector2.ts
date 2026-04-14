@@ -28,7 +28,7 @@ export default class Vector2 {
   }
 
   /**
-   * Initializes a new instance of Vector2.
+   * initialises a new instance of Vector2.
    * @param x Initial x coordinate.
    * @param y Initial y coordinate.
    */
