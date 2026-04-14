@@ -73,6 +73,7 @@ describe('Engine', () => {
       stroke: jest.fn(),
       arc: jest.fn(),
       fill: jest.fn(),
+      setLineDash: jest.fn(),
       closePath: jest.fn(),
       drawImage: jest.fn(),
       translate: jest.fn(),

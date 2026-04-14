@@ -117,10 +117,17 @@ export default class RenderingSystem extends System {
 
         // Draw debug overlays in world space
         if (debug) {
+          const physics = object.getComponent(PhysicsComponent);
           this.ctx.save();
           this.ctx.strokeStyle = object === Engine.selectedObject ? '#00ff00' : 'red';
           this.ctx.lineWidth = (object === Engine.selectedObject ? 2 : 1) / Engine.camera.zoom;
+          
+          if (physics?.isSensor) {
+            this.ctx.setLineDash([5 / Engine.camera.zoom, 5 / Engine.camera.zoom]);
+          }
+
           this.ctx.strokeRect(worldPosition.x, worldPosition.y, width, height);
+          this.ctx.setLineDash([]);
 
           // Draw resize handle if selected
           if (object === Engine.selectedObject) {
@@ -147,7 +154,6 @@ export default class RenderingSystem extends System {
           this.ctx.fillText(object.metadata.tag || 'obj', worldPosition.x, worldPosition.y - (5 / Engine.camera.zoom));
 
           // Draw Physics Vectors
-          const physics = object.getComponent(PhysicsComponent);
           if (physics && Engine.showPhysicsVectors) {
             const centerX = worldPosition.x + width / 2;
             const centerY = worldPosition.y + height / 2;

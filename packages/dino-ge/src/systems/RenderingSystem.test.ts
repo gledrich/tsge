@@ -42,6 +42,7 @@ describe('RenderingSystem', () => {
       lineTo: jest.fn(),
       arc: jest.fn(),
       fill: jest.fn(),
+      setLineDash: jest.fn(),
       canvas: { width: 800, height: 600 },
       strokeStyle: '',
       fillStyle: '',
@@ -261,6 +262,36 @@ describe('RenderingSystem', () => {
     Engine.zOrderDirty = true;
     system.update(new Set(), 0.016, true);
     expect(Engine.debugCollisions.length).toBe(0);
+  });
+
+  it('draws dashed debug box for sensor objects', () => {
+    const system = new RenderingSystem(mockCtx);
+    const obj = new MockGameObject('sensor', 0);
+    const phys = new PhysicsComponent();
+    phys.isSensor = true;
+    obj.addComponent(phys);
+
+    const debugCtx = {
+      ...mockCtx,
+      save: jest.fn(),
+      restore: jest.fn(),
+      setLineDash: jest.fn(),
+      strokeRect: jest.fn(),
+      fillText: jest.fn(),
+      strokeStyle: '',
+      lineWidth: 0,
+      font: '',
+      fillStyle: ''
+    } as unknown as CanvasRenderingContext2D;
+    system.setContext(debugCtx);
+
+    const entities = new Set([obj]);
+    Engine.debug = true;
+    Engine.zOrderDirty = true;
+    system.update(entities, 0.016, true);
+
+    expect(debugCtx.setLineDash).toHaveBeenCalledWith([5, 5]);
+    expect(debugCtx.setLineDash).toHaveBeenCalledWith([]);
   });
 
   it('respects showPhysicsVectors flag', () => {

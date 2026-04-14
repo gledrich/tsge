@@ -278,6 +278,21 @@ describe('Sprite', () => {
     expect(pc?.isStatic).toBe(true);
     expect(pc?.restitution).toBe(0.5);
     expect(pc?.friction).toBe(0.2);
+    expect(pc?.isSensor).toBe(false);
+  });
+
+  it('initialises with isSensor set to true', () => {
+    const obj = new Sprite({ 
+      tag: "test", 
+      img: "dino", 
+      rows: 1, 
+      cols: 10, 
+      physics: { 
+        isSensor: true 
+      } 
+    });
+    const pc = obj.getComponent(PhysicsComponent);
+    expect(pc?.isSensor).toBe(true);
   });
 
   it('initialises with partial physics options', () => {

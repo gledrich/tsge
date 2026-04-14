@@ -30,6 +30,7 @@ export interface CircleProps {
     isStatic?: boolean;
     restitution?: number;
     friction?: number;
+    isSensor?: boolean;
   };
 }
 
@@ -102,6 +103,7 @@ export default class Circle extends GameObject {
       if (props.physics.isStatic !== undefined) pc.isStatic = props.physics.isStatic;
       if (props.physics.restitution !== undefined) pc.restitution = props.physics.restitution;
       if (props.physics.friction !== undefined) pc.friction = props.physics.friction;
+      if (props.physics.isSensor !== undefined) pc.isSensor = props.physics.isSensor;
       this.addComponent(pc);
     }
 

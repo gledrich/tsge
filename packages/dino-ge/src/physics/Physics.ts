@@ -189,8 +189,9 @@ export default class Physics {
     const phys2 = obj2.getComponent(PhysicsComponent);
     const obj1Static = phys1?.isStatic ?? true;
     const obj2Static = phys2?.isStatic ?? true;
+    const isSensor = (phys1?.isSensor ?? false) || (phys2?.isSensor ?? false);
 
-    if (!obj1Static || !obj2Static) {
+    if ((!obj1Static || !obj2Static) && !isSensor) {
       this.resolveCollision(manifold, phys1, phys2);
     }
 

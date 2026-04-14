@@ -82,6 +82,19 @@ describe('Line', () => {
     expect(pc?.isStatic).toBe(true);
     expect(pc?.restitution).toBe(0.5);
     expect(pc?.friction).toBe(0.2);
+    expect(pc?.isSensor).toBe(false);
+  });
+
+  it('initialises with isSensor set to true', () => {
+    const obj = new Line({ 
+      p1: new Vector2(), 
+      p2: new Vector2(), 
+      physics: { 
+        isSensor: true 
+      } 
+    });
+    const pc = obj.getComponent(PhysicsComponent);
+    expect(pc?.isSensor).toBe(true);
   });
 
   it('initialises with partial physics options', () => {

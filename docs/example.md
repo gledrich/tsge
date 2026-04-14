@@ -177,6 +177,7 @@ class PlayScene extends Scene {
           this.onGameOver(finalScore);
         } else {
           this.isInvulnerable = true;
+          this.player.getComponent(PhysicsComponent).isSensor = true;
           this.lastHitTime = Date.now();
           this.spawnExplosion(this.player.transform.position, 20, '#F94144');
           other.destroySelf();
@@ -342,10 +343,11 @@ class PlayScene extends Scene {
       const visibility = this.player.getComponent(VisibilityComponent);
       if (visibility) {
         visibility.visible = Math.floor(now / 100) % 2 === 0;
-        if (now - this.lastHitTime > this.invulnerabilityDuration) {
-          this.isInvulnerable = false;
-          visibility.visible = true;
-        }
+      }
+      if (now - this.lastHitTime > this.invulnerabilityDuration) {
+        this.isInvulnerable = false;
+        this.player.getComponent(PhysicsComponent).isSensor = false;
+        if (visibility) visibility.visible = true;
       }
     }
 
