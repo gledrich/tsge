@@ -28,6 +28,7 @@ export default [
         project: './packages/dino-ge/tsconfig.json'
       },
       globals: {
+        ...globals.browser,
         ...globals.jest
       }
     },
@@ -35,7 +36,8 @@ export default [
       '@typescript-eslint': tsPlugin
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules
+      ...tsPlugin.configs.recommended.rules,
+      'no-undef': 'off'
     }
   },
   // React specific config for the playground

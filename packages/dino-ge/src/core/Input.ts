@@ -187,6 +187,18 @@ export default class Input {
     });
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target && (
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable === true ||
+          (typeof target.getAttribute === 'function' && target.getAttribute('contenteditable') === 'true')
+        )
+      ) {
+        return;
+      }
+
       const key = String(event.key).toLowerCase();
       this.keys.add(key);
 
