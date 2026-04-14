@@ -274,9 +274,32 @@ export const getSurgicalEdit = (
     
     const topProp = paths[0];
     
-    // If topProp already exists, we shouldn't insert another topProp at the root.
-    if (mapping.properties[topProp]) {
+    // If topProp already exists and it's NOT physics, we shouldn't insert another topProp at the root.
+    // If it IS physics, we might want to insert into it if it's missing the subproperty.
+    if (mapping.properties[topProp] && topProp !== 'physics') {
       return null; // Deep insertion not supported cleanly without rewriting parent node
+    }
+
+    if (topProp === 'physics' && mapping.properties['physics']) {
+      // Insert into existing physics object
+      const physMapping = mapping.properties['physics'];
+      const subProp = paths[1];
+      if (physMapping.properties && physMapping.properties[subProp]) {
+        return null; // Should have been handled by Priority 1
+      }
+
+      let insertionText = ` ${subProp}: ${formattedVal},`;
+      if (paths.length === 3 && (paths[2] === 'x' || paths[2] === 'y')) {
+        const x = paths[2] === 'x' ? value : getRuntimeValue(`physics.${subProp}.x`);
+        const y = paths[2] === 'y' ? value : getRuntimeValue(`physics.${subProp}.y`);
+        insertionText = ` ${subProp}: new Vector2(${x}, ${y}),`;
+      }
+
+      return {
+        start: physMapping.valueStart + 1,
+        end: physMapping.valueStart + 1,
+        newText: insertionText
+      };
     }
 
     let insertionText = `\n    ${topProp}: `;
