@@ -486,7 +486,7 @@ class GameOverScene extends Scene {
     });
   }
 
-  onResize(width, height) {
+  onResize(width) {
     if (
       this.gameOverText &&
       this.finalScoreText &&

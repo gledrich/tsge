@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
+import * as Dino from 'dino-ge';
 import { getScript, getFilesList, setCurrentScriptId, updateScript } from '../utils/helpers';
-import { Edit, instrumentCode } from '../utils/ast-utils';
+import { Edit, instrumentCode, getSourceMapping } from '../utils/ast-utils';
 import { useMonacoEditor } from '../hooks/useMonacoEditor';
 import '../styles/editor.css';
 
@@ -53,6 +54,38 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
     };
     loadScript();
   }, [currentScriptId, formatCode]);
+
+  useEffect(() => {
+    const onSelectedObjectChanged = (e: any) => {
+      const obj = e.detail as Dino.GameObject | null;
+      if (obj && obj.metadata.sourceId) {
+        const mapping = getSourceMapping()[obj.metadata.sourceId];
+        if (mapping) {
+          const editor = monacoEditorRef.current;
+          if (editor) {
+            const model = editor.getModel();
+            if (model) {
+              const startPos = model.getPositionAt(mapping.start);
+              editor.revealPositionInCenter(startPos);
+              editor.setPosition(startPos);
+            }
+          }
+        }
+      }
+    };
+
+    Dino.Engine.on('selectedObjectChanged', onSelectedObjectChanged);
+    
+    // If an object is already selected when the editor mounts, scroll to it
+    if (Dino.Engine.selectedObject) {
+      onSelectedObjectChanged({ detail: Dino.Engine.selectedObject });
+    }
+
+    return () => {
+      Dino.Engine.off('selectedObjectChanged', onSelectedObjectChanged);
+    };
+  }, [monacoEditorRef]);
+
 
   useEffect(() => {
     const handleInsertText = (e: Event) => {
