@@ -67,9 +67,10 @@ export default abstract class GameObject {
    * Initializes a new instance of a GameObject.
    * @param tag A descriptive name for the object.
    * @param zIndex The rendering order (higher numbers are drawn on top).
+   * @param sourceId Hidden identifier linking runtime object to its source code location.
    */
-  constructor(tag: string = 'obj', zIndex: number = 0) {
-    this.addComponent(new TagComponent(tag, zIndex));
+  constructor(tag: string = 'obj', zIndex: number = 0, sourceId?: string) {
+    this.addComponent(new TagComponent(tag, zIndex, sourceId));
     this.addComponent(new TransformComponent());
   }
 

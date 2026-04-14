@@ -2,6 +2,8 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import LineComponent from './LineComponent.js';
 import BoundsComponent from './BoundsComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /**
  * Configuration for creating a Line object.
@@ -9,6 +11,8 @@ import BoundsComponent from './BoundsComponent.js';
 export interface LineProperties {
   /** Unique tag for identification. */
   tag?: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  __sourceId?: string;
   /** Stroke width of the line. */
   width?: number;
   /** Start point of the line. */
@@ -17,6 +21,17 @@ export interface LineProperties {
   p2: Vector2;
   /** Render order (lower is background). */
   zIndex?: number;
+  /** Whether the line is initially visible. */
+  visible?: boolean;
+  /** Initial physics configuration. */
+  physics?: {
+    velocity?: Vector2;
+    acceleration?: Vector2;
+    mass?: number;
+    isStatic?: boolean;
+    restitution?: number;
+    friction?: number;
+  };
 }
 
 const defaultProps = {
@@ -50,7 +65,7 @@ export default class Line extends GameObject {
    * @param props Configuration properties for the line.
    */
   constructor(props: LineProperties) {
-    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
+    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex, props.__sourceId);
 
     const defaultedProps = {
       ...defaultProps,
@@ -72,6 +87,21 @@ export default class Line extends GameObject {
     this.addComponent(this.bounds);
 
     this.addComponent(new LineComponent(this.strokeWidth, defaultedProps.p1, defaultedProps.p2));
+
+    if (props.visible !== undefined) {
+      this.addComponent(new VisibilityComponent(props.visible));
+    }
+
+    if (props.physics) {
+      const pc = new PhysicsComponent();
+      if (props.physics.velocity) pc.velocity.copy(props.physics.velocity);
+      if (props.physics.acceleration) pc.acceleration.copy(props.physics.acceleration);
+      if (props.physics.mass !== undefined) pc.mass = props.physics.mass;
+      if (props.physics.isStatic !== undefined) pc.isStatic = props.physics.isStatic;
+      if (props.physics.restitution !== undefined) pc.restitution = props.physics.restitution;
+      if (props.physics.friction !== undefined) pc.friction = props.physics.friction;
+      this.addComponent(pc);
+    }
 
     this.registerSelf();
   }
