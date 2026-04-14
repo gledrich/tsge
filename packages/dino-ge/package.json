@@ -19,5 +19,27 @@
   "devDependencies": {
     "typedoc": "^0.28.18",
     "typescript": "^5.8.2"
-  }
+  },
+  "keywords": [
+    "game-engine",
+    "2d-game-engine",
+    "typescript",
+    "gamedev",
+    "html5",
+    "canvas",
+    "browser-game",
+    "ecs",
+    "entity-component-system",
+    "physics",
+    "2d-physics",
+    "collision",
+    "sprite",
+    "sprite-animation",
+    "spritesheet",
+    "camera",
+    "scene-management",
+    "asset-loader",
+    "lightweight",
+    "pixel-art"
+  ]
 }
