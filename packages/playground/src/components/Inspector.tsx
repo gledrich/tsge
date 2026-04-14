@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import * as Dino from 'dino-ge';
 import InspectorRow, { InspectableObject, PropertyRowDef, resolveComponentPath } from './InspectorRow';
 import { getSurgicalEdit, Edit } from '../utils/ast-utils';
+import { usePlayground } from '../context/PlaygroundContext';
 import '../styles/inspector.css';
 
 const { Engine } = Dino;
@@ -52,13 +53,12 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
 };
 
 const Inspector: React.FC<InspectorProps> = ({ visible }) => {
+  const { isDebug } = usePlayground();
   const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(Engine.selectedObject as InspectableObject | null);
-  const [isDebug, setIsDebug] = useState(Engine.debug);
   const [isApplying, setIsApplying] = useState(false);
   const [syntaxError, setSyntaxError] = useState<string | null>(null);
   const [, setTick] = useState(0);
 
-  // Sync state using events and throttled polling for properties
   useEffect(() => {
     if (!visible) return;
 
@@ -66,34 +66,27 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
       setSelectedObject(e.detail as InspectableObject | null);
     };
 
-    const onDebugChanged = (e: any) => {
-      setIsDebug(e.detail);
-    };
-
     const onSyntaxError = (e: Event) => {
       const customEvent = e as CustomEvent<string | null>;
       setSyntaxError(customEvent.detail);
     };
 
-    Engine.on('selectedObjectChanged', onSelectedObjectChanged);
-    Engine.on('debug', onDebugChanged);
-    window.addEventListener('playground-syntax-error', onSyntaxError);
-
-    // Sync properties when engine updates
     const onEngineUpdate = () => {
       setTick(t => t + 1);
     };
+
+    Engine.on('selectedObjectChanged', onSelectedObjectChanged);
+    window.addEventListener('playground-syntax-error', onSyntaxError);
     window.addEventListener('playground-update-inspector', onEngineUpdate);
 
     return () => {
       Engine.off('selectedObjectChanged', onSelectedObjectChanged);
-      Engine.off('debug', onDebugChanged);
       window.removeEventListener('playground-syntax-error', onSyntaxError);
       window.removeEventListener('playground-update-inspector', onEngineUpdate);
     };
   }, [visible]);
 
-  const handleApplyToCode = () => {
+  const handleApplyToCode = useCallback(() => {
     if (!selectedObject) return;
     const sourceId = selectedObject.metadata.sourceId;
     if (!sourceId) {
@@ -105,7 +98,6 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
 
     const edits: Edit[] = [];
 
-    // Iterate through all sections and rows to calculate edits
     Object.values(SECTIONS).forEach(section => {
       if (section.component && !selectedObject.hasComponent(section.component)) {
         return;
@@ -131,7 +123,7 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
     }
     
     setTimeout(() => setIsApplying(false), 500);
-  };
+  }, [selectedObject]);
 
   if (!visible) return null;
 
@@ -163,7 +155,6 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
           <div className="no-selection">Toggle Debug Mode to inspect objects.</div>
         ) : (
           <div className="inspector-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Global Debug Settings - Always visible when debug is on */}
             <div className="inspector-section">
               <h3>Debug Settings</h3>
               <div className="inspector-row">

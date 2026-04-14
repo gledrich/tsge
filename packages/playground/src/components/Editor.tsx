@@ -1,10 +1,8 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
-import * as prettier from 'prettier/standalone';
-import * as babel from 'prettier/plugins/babel';
-import * as estree from 'prettier/plugins/estree';
 import { getScript, getFilesList, setCurrentScriptId, updateScript } from '../utils/helpers';
 import { Edit, instrumentCode } from '../utils/ast-utils';
+import { useMonacoEditor } from '../hooks/useMonacoEditor';
 import '../styles/editor.css';
 
 interface EditorProps {
@@ -17,24 +15,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isFormatting, setIsFormatting] = useState(false);
   const [editorValue, setEditorValue] = useState<string>('');
-  const monacoEditorRef = useRef<any>(null);
-
-  const formatCode = useCallback(async (code: string, range?: { start: number, end: number }) => {
-    try {
-      return await prettier.format(code, {
-        parser: 'babel',
-        plugins: [babel, estree],
-        singleQuote: true,
-        trailingComma: 'none',
-        printWidth: 80,
-        tabWidth: 2,
-        ...(range ? { rangeStart: range.start, rangeEnd: range.end } : {})
-      });
-    } catch (err) {
-      console.error('Prettier formatting failed:', err);
-      return code;
-    }
-  }, []);
+  const { monacoEditorRef, formatCode, applyEdits, pushEditOperations } = useMonacoEditor();
 
   const handleSave = useCallback(async (value: string) => {
     setIsSaving(true);
@@ -46,20 +27,11 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
     setIsFormatting(true);
     const formatted = await formatCode(editorValue);
     if (formatted !== editorValue) {
-      const editor = monacoEditorRef.current;
-      if (editor) {
-        const model = editor.getModel();
-        if (model) {
-          model.pushEditOperations([], [{
-            range: model.getFullModelRange(),
-            text: formatted
-          }], () => null);
-        }
-      }
+      pushEditOperations(formatted);
       setEditorValue(formatted);
     }
     setIsFormatting(false);
-  }, [editorValue, formatCode]);
+  }, [editorValue, formatCode, pushEditOperations]);
 
   useEffect(() => {
     const refreshScripts = async () => {
@@ -75,7 +47,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
       const script = await getScript(currentScriptId);
       const formatted = await formatCode(script);
       setEditorValue(formatted);
-      const result = instrumentCode(formatted); // Initialize mapping
+      const result = instrumentCode(formatted);
       if (result.error) console.warn(result.error);
       setIsSaving(false);
     };
@@ -87,7 +59,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
       const customEvent = e as CustomEvent<string>;
       setEditorValue(prev => {
         const newValue = prev + '\n' + customEvent.detail;
-        const result = instrumentCode(newValue); // Refresh mapping
+        const result = instrumentCode(newValue);
         if (result.error) {
           window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
         } else {
@@ -104,7 +76,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
     const handleUpdateCodeEvent = (e: Event) => {
       const customEvent = e as CustomEvent<string>;
       setEditorValue(customEvent.detail);
-      const result = instrumentCode(customEvent.detail); // Refresh mapping
+      const result = instrumentCode(customEvent.detail);
       if (result.error) {
         window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
       } else {
@@ -131,28 +103,17 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
             endLineNumber: endPos.lineNumber,
             endColumn: endPos.column
           };
-          model.applyEdits([{
-            range,
-            text: newText,
-            forceMoveMarkers: true
-          }]);
           
-          let newValue = model.getValue();
-          newValue = await formatCode(newValue, { start, end: start + newText.length });
-          
-          if (newValue !== model.getValue()) {
-            model.pushEditOperations([], [{
-              range: model.getFullModelRange(),
-              text: newValue
-            }], () => null);
-          }
-          
-          setEditorValue(newValue);
-          const result = instrumentCode(newValue); // Refresh mapping
-          if (result.error) {
-            window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
-          } else {
-            window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: null }));
+          const newValueRaw = applyEdits([{ range, text: newText }]);
+          if (newValueRaw) {
+            const formatted = await formatCode(newValueRaw, { start, end: start + newText.length });
+            if (formatted !== newValueRaw) {
+              pushEditOperations(formatted);
+              setEditorValue(formatted);
+            } else {
+              setEditorValue(newValueRaw);
+            }
+            instrumentCode(formatted);
           }
         }
       }
@@ -182,28 +143,20 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
                 endLineNumber: endPos.lineNumber,
                 endColumn: endPos.column
               },
-              text: edit.newText,
-              forceMoveMarkers: true
+              text: edit.newText
             };
           });
-          model.applyEdits(monacoEdits);
-          
-          let newValue = model.getValue();
-          newValue = await formatCode(newValue, { start: minStart, end: maxEnd });
-          
-          if (newValue !== model.getValue()) {
-            model.pushEditOperations([], [{
-              range: model.getFullModelRange(),
-              text: newValue
-            }], () => null);
-          }
 
-          setEditorValue(newValue);
-          const result = instrumentCode(newValue); // Refresh mapping
-          if (result.error) {
-            window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
-          } else {
-            window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: null }));
+          const newValueRaw = applyEdits(monacoEdits);
+          if (newValueRaw) {
+            const formatted = await formatCode(newValueRaw, { start: minStart, end: maxEnd });
+            if (formatted !== newValueRaw) {
+              pushEditOperations(formatted);
+              setEditorValue(formatted);
+            } else {
+              setEditorValue(newValueRaw);
+            }
+            instrumentCode(formatted);
           }
         }
       }
@@ -224,7 +177,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
       window.removeEventListener('playground-apply-edit', handleApplyEditEvent);
       window.removeEventListener('playground-apply-multi-edit', handleApplyMultiEditEvent);
     };
-  }, [editorValue, onRefresh, formatCode]);
+  }, [editorValue, onRefresh, formatCode, applyEdits, pushEditOperations, monacoEditorRef]);
 
   const handleScriptChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCurrentScriptId(e.target.value);
@@ -234,7 +187,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
   const handleNewScript = async () => {
     const name = window.prompt('Enter script name:');
     if (name) {
-      await updateScript('', false, name); // Initialize empty file
+      await updateScript('', false, name);
       setCurrentScriptId(name);
       window.dispatchEvent(new CustomEvent('playground-script-selected', { detail: name }));
     }
@@ -247,8 +200,6 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
     });
 
     editor.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
-      // Prettier is already handled by handleFormat, but monaco might have its own formatter.
-      // We'll trigger our handleFormat
       handleFormat();
     });
   };
@@ -292,7 +243,7 @@ const CodeEditor: React.FC<EditorProps> = ({ currentScriptId, onRefresh }) => {
           onChange={(value) => {
             const newValue = value || '';
             setEditorValue(newValue);
-            const result = instrumentCode(newValue); // Update mapping as user types
+            const result = instrumentCode(newValue);
             if (result.error) {
               window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
             } else {
