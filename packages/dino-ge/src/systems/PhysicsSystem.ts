@@ -3,6 +3,7 @@ import type GameObject from '../core/GameObject.js';
 import PhysicsComponent from '../components/PhysicsComponent.js';
 import BoundsComponent from '../components/BoundsComponent.js';
 import Physics from '../physics/Physics.js';
+import { getEngineState } from '../core/EngineState.js';
 
 /**
  * A system that processes entities with PhysicsComponents.
@@ -15,9 +16,14 @@ export default class PhysicsSystem extends System {
    * @param fixedDelta The fixed time step.
    */
   public override fixedUpdate(entities: Set<GameObject>, fixedDelta: number): void {
+    const state = getEngineState();
     const collidables: GameObject[] = [];
+    const processingList = state?.sortedObjects?.length > 0 ? state.sortedObjects : Array.from(entities);
 
-    entities.forEach((object) => {
+    processingList.forEach((object) => {
+      // Skip if object is no longer in the set (might have been destroyed in this fixedUpdate loop)
+      if (!entities.has(object)) return;
+
       const physics = object.getComponent(PhysicsComponent);
       if (physics) {
         // 1. Integration Phase (Movement)

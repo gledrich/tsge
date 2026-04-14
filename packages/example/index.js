@@ -49,7 +49,7 @@ class MenuScene extends Scene {
       text: 'WASD to Move - SPACE to Shoot',
       fontSize: 20,
       colour: '#a0a0a0',
-      position: new Vector2(this.game.width / 2 - 150, 450),
+      position: new Vector2(this.game.width / 2 - 150, 410),
       width: 300,
       zIndex: 10
     });
@@ -169,14 +169,15 @@ class PlayScene extends Scene {
         this.shakeIntensity = 20;
 
         if (this.lives <= 0) {
-          const finalScore = this.score + Math.floor((Date.now() - this.startTime) / 1000);
+          const finalScore =
+            this.score + Math.floor((Date.now() - this.startTime) / 1000);
           this.onGameOver(finalScore);
         } else {
           this.isInvulnerable = true;
           this.lastHitTime = Date.now();
           this.spawnExplosion(this.player.transform.position, 20, '#F94144');
           other.destroySelf();
-          this.meteors = this.meteors.filter(m => m !== other);
+          this.meteors = this.meteors.filter((m) => m !== other);
         }
       }
     });
@@ -232,11 +233,15 @@ class PlayScene extends Scene {
     let targetVX = 0;
     let targetVY = 0;
 
-    if (Input.isKeyDown('w') || Input.isKeyDown('arrowup')) targetVY = -moveSpeed;
-    else if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown')) targetVY = moveSpeed;
+    if (Input.isKeyDown('w') || Input.isKeyDown('arrowup'))
+      targetVY = -moveSpeed;
+    else if (Input.isKeyDown('s') || Input.isKeyDown('arrowdown'))
+      targetVY = moveSpeed;
 
-    if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft')) targetVX = -moveSpeed;
-    else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright')) targetVX = moveSpeed;
+    if (Input.isKeyDown('a') || Input.isKeyDown('arrowleft'))
+      targetVX = -moveSpeed;
+    else if (Input.isKeyDown('d') || Input.isKeyDown('arrowright'))
+      targetVX = moveSpeed;
 
     if (targetVX !== 0 && targetVY !== 0) {
       targetVX *= 0.707;
@@ -276,17 +281,21 @@ class PlayScene extends Scene {
       });
       fireball.addComponent(new PhysicsComponent());
       fireball.getComponent(PhysicsComponent).velocity.y = -600;
-      
+
       fireball.on('collision', (e) => {
         const { other } = e.detail;
         if (other.metadata.tag === 'meteor') {
-          this.spawnExplosion(other.transform.position, other.radius, other.colour);
+          this.spawnExplosion(
+            other.transform.position,
+            other.radius,
+            other.colour
+          );
           other.destroySelf();
           fireball.destroySelf();
           this.score += 10;
           this.shakeIntensity = Math.max(this.shakeIntensity, 5);
-          this.meteors = this.meteors.filter(m => m !== other);
-          this.fireballs = this.fireballs.filter(fb => fb !== fireball);
+          this.meteors = this.meteors.filter((m) => m !== other);
+          this.fireballs = this.fireballs.filter((fb) => fb !== fireball);
         }
       });
 
@@ -342,13 +351,15 @@ class PlayScene extends Scene {
     this.uiContainer.transform.position.y = Engine.camera.position.y;
 
     // Parallax
-    this.starsMid.forEach(s => {
+    this.starsMid.forEach((s) => {
       s.transform.position.y += s.speed;
-      if (s.transform.position.y > PlayScene.WORLD_HEIGHT) s.transform.position.y = 0;
+      if (s.transform.position.y > PlayScene.WORLD_HEIGHT)
+        s.transform.position.y = 0;
     });
-    this.starsNear.forEach(s => {
+    this.starsNear.forEach((s) => {
       s.transform.position.y += s.speed;
-      if (s.transform.position.y > PlayScene.WORLD_HEIGHT) s.transform.position.y = 0;
+      if (s.transform.position.y > PlayScene.WORLD_HEIGHT)
+        s.transform.position.y = 0;
     });
 
     // Spawn Meteors
@@ -370,7 +381,10 @@ class PlayScene extends Scene {
     }
 
     this.meteors = this.meteors.filter((m) => {
-      if (m.transform.position.y > Engine.camera.position.y + this.game.height + 100) {
+      if (
+        m.transform.position.y >
+        Engine.camera.position.y + this.game.height + 100
+      ) {
         m.destroySelf();
         return false;
       }
@@ -468,7 +482,12 @@ class GameOverScene extends Scene {
   }
 
   onResize(width) {
-    if (this.gameOverText && this.finalScoreText && this.highScoreText && this.restartBtn) {
+    if (
+      this.gameOverText &&
+      this.finalScoreText &&
+      this.highScoreText &&
+      this.restartBtn
+    ) {
       this.gameOverText.transform.position.x = width / 2 - 200;
       this.finalScoreText.transform.position.x = width / 2 - 100;
       this.highScoreText.transform.position.x = width / 2 - 100;
@@ -496,7 +515,11 @@ class DinoSurvival {
         },
         update: () => {}
       },
-      { title: 'Dino Survival', backgroundColour: '#264653', containerId: 'playground-canvas-container' }
+      {
+        title: 'Dino Survival',
+        backgroundColour: '#264653',
+        containerId: 'playground-canvas-container'
+      }
     );
   }
 

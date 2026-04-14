@@ -171,9 +171,7 @@ export default class Text extends GameObject {
     // TextComponent will automatically create/update BoundsComponent via onAttach
     this.addComponent(this._textComponent);
 
-    if (props.visible !== undefined) {
-      this.addComponent(new VisibilityComponent(props.visible));
-    }
+    this.addComponent(new VisibilityComponent(props.visible ?? true));
 
     if (props.physics) {
       const pc = new PhysicsComponent();

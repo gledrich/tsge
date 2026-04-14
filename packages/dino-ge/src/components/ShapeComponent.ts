@@ -81,7 +81,6 @@ export default class ShapeComponent extends RenderComponent {
       }
 
       this.gameObject.bounds = new BoundsComponent(targetWidth, targetHeight);
-      this.gameObject.addComponent(this.gameObject.bounds);
     } else {
       // Sync initial values if bounds already exist
       this.width = this._initialWidth;

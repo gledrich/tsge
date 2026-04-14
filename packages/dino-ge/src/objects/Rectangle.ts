@@ -71,12 +71,10 @@ export default class Rectangle extends GameObject {
     this.colour = defaultedProps.colour;
     this.metadata.zIndex = defaultedProps.zIndex;
 
-    // ShapeComponent will automatically create/update BoundsComponent via onAttach
+    // ShapeComponent will automatically create the BoundsComponent via onAttach
     this.addComponent(new ShapeComponent('rect', this.colour, defaultedProps.width, defaultedProps.height));
 
-    if (props.visible !== undefined) {
-      this.addComponent(new VisibilityComponent(props.visible));
-    }
+    this.addComponent(new VisibilityComponent(props.visible ?? true));
 
     if (props.physics) {
       const pc = new PhysicsComponent();

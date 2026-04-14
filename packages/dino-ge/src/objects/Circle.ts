@@ -92,9 +92,7 @@ export default class Circle extends GameObject {
     // ShapeComponent will automatically create the BoundsComponent (radius * 2) via onAttach
     this.addComponent(new ShapeComponent('circle', this.colour, this.radius, this.radius));
 
-    if (props.visible !== undefined) {
-      this.addComponent(new VisibilityComponent(props.visible));
-    }
+    this.addComponent(new VisibilityComponent(props.visible ?? true));
 
     if (props.physics) {
       const pc = new PhysicsComponent();

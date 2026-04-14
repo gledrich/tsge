@@ -14,6 +14,7 @@ export default class Registry {
     if (!state) return;
 
     state.zOrderDirty = true;
+    state.sortedObjects = [];
     if (state.currentScene) {
       state.currentScene.add(object);
     } else {
@@ -29,6 +30,7 @@ export default class Registry {
     if (!state) return;
 
     state.zOrderDirty = true;
+    state.sortedObjects = [];
     if (state.selectedObject === object) {
       state.selectedObject = null;
     }

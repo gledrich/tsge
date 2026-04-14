@@ -79,6 +79,83 @@ describe('Physics', () => {
       expect(Physics.checkCollision(rect, circle)).toBe(true);
     });
 
+    it('regression: maintains object order and normal direction for Rect vs Circle', () => {
+      const rect = new Rectangle({
+        position: new Vector2(0, 0),
+        width: 50,
+        height: 50
+      });
+      const circle = new Circle({
+        position: new Vector2(40, 0),
+        radius: 20
+      }); 
+      // Circle center: (60, 20)
+      // Rect: (0,0) to (50,50)
+      // Closest point on rect: (50, 20)
+      // Vector from rect to circle: (10, 0)
+      // Normal should be (1, 0) pointing from rect to circle
+
+      const manifold = Physics.getCollisionManifold(rect, circle);
+      expect(manifold).not.toBeNull();
+      expect(manifold!.obj1).toBe(rect);
+      expect(manifold!.obj2).toBe(circle);
+      expect(manifold!.normal.x).toBe(1);
+      expect(manifold!.normal.y).toBe(0);
+
+      // Verify resolution pushes them apart
+      const initialRectX = rect.transform.position.x;
+      const initialCircleX = circle.transform.position.x;
+      
+      // Add physics components to allow resolution
+      rect.addComponent(new PhysicsComponent());
+      circle.addComponent(new PhysicsComponent());
+      
+      Physics.checkCollision(rect, circle);
+      
+      // Rect should move left, Circle should move right
+      expect(rect.transform.position.x).toBeLessThan(initialRectX);
+      expect(circle.transform.position.x).toBeGreaterThan(initialCircleX);
+    });
+
+    it('resolves correctly when circle center is inside rectangle', () => {
+      const rect = new Rectangle({
+        position: new Vector2(0, 0),
+        width: 100,
+        height: 100
+      });
+      const circle = new Circle({
+        position: new Vector2(0, 0), // Center (10, 10) - inside rect
+        radius: 10
+      });
+
+      rect.addComponent(new PhysicsComponent());
+      circle.addComponent(new PhysicsComponent());
+
+      const initialCircleX = circle.transform.position.x;
+      const initialRectX = rect.transform.position.x;
+
+      Physics.checkCollision(rect, circle);
+
+      // Circle center (10, 10) is closest to left edge (x=0, dist=10)
+      // and top edge (y=0, dist=10).
+      // If it picks left edge (dLeft), it should be pushed LEFT.
+      // initialCircleX=0, so new x should be < 0.
+      expect(circle.transform.position.x).toBeLessThan(initialCircleX);
+    });
+
+    it('does not resolve collision between two objects without PhysicsComponents', () => {
+      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
+      const r2 = new Rectangle({ position: new Vector2(25, 25), width: 50, height: 50 });
+      
+      // No PhysicsComponents added
+      const pos1 = r1.transform.position.clone();
+      const pos2 = r2.transform.position.clone();
+
+      expect(Physics.checkCollision(r1, r2)).toBe(true);
+      expect(r1.transform.position.x).toBe(pos1.x);
+      expect(r2.transform.position.x).toBe(pos2.x);
+    });
+
     it('returns false when circle and rectangle do not overlap', () => {
       const rect = new Rectangle({
         position: new Vector2(0, 0),
@@ -391,22 +468,22 @@ describe('Physics', () => {
       // Closer to left
       const cLeft = new Circle({ position: new Vector2(0, 40), radius: 10 }); // Center (10, 50)
       let m = Physics.getCollisionManifold(cLeft, rect);
-      expect(m!.normal.x).toBe(-1);
+      expect(m!.normal.x).toBe(1);
 
       // Closer to right
       const cRight = new Circle({ position: new Vector2(80, 40), radius: 10 }); // Center (90, 50)
       m = Physics.getCollisionManifold(cRight, rect);
-      expect(m!.normal.x).toBe(1);
+      expect(m!.normal.x).toBe(-1);
 
       // Closer to top
       const cTop = new Circle({ position: new Vector2(40, 0), radius: 10 }); // Center (50, 10)
       m = Physics.getCollisionManifold(cTop, rect);
-      expect(m!.normal.y).toBe(-1);
+      expect(m!.normal.y).toBe(1);
 
       // Closer to bottom
       const cBottom = new Circle({ position: new Vector2(40, 80), radius: 10 }); // Center (50, 90)
       m = Physics.getCollisionManifold(cBottom, rect);
-      expect(m!.normal.y).toBe(1);
+      expect(m!.normal.y).toBe(-1);
     });
 
     it('handles collision where one object has no bounds component', () => {

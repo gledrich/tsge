@@ -153,7 +153,6 @@ export default class Sprite extends GameObject {
     }
 
     this.bounds = new BoundsComponent(0, 0);
-    this.addComponent(this.bounds);
 
     if (img.complete) {
       this._updateBounds();
@@ -165,9 +164,7 @@ export default class Sprite extends GameObject {
       this.transform.position.copy(props.position);
     }
 
-    if (props.visible !== undefined) {
-      this.addComponent(new VisibilityComponent(props.visible));
-    }
+    this.addComponent(new VisibilityComponent(props.visible ?? true));
 
     if (props.physics) {
       const pc = new PhysicsComponent();

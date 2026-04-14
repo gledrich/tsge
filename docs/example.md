@@ -52,13 +52,13 @@ class MenuScene extends Scene {
       text: 'WASD to Move - SPACE to Shoot',
       fontSize: 20,
       colour: '#a0a0a0',
-      position: new Vector2(this.game.width / 2 - 150, 450),
+      position: new Vector2(this.game.width / 2 - 150, 410),
       width: 300,
       zIndex: 10
     });
   }
 
-  onResize(width, height) {
+  onResize(width) {
     if (this.title && this.startBtn && this.controls) {
       this.title.transform.position.x = width / 2 - 250;
       this.startBtn.transform.position.x = width / 2 - 150;
@@ -485,7 +485,12 @@ class GameOverScene extends Scene {
   }
 
   onResize(width, height) {
-    if (this.gameOverText && this.finalScoreText && this.highScoreText && this.restartBtn) {
+    if (
+      this.gameOverText &&
+      this.finalScoreText &&
+      this.highScoreText &&
+      this.restartBtn
+    ) {
       this.gameOverText.transform.position.x = width / 2 - 200;
       this.finalScoreText.transform.position.x = width / 2 - 100;
       this.highScoreText.transform.position.x = width / 2 - 100;

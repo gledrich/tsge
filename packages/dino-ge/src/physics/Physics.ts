@@ -2,6 +2,7 @@ import Vector2 from '../math/Vector2.js';
 import GameObject from '../core/GameObject.js';
 import Circle from '../objects/Circle.js';
 import PhysicsComponent from '../components/PhysicsComponent.js';
+import ShapeComponent from '../components/ShapeComponent.js';
 import Engine from '../core/Engine.js';
 
 /**
@@ -29,8 +30,10 @@ export default class Physics {
    * @returns A manifold if colliding, else null.
    */
   static getCollisionManifold(obj1: GameObject, obj2: GameObject): CollisionManifold | null {
-    const isCircle1 = obj1 instanceof Circle;
-    const isCircle2 = obj2 instanceof Circle;
+    const shape1 = obj1.getComponent(ShapeComponent);
+    const shape2 = obj2.getComponent(ShapeComponent);
+    const isCircle1 = shape1?.type === 'circle';
+    const isCircle2 = shape2?.type === 'circle';
 
     if (isCircle1 && isCircle2) {
       return this.circleVsCircle(obj1 as Circle, obj2 as Circle);
@@ -38,9 +41,16 @@ export default class Physics {
       const circle = (isCircle1 ? obj1 : obj2) as Circle;
       const rect = (isCircle1 ? obj2 : obj1);
       const manifold = this.circleVsRect(circle, rect);
-      if (manifold && isCircle2) {
-        // Flip normal if obj1 was the rect
-        manifold.normal.multiply(-1);
+      
+      if (manifold) {
+        // Ensure manifold objects match the input order
+        manifold.obj1 = obj1;
+        manifold.obj2 = obj2;
+        
+        if (isCircle2) {
+          // Flip normal if circle was actually obj2
+          manifold.normal.multiply(-1);
+        }
       }
       return manifold;
     } else {
@@ -141,10 +151,10 @@ export default class Physics {
       const minDist = Math.min(dLeft, dRight, dTop, dBottom);
       depth = cRadius + minDist;
 
-      if (minDist === dLeft) normal = new Vector2(-1, 0);
-      else if (minDist === dRight) normal = new Vector2(1, 0);
-      else if (minDist === dTop) normal = new Vector2(0, -1);
-      else normal = new Vector2(0, 1);
+      if (minDist === dLeft) normal = new Vector2(1, 0);
+      else if (minDist === dRight) normal = new Vector2(-1, 0);
+      else if (minDist === dTop) normal = new Vector2(0, 1);
+      else normal = new Vector2(0, -1);
     } else {
       normal = diff.multiply(1 / dist);
       depth = cRadius - dist;
@@ -177,8 +187,8 @@ export default class Physics {
 
     const phys1 = obj1.getComponent(PhysicsComponent);
     const phys2 = obj2.getComponent(PhysicsComponent);
-    const obj1Static = phys1?.isStatic ?? false;
-    const obj2Static = phys2?.isStatic ?? false;
+    const obj1Static = phys1?.isStatic ?? true;
+    const obj2Static = phys2?.isStatic ?? true;
 
     if (!obj1Static || !obj2Static) {
       this.resolveCollision(manifold, phys1, phys2);
