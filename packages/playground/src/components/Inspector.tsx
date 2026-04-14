@@ -47,7 +47,8 @@ const SECTIONS: Record<string, { rows: PropertyRowDef[], component?: any }> = {
       { label: 'Mass', type: 'number', propertyPath: '_physics.mass' },
       { label: 'Restitution', type: 'number', propertyPath: '_physics.restitution' },
       { label: 'Friction', type: 'number', propertyPath: '_physics.friction' },
-      { label: 'Is Static', type: 'checkbox', propertyPath: '_physics.isStatic' }
+      { label: 'Is Static', type: 'checkbox', propertyPath: '_physics.isStatic' },
+      { label: 'Is Sensor', type: 'checkbox', propertyPath: '_physics.isSensor' }
     ]
   }
 };

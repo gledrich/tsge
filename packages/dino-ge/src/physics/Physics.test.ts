@@ -527,8 +527,32 @@ describe('Physics', () => {
       expect(eventDetail.other).toBe(r2);
       expect(eventDetail.manifold).toBeDefined();
     });
-    });
 
+    it('does not resolve collision if one object is a sensor but still emits events', () => {
+      const r1 = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });
+      const r2 = new Rectangle({ position: new Vector2(25, 0), width: 50, height: 50 });
+
+      const p1 = new PhysicsComponent();
+      p1.isSensor = true;
+      r1.addComponent(p1);
+
+      const p2 = new PhysicsComponent();
+      r2.addComponent(p2);
+
+      const pos1 = r1.transform.position.clone();
+      const pos2 = r2.transform.position.clone();
+      const onCollision = jest.fn();
+      r1.on('collision', onCollision);
+
+      expect(Physics.checkCollision(r1, r2)).toBe(true);
+
+      // Positions should not have changed
+      expect(r1.transform.position.x).toBe(pos1.x);
+      expect(r2.transform.position.x).toBe(pos2.x);
+      // Event should still have been emitted
+      expect(onCollision).toHaveBeenCalledTimes(1);
+    });
+    });
   describe('Edge Cases and Branch Coverage', () => {
     it('flips normal correctly in Rect vs Circle', () => {
       const rect = new Rectangle({ position: new Vector2(0, 0), width: 50, height: 50 });

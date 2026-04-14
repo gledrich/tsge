@@ -17,4 +17,6 @@ export default class PhysicsComponent extends Component {
   restitution: number = 0.5;
   /** Resistance to sliding. */
   friction: number = 0.2;
+  /** Whether the object should detect collisions but not respond to them physically. */
+  isSensor: boolean = false;
 }
