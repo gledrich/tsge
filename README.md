@@ -2,6 +2,8 @@
 
 A lightweight, developer-friendly 2D game engine built with TypeScript, designed for building expressive web-based games.
 
+See [dino-ge](./packages/dino-ge//README.md) and [dino-ge-playground](./packages/playground/README.md).
+
 ⚠️ **This project is in alpha** ⚠️
 
 ## Core Features

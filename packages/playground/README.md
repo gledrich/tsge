@@ -1,6 +1,6 @@
 # dino-ge-playground
 
-Interactive, live-editing playground and inspector for the **Dino GE** game engine.
+Interactive, live-editing playground and inspector for the [dino-ge](https://www.npmjs.com/package/dino-ge) game engine.
 
 ![Dino GE Playground Preview](https://raw.githubusercontent.com/gledrich/dino-ge/main/packages/playground/assets/preview.png)
 
@@ -40,5 +40,3 @@ The playground automatically creates and manages a `scripts/` directory in the f
 ## License
 
 MIT
-
-

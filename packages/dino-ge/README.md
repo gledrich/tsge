@@ -1,6 +1,6 @@
 # dino-ge
 
-A lightweight, performant 2D game engine built from the ground up in TypeScript. `dino-ge` provides a robust, developer-friendly framework for building 2D web games.
+A lightweight, performant 2D game engine built from the ground up in TypeScript. `dino-ge` provides a robust, developer-friendly framework for building 2D web games. Friend of [dino-ge-playground](https://www.npmjs.com/package/dino-ge-playground).
 
 ⚠️ **This project is in alpha** ⚠️
 
@@ -26,14 +26,17 @@ import { Engine, Sprite, Vector2 } from 'dino-ge';
 
 class MyGame {
   constructor() {
-    new Engine({
-      onLoad: () => this.onLoad(),
-      update: () => this.onUpdate()
-    }, {
-      title: 'My Game',
-      width: '100%',
-      height: '100%'
-    });
+    new Engine(
+      {
+        onLoad: () => this.onLoad(),
+        update: () => this.onUpdate()
+      },
+      {
+        title: 'My Game',
+        width: '100%',
+        height: '100%'
+      }
+    );
   }
 
   onLoad() {
