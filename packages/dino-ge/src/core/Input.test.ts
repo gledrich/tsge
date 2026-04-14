@@ -502,25 +502,46 @@ describe('Input', () => {
     Input.init();
     
     // Lowercase p
-    capturedListeners['keydown']({ key: 'p' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'p', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(true);
-    capturedListeners['keydown']({ key: 'p' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'p', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(false);
 
     // Uppercase P
-    capturedListeners['keydown']({ key: 'P' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'P', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(true);
-    capturedListeners['keydown']({ key: 'P' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'P', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(false);
 
     // Non-p key
-    capturedListeners['keydown']({ key: 'w' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'w', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(false);
 
     // P with no canvas
     jest.spyOn(document, 'getElementById').mockReturnValue(null);
-    capturedListeners['keydown']({ key: 'p' } as unknown as KeyboardEvent);
+    capturedListeners['keydown']({ key: 'p', target: document.createElement('div') } as unknown as KeyboardEvent);
     expect(Engine.paused).toBe(true);
+  });
+
+  it('does not toggle pause with P key when in input or textarea', () => {
+    Input.init();
+    Engine.paused = false;
+    
+    // Input
+    const input = document.createElement('input');
+    capturedListeners['keydown']({ key: 'p', target: input } as unknown as KeyboardEvent);
+    expect(Engine.paused).toBe(false);
+
+    // Textarea
+    const textarea = document.createElement('textarea');
+    capturedListeners['keydown']({ key: 'p', target: textarea } as unknown as KeyboardEvent);
+    expect(Engine.paused).toBe(false);
+
+    // Contenteditable
+    const div = document.createElement('div');
+    div.setAttribute('contenteditable', 'true');
+    capturedListeners['keydown']({ key: 'p', target: div } as unknown as KeyboardEvent);
+    expect(Engine.paused).toBe(false);
   });
 
   it('clears keys on window blur', () => {
