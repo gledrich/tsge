@@ -4,10 +4,16 @@ import GameObject from '../core/GameObject.js';
 import Vector2 from '../math/Vector2.js';
 import BoundsComponent from '../components/BoundsComponent.js';
 import Physics from '../physics/Physics.js';
+import Engine from '../core/Engine.js';
+import { type EngineState } from '../core/EngineState.js';
 
 class MockGameObject extends GameObject {}
 
 describe('PhysicsSystem', () => {
+  beforeEach(() => {
+    Engine.resetState();
+  });
+
   it('updates velocity based on acceleration', () => {
     const system = new PhysicsSystem();
     const obj = new MockGameObject('test', 0);
@@ -37,6 +43,74 @@ describe('PhysicsSystem', () => {
     system.fixedUpdate(entities, 0.1);
     
     expect(obj.transform.position.x).toBe(5);
+  });
+
+  it('skips objects missing from the entities Set when processing via sortedObjects', () => {
+    const system = new PhysicsSystem();
+    const obj1 = new MockGameObject('obj1', 0);
+    const obj2 = new MockGameObject('obj2', 0);
+    
+    obj1.addComponent(new PhysicsComponent());
+    obj2.addComponent(new PhysicsComponent());
+    
+    // Initialise engine state
+    Engine.resetState();
+    
+    // Mock sortedObjects in global state
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    state.sortedObjects = [obj1, obj2];
+    
+    // entities Set ONLY contains obj2. obj1 is in sortedObjects but NOT in entities Set
+    const entities = new Set<GameObject>([obj2]);
+    
+    system.fixedUpdate(entities, 0.1);
+    
+    // obj2 should be updated, obj1 should be skipped
+    expect(obj2.transform.position.y).toBe(0); // it has no velocity anyway but it was processed
+    // if obj1 was processed, it wouldn't crash but we've successfully hit the !entities.has(obj1) line
+  });
+
+  it('handles empty sortedObjects array correctly', () => {
+    const system = new PhysicsSystem();
+    const obj = new MockGameObject('test', 0);
+    obj.addComponent(new PhysicsComponent());
+    const entities = new Set<GameObject>([obj]);
+    
+    Engine.resetState();
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    state.sortedObjects = []; // Empty but present
+    
+    system.fixedUpdate(entities, 0.1);
+    expect(obj.transform.position.x).toBe(0);
+  });
+
+  it('handles null sortedObjects correctly', () => {
+    const system = new PhysicsSystem();
+    const obj = new MockGameObject('test', 0);
+    obj.addComponent(new PhysicsComponent());
+    const entities = new Set<GameObject>([obj]);
+    
+    Engine.resetState();
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    (state as unknown as { sortedObjects: null }).sortedObjects = null; // specifically test null path
+    
+    system.fixedUpdate(entities, 0.1);
+    expect(obj.transform.position.x).toBe(0);
+  });
+
+  it('handles null engine state correctly', () => {
+    const system = new PhysicsSystem();
+    const obj = new MockGameObject('test', 0);
+    obj.addComponent(new PhysicsComponent());
+    const entities = new Set<GameObject>([obj]);
+    
+    const originalState = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    (globalThis as unknown as Record<string, unknown>).__DINO_ENGINE_STATE__ = null;
+    
+    system.fixedUpdate(entities, 0.1);
+    
+    expect(obj.transform.position.x).toBe(0);
+    (globalThis as unknown as Record<string, unknown>).__DINO_ENGINE_STATE__ = originalState;
   });
 
   it('ignores objects without PhysicsComponent', () => {

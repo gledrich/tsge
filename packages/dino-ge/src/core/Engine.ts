@@ -51,6 +51,8 @@ const createInitialState = (): EngineState => ({
   camera: new Camera(),
   systems: [new PhysicsSystem()],
   events: new EventTarget(),
+  totalPausedTime: 0,
+  pauseStartTime: 0,
   currentScene: null,
   debugCollisions: [],
   showPhysicsVectors: false,
@@ -125,8 +127,27 @@ export default class Engine {
   public static set paused(val: boolean) {
     if (this._state.paused !== val) {
       this._state.paused = val;
+      
+      if (val) {
+        this._state.pauseStartTime = Date.now();
+      } else if (this._state.pauseStartTime > 0) {
+        this._state.totalPausedTime += Date.now() - this._state.pauseStartTime;
+        this._state.pauseStartTime = 0;
+      }
+
       this.emit('paused', val);
     }
+  }
+
+  /**
+   * Returns the total active time of the game (excluding pause time).
+   */
+  public static get totalTime(): number {
+    let currentPaused = 0;
+    if (this.paused && this._state.pauseStartTime > 0) {
+      currentPaused = Date.now() - this._state.pauseStartTime;
+    }
+    return Date.now() - this._state.totalPausedTime - currentPaused;
   }
 
   /**
@@ -378,20 +399,20 @@ export default class Engine {
 
     if (this._oldTimestamp === 0) this._oldTimestamp = timestamp;
 
+    this._secondsPassed = (timestamp - this._oldTimestamp) / 1000;
+    this._oldTimestamp = timestamp;
+
+    // Avoid division by zero on first frame
+    if (this._secondsPassed > 0) {
+      // Smooth FPS calculation
+      const currentFps = 1 / this._secondsPassed;
+      this._fpsValues.push(currentFps);
+      if (this._fpsValues.length > 30) this._fpsValues.shift();
+      this.fps = Math.round(this._fpsValues.reduce((a, b) => a + b, 0) / this._fpsValues.length);
+      this.frameTime = parseFloat((this._secondsPassed * 1000).toFixed(2));
+    }
+
     if (!Engine.paused) {
-      this._secondsPassed = (timestamp - this._oldTimestamp) / 1000;
-      this._oldTimestamp = timestamp;
-
-      // Avoid division by zero on first frame
-      if (this._secondsPassed > 0) {
-        // Smooth FPS calculation
-        const currentFps = 1 / this._secondsPassed;
-        this._fpsValues.push(currentFps);
-        if (this._fpsValues.length > 30) this._fpsValues.shift();
-        this.fps = Math.round(this._fpsValues.reduce((a, b) => a + b, 0) / this._fpsValues.length);
-        this.frameTime = parseFloat((this._secondsPassed * 1000).toFixed(2));
-      }
-
       // Fixed update loop
       this._accumulator += this._secondsPassed;
       while (this._accumulator >= this._fixedDelta) {

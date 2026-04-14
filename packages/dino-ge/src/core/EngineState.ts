@@ -18,6 +18,8 @@ export interface EngineState {
   systems: System[];
   renderingSystem?: RenderingSystem;
   events: EventTarget;
+  totalPausedTime: number;
+  pauseStartTime: number;
   currentScene: Scene | null;
   debugCollisions: { manifold: CollisionManifold, timestamp: number }[];
   showPhysicsVectors: boolean;

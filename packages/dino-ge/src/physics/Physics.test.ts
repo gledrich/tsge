@@ -3,6 +3,7 @@ import Rectangle from '../objects/Rectangle.js';
 import Circle from '../objects/Circle.js';
 import Vector2 from '../math/Vector2.js';
 import PhysicsComponent from '../components/PhysicsComponent.js';
+import BoundsComponent from '../components/BoundsComponent.js';
 import GameObject from '../core/GameObject.js';
 import Engine from '../core/Engine.js';
 
@@ -132,7 +133,6 @@ describe('Physics', () => {
       circle.addComponent(new PhysicsComponent());
 
       const initialCircleX = circle.transform.position.x;
-      const initialRectX = rect.transform.position.x;
 
       Physics.checkCollision(rect, circle);
 
@@ -141,6 +141,181 @@ describe('Physics', () => {
       // If it picks left edge (dLeft), it should be pushed LEFT.
       // initialCircleX=0, so new x should be < 0.
       expect(circle.transform.position.x).toBeLessThan(initialCircleX);
+    });
+
+    it('resolves collision when only one object has a PhysicsComponent', () => {
+      const active = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const stat = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      const pc = new PhysicsComponent();
+      pc.velocity = new Vector2(10, 0);
+      active.addComponent(pc);
+      active.addComponent(new BoundsComponent(10, 10));
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(active, stat);
+      
+      // active was moving RIGHT (10, 0) and hit stat (at x=5)
+      // relative velocity (stat-active) = (-10, 0)
+      // velAlongNormal (normal 1,0) = -10. separating? no.
+      // it should be pushed BACK or have velocity reflected
+      expect(pc.velocity.x).toBeLessThan(0);
+    });
+
+    it('does not resolve collision when objects are already separating in single-active-physics case', () => {
+      const active = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const stat = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      const pc = new PhysicsComponent();
+      // Moving AWAY (Left) from stat (at x=5)
+      pc.velocity = new Vector2(-10, 0);
+      active.addComponent(pc);
+      active.addComponent(new BoundsComponent(10, 10));
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(active, stat);
+      
+      // velAlongNormal = Vector2.dot((-10,0) * -1, (1,0)) = dot((10,0), (1,0)) = 10
+      // velAlongNormal > 0 means they are separating. 
+      // Velocity should remain unchanged.
+      expect(pc.velocity.x).toBe(-10);
+    });
+
+    it('does not resolve collision when velAlongNormal is exactly 0 in single-active-physics case', () => {
+      const active = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const stat = new Rectangle({ position: new Vector2(10, 0), width: 10, height: 10 });
+      
+      const pc = new PhysicsComponent();
+      // Moving PERPENDICULAR (Up) to normal (Right)
+      pc.velocity = new Vector2(0, -10);
+      active.addComponent(pc);
+      active.addComponent(new BoundsComponent(10, 10));
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(active, stat);
+      
+      // Relative velocity = (0, 10). Normal = (1, 0). Dot = 0.
+      expect(pc.velocity.y).toBe(-10);
+    });
+
+    it('resolves collision when only the second object has a PhysicsComponent', () => {
+      const stat = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const active = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      const pc = new PhysicsComponent();
+      // Moving LEFT (-10, 0) towards stat (at x=0)
+      pc.velocity = new Vector2(-10, 0);
+      active.addComponent(pc);
+      active.addComponent(new BoundsComponent(10, 10));
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      // Normal will be (1, 0) from stat to active
+      Physics.checkCollision(stat, active);
+      
+      // phys1 is null, phys2 is active. 
+      // n = normal * -1 = (-1, 0) (from active to static)
+      // rv = active.velocity * -1 = (10, 0)
+      // velAlongNormal = dot((10,0), (-1,0)) = -10.
+      expect(pc.velocity.x).toBeGreaterThan(0); // Should be pushed back RIGHT
+    });
+
+    it('resolves collision when both objects have physics but one is static', () => {
+      const active = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const stat = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      const pc1 = new PhysicsComponent();
+      pc1.velocity = new Vector2(10, 0);
+      active.addComponent(pc1);
+      active.addComponent(new BoundsComponent(10, 10));
+
+      const pc2 = new PhysicsComponent();
+      pc2.isStatic = true;
+      stat.addComponent(pc2);
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(active, stat);
+      
+      expect(pc1.velocity.x).toBeLessThan(0); // active should be pushed back
+      expect(pc2.velocity.x).toBe(0); // static should not move
+    });
+
+    it('resolves collision when both objects have physics but the FIRST one is static', () => {
+      const stat = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const active = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      const pc1 = new PhysicsComponent();
+      pc1.isStatic = true;
+      stat.addComponent(pc1);
+      stat.addComponent(new BoundsComponent(10, 10));
+
+      const pc2 = new PhysicsComponent();
+      pc2.velocity = new Vector2(-10, 0);
+      active.addComponent(pc2);
+      active.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(stat, active);
+      
+      expect(pc1.velocity.x).toBe(0); // static should not move
+      expect(pc2.velocity.x).toBeGreaterThan(0); // active should be pushed back
+    });
+
+    it('does not resolve collision when NEITHER object has a PhysicsComponent', () => {
+      const obj1 = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const obj2 = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      obj1.addComponent(new BoundsComponent(10, 10));
+      obj2.addComponent(new BoundsComponent(10, 10));
+
+      const pos1 = obj1.transform.position.clone();
+      const pos2 = obj2.transform.position.clone();
+
+      // This should hit the 'else' (doing nothing) after 'if (phys1 && phys2)' and 'else if (phys1 || phys2)'
+      Physics.checkCollision(obj1, obj2);
+      
+      expect(obj1.transform.position.x).toBe(pos1.x);
+      expect(obj2.transform.position.x).toBe(pos2.x);
+    });
+
+    it('handles collision with only second object having a STATIC PhysicsComponent', () => {
+      const obj1 = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const obj2 = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      obj1.addComponent(new BoundsComponent(10, 10));
+      const pc2 = new PhysicsComponent();
+      // Keep it active (not static) so it can be pushed
+      pc2.isStatic = false;
+      obj2.addComponent(pc2);
+      obj2.addComponent(new BoundsComponent(10, 10));
+
+      const pos1 = obj1.transform.position.clone();
+      const pos2 = obj2.transform.position.clone();
+
+      Physics.checkCollision(obj1, obj2);
+      
+      // obj1 has no physics, obj2 has active physics. 
+      // Resolve should do positional correction if they overlap.
+      // obj2 should be pushed away from obj1 (to the right).
+      expect(obj1.transform.position.x).toBe(pos1.x);
+      expect(obj2.transform.position.x).toBeGreaterThan(pos2.x);
+    });
+
+    it('resolves collision when only second object has physics (v2)', () => {
+      const obj1 = new Rectangle({ position: new Vector2(0, 0), width: 10, height: 10 });
+      const obj2 = new Rectangle({ position: new Vector2(5, 0), width: 10, height: 10 });
+      
+      obj1.addComponent(new BoundsComponent(10, 10));
+      const pc2 = new PhysicsComponent();
+      pc2.velocity = new Vector2(-10, 0); // Moving towards obj1
+      obj2.addComponent(pc2);
+      obj2.addComponent(new BoundsComponent(10, 10));
+
+      Physics.checkCollision(obj1, obj2);
+      
+      // phys1=null, phys2=pc2. 
+      // This should hit else if (phys1 || phys2) -> true
+      // activePhys = pc2
+      // n = phys1 ? normal : normal * -1 -> normal * -1
+      expect(pc2.velocity.x).toBeGreaterThan(0);
     });
 
     it('does not resolve collision between two objects without PhysicsComponents', () => {

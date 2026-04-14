@@ -41,12 +41,12 @@ export default class Physics {
       const circle = (isCircle1 ? obj1 : obj2) as Circle;
       const rect = (isCircle1 ? obj2 : obj1);
       const manifold = this.circleVsRect(circle, rect);
-      
+
       if (manifold) {
         // Ensure manifold objects match the input order
         manifold.obj1 = obj1;
         manifold.obj2 = obj2;
-        
+
         if (isCircle2) {
           // Flip normal if circle was actually obj2
           manifold.normal.multiply(-1);
@@ -62,7 +62,7 @@ export default class Physics {
     const r1 = c1.worldRadius;
     const r2 = c2.worldRadius;
     const combinedRadius = r1 + r2;
-    
+
     const diff = c2.center.clone().subtract(c1.center);
     const distSq = diff.x * diff.x + diff.y * diff.y;
 
@@ -70,7 +70,7 @@ export default class Physics {
 
     const dist = Math.sqrt(distSq);
     const normal = dist !== 0 ? diff.multiply(1 / dist) : new Vector2(0, 1);
-    
+
     return {
       obj1: c1,
       obj2: c2,
@@ -239,12 +239,13 @@ export default class Physics {
       const impulse = normal.clone().multiply(j);
       if (!isStatic1) phys1.velocity.subtract(impulse.clone().multiply(invMass1));
       if (!isStatic2) phys2.velocity.add(impulse.clone().multiply(invMass2));
-    } else if (phys1 || phys2) {
-      // Only one object has physics, treat the other as static infinity mass
+    } else {
+      // Exactly one object has physics, treat the other as static infinity mass
+      // Note: we know one of them has physics because of the caller's guard (!static1 || !static2)
       const activePhys = (phys1 || phys2)!;
       // Direction FROM active TO static
       const n = phys1 ? normal : normal.clone().multiply(-1);
-      
+
       // Relative velocity (static - active)
       const rv = activePhys.velocity.clone().multiply(-1);
       const velAlongNormal = Vector2.dot(rv, n);

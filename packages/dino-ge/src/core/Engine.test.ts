@@ -130,6 +130,92 @@ describe('Engine', () => {
     expect(emitSpy).toHaveBeenCalledWith('debug', false);
   });
 
+  it('tracks total active time correctly excluding pauses', () => {
+    // Initial state: totalTime should be ~0 (but since we use Date.now() it might be slightly more)
+    const startTime = Engine.totalTime;
+    
+    // Advance time by 1s
+    jest.advanceTimersByTime(1000);
+    expect(Engine.totalTime - startTime).toBeGreaterThanOrEqual(1000);
+    
+    // Pause the engine
+    Engine.paused = true;
+    const timeAtPause = Engine.totalTime;
+    
+    // Advance time by 2s while paused
+    jest.advanceTimersByTime(2000);
+    // totalTime should NOT have advanced (or very minimally due to Date.now() precision in tests)
+    expect(Engine.totalTime).toBeLessThanOrEqual(timeAtPause + 10); // Allow tiny buffer
+    
+    // Unpause the engine
+    Engine.paused = false;
+    
+    // Set to same value to cover branch
+    Engine.paused = false;
+
+    // Cover the case where paused is set to false but it was already false (so pauseStartTime is 0)
+    // Actually it's already false here.
+    
+    // Unpause when already unpaused (should do nothing)
+    Engine.paused = false;
+    
+    // Set to true, then true again
+    Engine.paused = true;
+    Engine.paused = true;
+    
+    // Set to false, then false again
+    Engine.paused = false;
+    Engine.paused = false;
+    
+    // Advance time by 1s again
+    jest.advanceTimersByTime(1000);
+    expect(Engine.totalTime - timeAtPause).toBeGreaterThanOrEqual(1000);
+  });
+
+  it('handles totalTime when paused but pauseStartTime is 0', () => {
+    Engine.resetState();
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    state.paused = true;
+    state.pauseStartTime = 0;
+    expect(Engine.totalTime).toBeDefined();
+  });
+
+  it('handles unpausing when pauseStartTime is 0', () => {
+    Engine.resetState();
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    state.paused = true;
+    state.pauseStartTime = 0;
+    Engine.paused = false;
+    expect(Engine.paused).toBe(false);
+  });
+
+  it('handles standard pause/unpause cycle', () => {
+    Engine.resetState();
+    const state = (globalThis as unknown as { __DINO_ENGINE_STATE__: EngineState }).__DINO_ENGINE_STATE__;
+    Engine.paused = true;
+    expect(state.pauseStartTime).toBeGreaterThan(0);
+    Engine.paused = false;
+    expect(state.pauseStartTime).toBe(0);
+    expect(state.totalPausedTime).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handles multiple pause/unpause cycles', () => {
+    Engine.paused = false;
+    const initial = Engine.totalTime;
+    
+    Engine.paused = true;
+    jest.advanceTimersByTime(500);
+    Engine.paused = false;
+    
+    Engine.paused = true;
+    jest.advanceTimersByTime(500);
+    Engine.paused = false;
+    
+    const after = Engine.totalTime;
+    // Total elapsed wall time was 1000ms, but all was paused.
+    expect(after - initial).toBeLessThan(100); 
+  });
+
   it('handles scene transitions correctly', () => {
     const scene = new MockScene();
     Engine.currentScene = scene;
