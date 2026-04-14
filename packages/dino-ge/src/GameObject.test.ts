@@ -47,6 +47,14 @@ describe('GameObject', () => {
     const obj = new MockGameObject();
     expect(obj.metadata.tag).toBe('obj');
     expect(obj.metadata.zIndex).toBe(0);
+    expect(obj.metadata.sourceId).toBeUndefined();
+  });
+
+  it('initialises with sourceId if provided', () => {
+    const obj = new MockGameObject('player', 10, 'src-123');
+    expect(obj.metadata.tag).toBe('player');
+    expect(obj.metadata.zIndex).toBe(10);
+    expect(obj.metadata.sourceId).toBe('src-123');
   });
 
   it('handles component management correctly', () => {

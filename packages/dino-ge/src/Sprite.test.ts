@@ -1,5 +1,7 @@
 import Sprite from './Sprite';
 import Vector2 from './Vector2';
+import VisibilityComponent from './VisibilityComponent';
+import PhysicsComponent from './PhysicsComponent';
 import Engine from './Engine';
 import SpriteComponent from './SpriteComponent';
 import BoundsComponent from './BoundsComponent';
@@ -250,5 +252,17 @@ describe('Sprite', () => {
     const sprite = new Sprite(mockProps);
     (sprite as unknown as { _updateBounds: () => void })._updateBounds();
     expect(sprite.bounds!.width).toBe(10);
+    });
+
+  it('initialises with physics and visibility options', () => {
+    const obj = new Sprite({ tag: "test", img: "dino", rows: 1, cols: 10, visible: false, physics: { velocity: new Vector2(1,2), acceleration: new Vector2(3,4), mass: 5, isStatic: true, restitution: 0.5, friction: 0.2 } });
+    expect(obj.getComponent(VisibilityComponent)?.visible).toBe(false);
+    const pc = obj.getComponent(PhysicsComponent);
+    expect(pc?.velocity.x).toBe(1);
+    expect(pc?.acceleration.x).toBe(3);
+    expect(pc?.mass).toBe(5);
+    expect(pc?.isStatic).toBe(true);
+    expect(pc?.restitution).toBe(0.5);
+    expect(pc?.friction).toBe(0.2);
   });
 });

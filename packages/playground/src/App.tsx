@@ -9,6 +9,7 @@ import Logo from './components/Logo';
 import SceneExplorer from './components/SceneExplorer';
 import Console from './components/Console';
 import { getCurrentScriptId, getScript, updateScript } from './utils/helpers';
+import { instrumentCode } from './utils/ast-utils';
 import './App.css';
 
 const { Engine } = Dino;
@@ -84,7 +85,6 @@ function App() {
     if (!isViewportReady) return;
 
     const id = currentScriptId;
-    (globalThis as any).__DINO_ENGINE_INSTANCE__?.terminate();
     Engine.destroyAll();
     
     document.querySelectorAll('script[data-playground-script]').forEach(s => s.remove());
@@ -95,12 +95,19 @@ function App() {
     }
 
     const scriptText = await getScript(id);
+    const result = instrumentCode(scriptText);
+
+    if (result.error) {
+      window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: result.error }));
+    } else {
+      window.dispatchEvent(new CustomEvent('playground-syntax-error', { detail: null }));
+    }
     
     // Tiny delay to ensure React state has flushed to DOM for the container
     requestAnimationFrame(() => {
       const script = document.createElement('script');
       script.type = 'module';
-      script.innerHTML = scriptText;
+      script.innerHTML = result.code;
       script.setAttribute('data-playground-script', id);
       document.body.appendChild(script);
     });

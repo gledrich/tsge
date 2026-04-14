@@ -7,6 +7,8 @@ import { getEngineState } from './EngineState.js';
 export default class TagComponent extends Component {
   /** A unique identifier for the object type. */
   tag: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  sourceId?: string;
   private _zIndex: number;
 
   /** Rendering order (lower is background, higher is foreground). */
@@ -21,9 +23,10 @@ export default class TagComponent extends Component {
     }
   }
 
-  constructor(tag: string = 'obj', zIndex: number = 0) {
+  constructor(tag: string = 'obj', zIndex: number = 0, sourceId?: string) {
     super();
     this.tag = tag;
     this._zIndex = zIndex;
+    this.sourceId = sourceId;
   }
 }

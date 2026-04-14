@@ -4,6 +4,8 @@ import Vector2 from './Vector2.js';
 import ResourceLoader from './Loader.js';
 import SpriteComponent from './SpriteComponent.js';
 import BoundsComponent from './BoundsComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /**
  * Configuration for creating a Sprite object.
@@ -11,6 +13,8 @@ import BoundsComponent from './BoundsComponent.js';
 export interface SpriteProps {
   /** Unique tag for the object. */
   tag: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  __sourceId?: string;
   /** Image instance or tag from ResourceLoader. */
   img: HTMLImageElement | string;
   /** Number of rows in the spritesheet. */
@@ -27,6 +31,17 @@ export interface SpriteProps {
   zIndex?: number;
   /** Scale factor (number or Vector2). */
   scale?: number | Vector2;
+  /** Whether the sprite is initially visible. */
+  visible?: boolean;
+  /** Initial physics configuration. */
+  physics?: {
+    velocity?: Vector2;
+    acceleration?: Vector2;
+    mass?: number;
+    isStatic?: boolean;
+    restitution?: number;
+    friction?: number;
+  };
 }
 
 /**
@@ -112,7 +127,7 @@ export default class Sprite extends GameObject {
     if (!props.tag) {
       throw new Error('You must provide a tag for a Sprite');
     }
-    super(props.tag, props.zIndex ?? 1);
+    super(props.tag, props.zIndex ?? 1, props.__sourceId);
 
     let img: HTMLImageElement;
     if (typeof props.img === 'string') {
@@ -148,6 +163,21 @@ export default class Sprite extends GameObject {
 
     if (props.position) {
       this.transform.position.copy(props.position);
+    }
+
+    if (props.visible !== undefined) {
+      this.addComponent(new VisibilityComponent(props.visible));
+    }
+
+    if (props.physics) {
+      const pc = new PhysicsComponent();
+      if (props.physics.velocity) pc.velocity.copy(props.physics.velocity);
+      if (props.physics.acceleration) pc.acceleration.copy(props.physics.acceleration);
+      if (props.physics.mass !== undefined) pc.mass = props.physics.mass;
+      if (props.physics.isStatic !== undefined) pc.isStatic = props.physics.isStatic;
+      if (props.physics.restitution !== undefined) pc.restitution = props.physics.restitution;
+      if (props.physics.friction !== undefined) pc.friction = props.physics.friction;
+      this.addComponent(pc);
     }
   }
 

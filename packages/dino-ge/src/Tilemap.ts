@@ -9,6 +9,8 @@ import TilemapComponent from './TilemapComponent.js';
 export interface TilemapProps {
   /** Unique tag for the object. */
   tag?: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  __sourceId?: string;
   /** Image element or tag from ResourceLoader. */
   tileset: HTMLImageElement | string;
   /** 2D array of tile indices. */
@@ -46,7 +48,7 @@ export default class Tilemap extends GameObject {
    * @param props Configuration properties for the tilemap.
    */
   constructor(props: TilemapProps) {
-    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
+    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex, props.__sourceId);
 
     if (typeof props.tileset === 'string') {
       this.tileset = ResourceLoader.getImage(props.tileset);

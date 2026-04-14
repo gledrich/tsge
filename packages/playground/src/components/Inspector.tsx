@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as Dino from 'dino-ge';
-import InspectorRow, { InspectableObject, PropertyRowDef, resolveComponentPath, getUpdatedCodeSnippet } from './InspectorRow';
+import InspectorRow, { InspectableObject, PropertyRowDef, resolveComponentPath } from './InspectorRow';
+import { getSurgicalEdit, Edit } from '../utils/ast-utils';
 import '../styles/inspector.css';
 
 const { Engine } = Dino;
@@ -54,6 +55,7 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
   const [selectedObject, setSelectedObject] = useState<InspectableObject | null>(Engine.selectedObject as InspectableObject | null);
   const [isDebug, setIsDebug] = useState(Engine.debug);
   const [isApplying, setIsApplying] = useState(false);
+  const [syntaxError, setSyntaxError] = useState<string | null>(null);
   const [, setTick] = useState(0);
 
   // Sync state using events and throttled polling for properties
@@ -68,8 +70,14 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
       setIsDebug(e.detail);
     };
 
+    const onSyntaxError = (e: Event) => {
+      const customEvent = e as CustomEvent<string | null>;
+      setSyntaxError(customEvent.detail);
+    };
+
     Engine.on('selectedObjectChanged', onSelectedObjectChanged);
     Engine.on('debug', onDebugChanged);
+    window.addEventListener('playground-syntax-error', onSyntaxError);
 
     // Sync properties when engine updates
     const onEngineUpdate = () => {
@@ -80,51 +88,49 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
     return () => {
       Engine.off('selectedObjectChanged', onSelectedObjectChanged);
       Engine.off('debug', onDebugChanged);
+      window.removeEventListener('playground-syntax-error', onSyntaxError);
       window.removeEventListener('playground-update-inspector', onEngineUpdate);
     };
   }, [visible]);
 
   const handleApplyToCode = () => {
     if (!selectedObject) return;
-    const tag = selectedObject.metadata.tag;
-    if (!tag) return;
+    const sourceId = selectedObject.metadata.sourceId;
+    if (!sourceId) {
+      console.warn('Cannot sync object without sourceId. Ensure it was defined in a script.');
+      return;
+    }
 
     setIsApplying(true);
 
-    const onValueReceived = (event: Event) => {
-      window.removeEventListener('playground-editor-value', onValueReceived);
-      const customEvent = event as CustomEvent<string>;
-      let currentCode = customEvent.detail;
-      let hasChanges = false;
+    const edits: Edit[] = [];
 
-      // Iterate through all sections and rows to apply current values
-      Object.values(SECTIONS).forEach(section => {
-        if (section.component && !selectedObject.hasComponent(section.component)) {
-          return;
-        }
-
-        section.rows.forEach(def => {
-          const resolved = resolveComponentPath(selectedObject, def.propertyPath);
-          if (resolved && resolved.target) {
-            const val = resolved.target[resolved.prop];
-            const newCode = getUpdatedCodeSnippet(currentCode, tag, def.propertyPath, val);
-            if (newCode) {
-              currentCode = newCode;
-              hasChanges = true;
-            }
-          }
-        });
-      });
-
-      if (hasChanges) {
-        window.dispatchEvent(new CustomEvent('playground-update-code', { detail: currentCode }));
+    // Iterate through all sections and rows to calculate edits
+    Object.values(SECTIONS).forEach(section => {
+      if (section.component && !selectedObject.hasComponent(section.component)) {
+        return;
       }
-      
-      setTimeout(() => setIsApplying(false), 500);
-    };
 
-    window.addEventListener('playground-editor-value', onValueReceived);
-    window.dispatchEvent(new CustomEvent('playground-get-value'));
+      section.rows.forEach(def => {
+        const resolved = resolveComponentPath(selectedObject, def.propertyPath);
+        if (resolved && resolved.target) {
+          const val = resolved.target[resolved.prop];
+          const edit = getSurgicalEdit(sourceId, def.propertyPath, val, (path) => {
+            const res = resolveComponentPath(selectedObject, path);
+            return res && res.target ? res.target[res.prop] : undefined;
+          });
+          if (edit) {
+            edits.push(edit);
+          }
+        }
+      });
+    });
+
+    if (edits.length > 0) {
+      window.dispatchEvent(new CustomEvent('playground-apply-multi-edit', { detail: edits }));
+    }
+    
+    setTimeout(() => setIsApplying(false), 500);
   };
 
   if (!visible) return null;
@@ -134,7 +140,7 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
       <div className="inspector-header">
         <div className="header-left">
           <h2>Inspector</h2>
-          {selectedObject && (
+          {selectedObject && !syntaxError && (
             <button 
               className={`apply-btn ${isApplying ? 'applying' : ''}`} 
               onClick={handleApplyToCode}
@@ -146,6 +152,12 @@ const Inspector: React.FC<InspectorProps> = ({ visible }) => {
           )}
         </div>
       </div>
+      {syntaxError && (
+        <div className="syntax-error-banner" style={{ padding: '8px', background: '#dc3545', color: 'white', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="fa-solid fa-triangle-exclamation"></i>
+          <span>Code Sync Paused: {syntaxError}</span>
+        </div>
+      )}
       <div className="inspector-body">
         {!isDebug ? (
           <div className="no-selection">Toggle Debug Mode to inspect objects.</div>

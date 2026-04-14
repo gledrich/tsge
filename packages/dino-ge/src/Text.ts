@@ -3,6 +3,8 @@ import GameObject from './GameObject.js';
 import Vector2 from './Vector2.js';
 import Input from './Input.js';
 import TextComponent from './TextComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /** Horizontal alignment options for text. */
 export type HorizontalAlign = 'left' | 'right' | 'center' | 'start' | 'end';
@@ -21,6 +23,8 @@ export type VerticalAlign =
 export interface TextProperties {
   /** Unique tag for identification. */
   tag?: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  __sourceId?: string;
   /** Fill colour of the text. */
   colour?: string;
   /** Optional background box colour. */
@@ -47,6 +51,17 @@ export interface TextProperties {
   register?: boolean;
   /** Callback for click events. */
   onClick?: () => void;
+  /** Whether the text is initially visible. */
+  visible?: boolean;
+  /** Initial physics configuration. */
+  physics?: {
+    velocity?: Vector2;
+    acceleration?: Vector2;
+    mass?: number;
+    isStatic?: boolean;
+    restitution?: number;
+    friction?: number;
+  };
 }
 
 const defaultProps = {
@@ -119,7 +134,7 @@ export default class Text extends GameObject {
    * @param props Configuration properties for the text.
    */
   constructor(props: TextProperties) {
-    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
+    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex, props.__sourceId);
 
     const defaultedProps = {
       ...defaultProps,
@@ -155,6 +170,21 @@ export default class Text extends GameObject {
     );
     // TextComponent will automatically create/update BoundsComponent via onAttach
     this.addComponent(this._textComponent);
+
+    if (props.visible !== undefined) {
+      this.addComponent(new VisibilityComponent(props.visible));
+    }
+
+    if (props.physics) {
+      const pc = new PhysicsComponent();
+      if (props.physics.velocity) pc.velocity.copy(props.physics.velocity);
+      if (props.physics.acceleration) pc.acceleration.copy(props.physics.acceleration);
+      if (props.physics.mass !== undefined) pc.mass = props.physics.mass;
+      if (props.physics.isStatic !== undefined) pc.isStatic = props.physics.isStatic;
+      if (props.physics.restitution !== undefined) pc.restitution = props.physics.restitution;
+      if (props.physics.friction !== undefined) pc.friction = props.physics.friction;
+      this.addComponent(pc);
+    }
 
     if (defaultedProps.register) {
       this.registerSelf();

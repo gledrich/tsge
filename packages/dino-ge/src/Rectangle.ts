@@ -1,6 +1,8 @@
 import Vector2 from './Vector2.js';
 import GameObject from './GameObject.js';
 import ShapeComponent from './ShapeComponent.js';
+import VisibilityComponent from './VisibilityComponent.js';
+import PhysicsComponent from './PhysicsComponent.js';
 
 /**
  * Configuration for creating a Rectangle object.
@@ -8,6 +10,8 @@ import ShapeComponent from './ShapeComponent.js';
 export interface RectProps {
   /** Unique tag for identification. */
   tag?: string;
+  /** Hidden identifier linking runtime object to its source code location. */
+  __sourceId?: string;
   /** Initial position of the top-left corner. */
   position: Vector2;
   /** Width of the rectangle. */
@@ -18,6 +22,17 @@ export interface RectProps {
   colour?: string;
   /** Render order. */
   zIndex?: number;
+  /** Whether the rectangle is initially visible. */
+  visible?: boolean;
+  /** Initial physics configuration. */
+  physics?: {
+    velocity?: Vector2;
+    acceleration?: Vector2;
+    mass?: number;
+    isStatic?: boolean;
+    restitution?: number;
+    friction?: number;
+  };
 }
 
 const defaultProps = {
@@ -36,7 +51,7 @@ export default class Rectangle extends GameObject {
    * @param props Configuration properties for the rectangle.
    */
   constructor(props: RectProps) {
-    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex);
+    super(props.tag || defaultProps.tag, props.zIndex || defaultProps.zIndex, props.__sourceId);
     
     const defaultedProps = {
       ...defaultProps,
@@ -58,6 +73,21 @@ export default class Rectangle extends GameObject {
 
     // ShapeComponent will automatically create/update BoundsComponent via onAttach
     this.addComponent(new ShapeComponent('rect', this.colour, defaultedProps.width, defaultedProps.height));
+
+    if (props.visible !== undefined) {
+      this.addComponent(new VisibilityComponent(props.visible));
+    }
+
+    if (props.physics) {
+      const pc = new PhysicsComponent();
+      if (props.physics.velocity) pc.velocity.copy(props.physics.velocity);
+      if (props.physics.acceleration) pc.acceleration.copy(props.physics.acceleration);
+      if (props.physics.mass !== undefined) pc.mass = props.physics.mass;
+      if (props.physics.isStatic !== undefined) pc.isStatic = props.physics.isStatic;
+      if (props.physics.restitution !== undefined) pc.restitution = props.physics.restitution;
+      if (props.physics.friction !== undefined) pc.friction = props.physics.friction;
+      this.addComponent(pc);
+    }
 
     this.registerSelf();
   }

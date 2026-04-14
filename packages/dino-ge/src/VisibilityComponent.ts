@@ -5,5 +5,10 @@ import Component from './Component.js';
  */
 export default class VisibilityComponent extends Component {
   /** Whether the object should be rendered. */
-  visible: boolean = true;
+  visible: boolean;
+
+  constructor(visible: boolean = true) {
+    super();
+    this.visible = visible;
+  }
 }
