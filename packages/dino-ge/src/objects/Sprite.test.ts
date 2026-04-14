@@ -254,8 +254,22 @@ describe('Sprite', () => {
     expect(sprite.bounds!.width).toBe(10);
     });
 
-  it('initialises with physics and visibility options', () => {
-    const obj = new Sprite({ tag: "test", img: "dino", rows: 1, cols: 10, visible: false, physics: { velocity: new Vector2(1,2), acceleration: new Vector2(3,4), mass: 5, isStatic: true, restitution: 0.5, friction: 0.2 } });
+  it('initialises with full physics and visibility options', () => {
+    const obj = new Sprite({ 
+      tag: "test", 
+      img: "dino", 
+      rows: 1, 
+      cols: 10, 
+      visible: false, 
+      physics: { 
+        velocity: new Vector2(1,2), 
+        acceleration: new Vector2(3,4), 
+        mass: 5, 
+        isStatic: true, 
+        restitution: 0.5, 
+        friction: 0.2 
+      } 
+    });
     expect(obj.getComponent(VisibilityComponent)?.visible).toBe(false);
     const pc = obj.getComponent(PhysicsComponent);
     expect(pc?.velocity.x).toBe(1);
@@ -264,5 +278,39 @@ describe('Sprite', () => {
     expect(pc?.isStatic).toBe(true);
     expect(pc?.restitution).toBe(0.5);
     expect(pc?.friction).toBe(0.2);
+  });
+
+  it('initialises with partial physics options', () => {
+    const obj = new Sprite({ 
+      tag: "test", 
+      img: "dino", 
+      rows: 1, 
+      cols: 10, 
+      physics: { 
+        velocity: new Vector2(1,1),
+        acceleration: new Vector2(2,2),
+        isStatic: true,
+        restitution: 0.8,
+        friction: 0.1
+      } 
+    });
+    const pc = obj.getComponent(PhysicsComponent);
+    expect(pc?.velocity.x).toBe(1);
+    expect(pc?.acceleration.x).toBe(2);
+    expect(pc?.isStatic).toBe(true);
+    expect(pc?.restitution).toBe(0.8);
+    expect(pc?.friction).toBe(0.1);
+  });
+
+  it('initialises with empty physics object', () => {
+    const obj = new Sprite({ 
+      tag: "test", 
+      img: "dino", 
+      rows: 1, 
+      cols: 10, 
+      physics: {} 
+    });
+    const pc = obj.getComponent(PhysicsComponent);
+    expect(pc).toBeDefined();
   });
 });
